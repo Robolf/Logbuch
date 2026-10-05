@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Logbuch - Haushaltsbuch</title>
+  <title id="pageTitle">Logbuch - Haushaltsbuch</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Logbuch">
@@ -61,29 +61,66 @@
     <span id="toastMessage">Gespeichert</span>
   </div>
 
-  <!-- Welcome / Onboarding Modal (Wessen Telefon ist das?) -->
-  <div id="welcomeModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
-    <div class="glass-card max-w-xs w-full rounded-3xl p-6 text-center shadow-2xl border border-slate-700 space-y-4">
-      <div class="w-14 h-14 mx-auto rounded-2xl bg-sky-500/15 text-sky-400 flex items-center justify-center border border-sky-400/20 text-2xl shadow">
-        ⛵
+  <!-- Wizard Modal: Haushalt & Personen einrichten (Erster Start) -->
+  <div id="setupWizardModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden overflow-y-auto">
+    <div class="glass-card max-w-sm w-full rounded-3xl p-6 shadow-2xl border border-slate-700 space-y-4 my-auto">
+      <div class="text-center space-y-2">
+        <div class="w-14 h-14 mx-auto rounded-2xl bg-sky-500/15 text-sky-400 flex items-center justify-center border border-sky-400/20 text-2xl shadow">
+          ⛵
+        </div>
+        <h3 class="text-base font-extrabold text-white tracking-tight">Neuen Haushalt anlegen</h3>
+        <p class="text-xs text-slate-400">Richte dein persönliches Haushaltsbuch in 30 Sekunden ein.</p>
       </div>
-      <div>
-        <h3 class="text-base font-extrabold text-white tracking-tight">Willkommen im Logbuch</h3>
-        <p class="text-xs text-slate-400 mt-1">Haushaltsbuch</p>
-        <p class="text-[11px] text-slate-400 mt-2">Wem gehört dieses Smartphone? Deine Auswahl bleibt dauerhaft gespeichert:</p>
+
+      <div class="space-y-3 pt-1">
+        <!-- 1. Haushaltsname -->
+        <div>
+          <label class="text-[11px] font-bold text-slate-300 block mb-1">Name des Haushalts</label>
+          <input type="text" id="wizardHouseholdName" placeholder="z. B. Unser Haushalt" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+        </div>
+
+        <!-- 2. Monatliches Budget -->
+        <div>
+          <label class="text-[11px] font-bold text-slate-300 block mb-1">Monatliches Soll-Budget (€)</label>
+          <input type="number" step="10" id="wizardMonthlyBudget" placeholder="1500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+        </div>
+
+        <!-- 3. Personen anlegen -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-[11px] font-bold text-slate-300">Personen im Haushalt</label>
+            <button type="button" onclick="addWizardUser()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold flex items-center gap-1">
+              + Person hinzufügen
+            </button>
+          </div>
+          <div id="wizardUsersContainer" class="space-y-2 max-h-40 overflow-y-auto pr-1">
+            <!-- Dynamisch gefüllt mit Farbpunkten -->
+          </div>
+        </div>
+
+        <!-- 4. Wer bedient dieses Smartphone? -->
+        <div class="pt-2 border-t border-slate-800">
+          <label class="text-[11px] font-bold text-slate-300 block mb-1">Wem gehört dieses Smartphone?</label>
+          <div id="wizardOwnerOptions" class="grid grid-cols-2 gap-1.5">
+            <!-- Dynamisch gefüllt -->
+          </div>
+        </div>
+
+        <!-- 5. Google Sheet Webhook (Optional) -->
+        <div class="pt-2 border-t border-slate-800 space-y-1">
+          <label class="text-[11px] font-bold text-slate-300 block">Google Sheet Webhook (Optional)</label>
+          <input type="url" id="wizardGoogleWebhook" placeholder="https://script.google.com/macros/s/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
+          <p class="text-[10px] text-slate-500 leading-tight">Kann auch jederzeit später in den Einstellungen hinterlegt werden.</p>
+        </div>
       </div>
-      <div class="space-y-2 pt-2">
-        <button onclick="confirmInitialOwner('Person 1')" class="w-full py-2.5 px-4 rounded-xl bg-sky-600/30 hover:bg-sky-600/50 text-sky-200 border border-sky-500/30 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95">
-          Person 1
-        </button>
-        <button onclick="confirmInitialOwner('Person 2')" class="w-full py-2.5 px-4 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/30 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95">
-          Person 2
-        </button>
-      </div>
+
+      <button onclick="finishSetupWizard()" class="w-full mt-2 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 text-white font-extrabold rounded-xl text-xs transition shadow-lg shadow-sky-500/20 active:scale-[0.98]">
+        Haushalt jetzt starten 🚀
+      </button>
     </div>
   </div>
 
-  <!-- Header: Logbuch - Haushaltsbuch -->
+  <!-- Header: Logbuch - Haushalt -->
   <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-40 backdrop-blur-md px-4 py-3">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2.5">
@@ -91,12 +128,12 @@
         <div>
           <div class="flex items-center gap-1.5">
             <h1 class="text-sm font-bold text-white tracking-tight leading-tight">Logbuch</h1>
-            <!-- Klickbarer Switcher direkt im Header -->
-            <button onclick="toggleDeviceOwner()" id="headerOwnerBadge" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30 flex items-center gap-1 transition active:scale-95" title="Tippen zum Wechseln">
-              Person 1
+            <!-- Klickbarer Switcher direkt im Header mit Benutzer-Farbe -->
+            <button onclick="toggleDeviceOwner()" id="headerOwnerBadge" class="text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 transition active:scale-95" title="Tippen zum Wechseln">
+              User
             </button>
           </div>
-          <p class="text-[10px] text-slate-400">Haushaltsbuch</p>
+          <p class="text-[10px] text-slate-400" id="headerHouseholdSubtitle">Haushalt</p>
         </div>
       </div>
       <div class="flex items-center gap-1.5">
@@ -140,14 +177,9 @@
           <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           Ausgabe erfassen
         </h2>
-        <!-- Wer zahlt Umschalter (bleibt standardmäßig auf Handy-Besitzer) -->
-        <div class="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-800 text-xs">
-          <button type="button" onclick="setPerson('Person 1')" id="btnToggle1" class="px-2.5 py-1 rounded-md font-bold text-sky-300 bg-sky-600/30 transition">
-            Person 1
-          </button>
-          <button type="button" onclick="setPerson('Person 2')" id="btnToggle2" class="px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition">
-            Person 2
-          </button>
+        <!-- Dynamischer Personen-Wähler (Beliebig viele Personen mit Farben) -->
+        <div id="formPersonSelectors" class="flex flex-wrap gap-1">
+          <!-- Dynamisch gerendert -->
         </div>
       </div>
 
@@ -217,7 +249,7 @@
         </div>
 
         <!-- Speichern Button -->
-        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 active:from-sky-700 text-white font-extrabold rounded-xl text-sm transition shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2 active:scale-[0.98]">
+        <button type="submit" id="btnSubmitExpense" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 active:from-sky-700 text-white font-extrabold rounded-xl text-sm transition shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2 active:scale-[0.98]">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
           Ausgabe speichern
         </button>
@@ -257,10 +289,9 @@
         </div>
       </div>
 
-      <!-- Aufteilung nach Person -->
-      <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-        <span>Aufteilung:</span>
-        <span class="text-slate-300"><span id="labelPerson1">Person 1:</span> <strong id="sumPerson1" class="text-sky-400">0 €</strong> <span id="labelPerson2">• Person 2:</span> <strong id="sumPerson2" class="text-purple-400">0 €</strong></span>
+      <!-- Aufteilung nach Person (Beliebig viele User dynamisch gerendert) -->
+      <div class="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-y-1 text-[11px] text-slate-400" id="userSplitBreakdown">
+        <!-- Dynamisch gefüllt -->
       </div>
     </div>
 
@@ -295,87 +326,93 @@
     <div class="glass-card rounded-2xl p-4 text-xs space-y-3">
       <h4 class="font-bold text-slate-200 flex items-center gap-1.5">
         <svg class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
-        Partner-Abgleich (Zwei iPhones zusammenführen)
+        Haushalt teilen & Daten sichern
       </h4>
       <p class="text-slate-400 text-[11px] leading-relaxed">
-        Jeder von euch trägt Quittungen auf seinem Handy ein. Am Monatsende oder sonntags:
+        Jedes Smartphone synchronisiert automatisch mit eurer Google-Tabelle. Alternativ könnt ihr Ausgaben auch direkt per CSV austauschen:
       </p>
       <div class="grid grid-cols-2 gap-2">
         <button onclick="shareOrExport()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition">
           <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          CSV an Partner senden
+          CSV teilen
         </button>
         <button onclick="document.getElementById('importPartnerInput').click()" class="py-2.5 px-3 rounded-xl bg-blue-600/30 hover:bg-blue-600/40 text-blue-200 border border-blue-500/40 font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition">
           <svg class="w-3.5 h-3.5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Partner-CSV einspielen
+          CSV einspielen
         </button>
         <input type="file" id="importPartnerInput" accept=".csv" class="hidden" onchange="importPartnerCSV(event)">
       </div>
       <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-400">
-        <button onclick="openSettingsModal()" class="hover:text-white underline">Gerät wechseln / Google Sync</button>
+        <button onclick="openSettingsModal()" class="hover:text-white underline">Einstellungen & Google Sync</button>
         <button onclick="clearCurrentMonth()" class="text-rose-400 hover:text-rose-300">Monat leeren</button>
       </div>
     </div>
 
   </main>
 
-  <!-- Modal: Einstellungen & Google Sheet Sync -->
-  <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl">
+  <!-- Modal: Einstellungen & Haushalt verwalten -->
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl my-auto">
       <div class="flex items-center justify-between pb-2 border-b border-slate-800">
         <h3 class="text-sm font-bold text-white flex items-center gap-2">
           <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-          App-Einstellungen
+          Haushalts-Einstellungen
         </h3>
         <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white">
           <svg class="w-5 h-5 text-slate-400 hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
-      <!-- Personen-Namen einstellen -->
-      <div class="space-y-2">
-        <label class="text-xs font-semibold text-slate-300 block">Namen der Erfasser</label>
-        <div class="grid grid-cols-2 gap-2">
-          <div>
-            <label class="text-[10px] text-slate-400 block mb-1">Person 1</label>
-            <input type="text" id="inputPerson1" placeholder="Person 1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+      <div class="space-y-3">
+        <!-- Haushaltsname -->
+        <div>
+          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Name des Haushalts</label>
+          <input type="text" id="settingsHouseholdName" placeholder="z. B. Unser Haushalt" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+        </div>
+
+        <!-- Monatliches Soll-Budget -->
+        <div>
+          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Monatliches Soll-Budget (€)</label>
+          <input type="number" step="10" id="settingsMonthlyBudget" placeholder="1500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
+        </div>
+
+        <!-- Personen verwalten (Beliebig viele mit Farben) -->
+        <div class="pt-2 border-t border-slate-800">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-[11px] font-semibold text-slate-300">Personen im Haushalt</label>
+            <button type="button" onclick="addSettingsUser()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
+              + Person hinzufügen
+            </button>
           </div>
-          <div>
-            <label class="text-[10px] text-slate-400 block mb-1">Person 2</label>
-            <input type="text" id="inputPerson2" placeholder="Person 2" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+          <div id="settingsUsersList" class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
+            <!-- Dynamisch gerendert -->
           </div>
         </div>
-      </div>
 
-      <!-- Wer ist Inhaber dieses Handys? -->
-      <div class="pt-2 border-t border-slate-800">
-        <label class="text-xs font-semibold text-slate-300 block mb-1.5">Wem gehört dieses Smartphone? (Standard-Erfasser)</label>
-        <div class="grid grid-cols-2 gap-2">
-          <button type="button" onclick="setDeviceOwner('Person 1')" id="btnOwner1" class="py-2.5 rounded-xl border border-sky-500 bg-sky-600/40 text-sky-200 font-bold text-xs flex items-center justify-center gap-1.5 transition">
-            Person 1
-          </button>
-          <button type="button" onclick="setDeviceOwner('Person 2')" id="btnOwner2" class="py-2.5 rounded-xl border border-purple-500 bg-purple-600/40 text-purple-200 font-bold text-xs flex items-center justify-center gap-1.5 transition">
-            Person 2
-          </button>
+        <!-- Wer ist Inhaber dieses Handys? -->
+        <div class="pt-2 border-t border-slate-800">
+          <label class="text-[11px] font-semibold text-slate-300 block mb-1.5">Standard-Erfasser auf diesem Gerät</label>
+          <div id="settingsDeviceOwnerOptions" class="grid grid-cols-2 gap-1.5">
+            <!-- Dynamisch gerendert -->
+          </div>
         </div>
-        <p class="text-[10px] text-slate-400 mt-1.5 leading-tight">
-          Auf diesem Smartphone bleibt die Eingabe dauerhaft auf den Besitzer gesperrt, sodass keine Verwechslungen passieren.
-        </p>
-      </div>
 
-      <!-- Monatliches Soll-Budget -->
-      <div class="space-y-1.5 pt-2 border-t border-slate-800">
-        <label class="text-xs font-semibold text-slate-300 block">Monatliches Soll-Budget (€)</label>
-        <input type="number" step="10" id="inputMonthlyBudget" placeholder="1500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
-      </div>
+        <!-- Google Sheet Webhook Sync -->
+        <div class="pt-2 border-t border-slate-800 space-y-1">
+          <label class="text-[11px] font-semibold text-slate-300 block">Google Sheet Webhook (Gemeinsame Cloud)</label>
+          <p class="text-[10px] text-slate-400 leading-tight">
+            Synchronisiert alle Einträge automatisch mit eurer Google-Tabelle.
+          </p>
+          <input type="url" id="inputGoogleWebhook" placeholder="https://script.google.com/macros/s/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
+        </div>
 
-      <!-- Google Sheet Webhook Sync (Optional) -->
-      <div class="space-y-1.5 pt-2 border-t border-slate-800">
-        <label class="text-xs font-semibold text-slate-300 block">Google Sheet Webhook (Gemeinsame Cloud-Tabelle)</label>
-        <p class="text-[11px] text-slate-400 leading-tight">
-          Synchronisiert alle Einträge von beiden iPhones automatisch mit der gemeinsamen Google Tabelle.
-        </p>
-        <input type="url" id="inputGoogleWebhook" placeholder="https://script.google.com/macros/s/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
+        <!-- Magischer Setup-Link für Partner kopieren -->
+        <div class="pt-2 border-t border-slate-800">
+          <button type="button" onclick="copyPartnerSetupLink()" class="w-full py-2 px-3 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-300 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+            <span>🔗</span> Einrichtungs-Link für Partner kopieren
+          </button>
+          <p class="text-[9px] text-slate-400 text-center mt-1">Per WhatsApp / iMessage senden – richtet das Handy des Partners sofort ein!</p>
+        </div>
       </div>
 
       <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
@@ -387,6 +424,18 @@
   </div>
 
   <script>
+    // Farb-Palette für unbegrenzt viele Personen
+    const PALETTE = [
+      { name: 'Sky', hex: '#38bdf8', bg: 'rgba(14, 165, 233, 0.22)', border: '#38bdf8', text: '#7dd3fc' },
+      { name: 'Purple', hex: '#c084fc', bg: 'rgba(168, 85, 247, 0.22)', border: '#c084fc', text: '#e9d5ff' },
+      { name: 'Emerald', hex: '#34d399', bg: 'rgba(16, 185, 129, 0.22)', border: '#34d399', text: '#a7f3d0' },
+      { name: 'Amber', hex: '#fbbf24', bg: 'rgba(245, 158, 11, 0.22)', border: '#fbbf24', text: '#fde68a' },
+      { name: 'Rose', hex: '#fb7185', bg: 'rgba(244, 63, 94, 0.22)', border: '#fb7185', text: '#fecdd3' },
+      { name: 'Cyan', hex: '#22d3ee', bg: 'rgba(6, 182, 212, 0.22)', border: '#22d3ee', text: '#a5f3fc' },
+      { name: 'Lime', hex: '#a3e635', bg: 'rgba(132, 204, 22, 0.22)', border: '#a3e635', text: '#d9f99d' },
+      { name: 'Fuchsia', hex: '#e879f9', bg: 'rgba(217, 70, 239, 0.22)', border: '#e879f9', text: '#f5d0fe' }
+    ];
+
     // Safe LocalStorage Wrapper (protects against iOS Safari private browsing / iframe security restrictions)
     const memStore = {};
     const safeStore = {
@@ -409,15 +458,39 @@
     let outbox = [];
     let isDrainingOutbox = false;
     let isSyncing = false;
+
     let config = {
-      person1: 'Person 1',
-      person2: 'Person 2',
-      deviceOwner: 'Person 1',
+      householdName: 'Haushalt',
       monthlyBudget: 1500,
+      users: [
+        { id: 'u_1', name: 'Person 1', colorIdx: 0 },
+        { id: 'u_2', name: 'Person 2', colorIdx: 1 }
+      ],
+      deviceOwner: 'Person 1',
       googleWebhook: DEFAULT_WEBHOOK
     };
+
     let activePerson = 'Person 1';
     let chartInstance = null;
+
+    function getUserColor(userName) {
+      if (!config.users || config.users.length === 0) return PALETTE[0];
+      const idx = config.users.findIndex(u => u.name.toLowerCase() === (userName || '').toLowerCase());
+      if (idx !== -1) {
+        const cIdx = config.users[idx].colorIdx !== undefined ? config.users[idx].colorIdx : idx;
+        return PALETTE[cIdx % PALETTE.length];
+      }
+      return PALETTE[Math.abs(hashString(userName || '')) % PALETTE.length];
+    }
+
+    function hashString(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      return hash;
+    }
 
     // Sofortiges Kassen-Feedback (Toast)
     function showToast(message, isWarning = false) {
@@ -452,20 +525,47 @@
       safeStore.setItem(STORAGE_KEY_OUTBOX, JSON.stringify(outbox));
     }
 
-    // Initialisierung
+    // Initialisierung & URL Setup
     function checkUrlSetup() {
       try {
         const hash = window.location.hash;
         if (hash && hash.includes('setup')) {
           const qStr = hash.split('?')[1] || hash.replace('#setup', '').replace('#', '');
           const params = new URLSearchParams(qStr);
-          if (params.get('p1')) config.person1 = params.get('p1');
-          if (params.get('p2')) config.person2 = params.get('p2');
-          if (params.get('owner')) config.deviceOwner = params.get('owner');
+
+          // Haushaltsname
+          if (params.get('h')) config.householdName = decodeURIComponent(params.get('h'));
+
+          // Budget
           if (params.get('budget')) config.monthlyBudget = parseFloat(params.get('budget')) || 1500;
+          if (params.get('b')) config.monthlyBudget = parseFloat(params.get('b')) || 1500;
+
+          // User-Liste: Entweder als "users=Name1,Name2,Name3" oder als "p1=Name1&p2=Name2"
+          if (params.get('users')) {
+            const rawUsers = decodeURIComponent(params.get('users')).split(',');
+            config.users = rawUsers.map((uStr, i) => {
+              const parts = uStr.trim().split(':');
+              return { id: 'u_' + (i + 1), name: parts[0].trim(), colorIdx: i % PALETTE.length };
+            }).filter(u => u.name.length > 0);
+          } else {
+            const p1 = params.get('p1');
+            const p2 = params.get('p2');
+            if (p1 || p2) {
+              config.users = [];
+              if (p1) config.users.push({ id: 'u_1', name: p1.trim(), colorIdx: 0 });
+              if (p2) config.users.push({ id: 'u_2', name: p2.trim(), colorIdx: 1 });
+            }
+          }
+
+          // Geräte-Inhaber
+          if (params.get('owner')) config.deviceOwner = decodeURIComponent(params.get('owner')).trim();
+
+          // Webhook
           if (params.get('hook')) config.googleWebhook = decodeURIComponent(params.get('hook'));
+
           saveConfig();
           safeStore.setItem('logbuch_device_owner_set', 'true');
+          safeStore.setItem('logbuch_household_initialized', 'true');
           window.history.replaceState(null, '', window.location.pathname);
           showToast('✓ Konfiguration geladen: ' + config.deviceOwner);
         }
@@ -491,18 +591,33 @@
       // Config laden
       const storedConfig = safeStore.getItem(STORAGE_KEY_CONFIG);
       if (storedConfig) {
-        try { config = Object.assign(config, JSON.parse(storedConfig)); } catch(e){}
+        try {
+          const parsed = JSON.parse(storedConfig);
+          // Migration von alter Version (person1 / person2)
+          if (!parsed.users && (parsed.person1 || parsed.person2)) {
+            parsed.users = [
+              { id: 'u_1', name: parsed.person1 || 'Person 1', colorIdx: 0 },
+              { id: 'u_2', name: parsed.person2 || 'Person 2', colorIdx: 1 }
+            ];
+          }
+          config = Object.assign(config, parsed);
+        } catch(e){}
       }
-      if (!config.monthlyBudget) {
-        config.monthlyBudget = 1500;
+
+      if (!config.users || config.users.length === 0) {
+        config.users = [
+          { id: 'u_1', name: 'Person 1', colorIdx: 0 },
+          { id: 'u_2', name: 'Person 2', colorIdx: 1 }
+        ];
       }
-      if (!config.googleWebhook) {
-        config.googleWebhook = DEFAULT_WEBHOOK;
-      }
+
+      if (!config.monthlyBudget) config.monthlyBudget = 1500;
+      if (!config.googleWebhook) config.googleWebhook = DEFAULT_WEBHOOK;
       saveConfig();
 
-      activePerson = config.deviceOwner || 'Person 1';
-      updateOwnerUI();
+      activePerson = config.deviceOwner || (config.users[0] && config.users[0].name) || 'User';
+
+      updateHouseholdUI();
       checkFirstLaunch();
 
       // Outbox laden
@@ -521,7 +636,7 @@
         try { lucide.createIcons(); } catch(e){}
       }
 
-      // Wenn das Telefon nach einem Funkloch wieder Netz bekommt: Sofort Outbox leeren!
+      // Bei Netzwerk-Wiederherstellung Outbox leeren
       window.addEventListener('online', () => {
         drainOutbox();
       });
@@ -540,27 +655,21 @@
       safeStore.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config));
     }
 
-    function updateOwnerUI() {
-      const p1 = config.person1 || 'Person 1';
-      const p2 = config.person2 || 'Person 2';
+    // Aktualisiert alle UI-Elemente bezüglich Haushalt, User & Farben
+    function updateHouseholdUI() {
+      // Titel & Untertitel
+      const hName = config.householdName || 'Haushalt';
+      document.getElementById('headerHouseholdSubtitle').textContent = hName;
+      document.getElementById('pageTitle').textContent = `Logbuch - ${hName}`;
 
-      const btnToggle1 = document.getElementById('btnToggle1');
-      const btnToggle2 = document.getElementById('btnToggle2');
-      if (btnToggle1) btnToggle1.textContent = p1;
-      if (btnToggle2) btnToggle2.textContent = p2;
-
-      const btnOwner1 = document.getElementById('btnOwner1');
-      const btnOwner2 = document.getElementById('btnOwner2');
-      if (btnOwner1) btnOwner1.textContent = p1;
-      if (btnOwner2) btnOwner2.textContent = p2;
-
+      // Header Badge für aktuellen Geräte-Besitzer
       const badge = document.getElementById('headerOwnerBadge');
       if (badge) {
-        const isP1 = config.deviceOwner === p1;
-        badge.innerHTML = `<span>${isP1 ? '⚓' : '⛵'}</span> ${config.deviceOwner}`;
-        badge.className = isP1 
-          ? "text-[10px] px-2 py-0.5 rounded-full font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30 flex items-center gap-1 transition active:scale-95"
-          : "text-[10px] px-2 py-0.5 rounded-full font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1 transition active:scale-95";
+        const color = getUserColor(config.deviceOwner);
+        badge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span> ${config.deviceOwner}`;
+        badge.style.backgroundColor = color.bg;
+        badge.style.borderColor = color.border;
+        badge.style.color = color.text;
       }
 
       // Sync Badge Status
@@ -570,59 +679,195 @@
         syncBadge.className = "text-[11px] px-2 py-0.5 rounded-full bg-sky-950/60 text-sky-300 border border-sky-500/40 font-medium";
       }
 
-      setPerson(config.deviceOwner);
+      // Formular-Pills für alle User rendern
+      renderFormUserSelectors();
+
+      // Standardmäßig den Besitzer dieses Geräts als Erfasser vorauswählen
+      setPerson(config.deviceOwner || (config.users[0] && config.users[0].name) || 'User');
     }
 
-    function toggleDeviceOwner() {
-      const p1 = config.person1 || 'Person 1';
-      const p2 = config.person2 || 'Person 2';
-      const newOwner = config.deviceOwner === p1 ? p2 : p1;
-      config.deviceOwner = newOwner;
-      safeStore.setItem('logbuch_device_owner_set', 'true');
-      saveConfig();
-      updateOwnerUI();
-      showToast(`Erfasser eingestellt: ${newOwner}`);
-    }
+    function renderFormUserSelectors() {
+      const container = document.getElementById('formPersonSelectors');
+      if (!container) return;
 
-    function checkFirstLaunch() {
-      const isSet = safeStore.getItem('logbuch_device_owner_set');
-      if (!isSet) {
-        const p1 = config.person1 || 'Person 1';
-        const p2 = config.person2 || 'Person 2';
-        const b1 = document.getElementById('btnWelcome1');
-        const b2 = document.getElementById('btnWelcome2');
-        if (b1) b1.textContent = p1;
-        if (b2) b2.textContent = p2;
-        const welcome = document.getElementById('welcomeModal');
-        if (welcome) welcome.classList.remove('hidden');
-      }
-    }
-
-    function confirmInitialOwner(owner) {
-      config.deviceOwner = owner;
-      activePerson = owner;
-      safeStore.setItem('logbuch_device_owner_set', 'true');
-      saveConfig();
-      updateOwnerUI();
-      const welcome = document.getElementById('welcomeModal');
-      if (welcome) welcome.classList.add('hidden');
-      showToast(`Eingestellt auf ${owner}`);
+      container.innerHTML = config.users.map(u => {
+        const color = getUserColor(u.name);
+        const isActive = activePerson === u.name;
+        return `
+          <button type="button" data-user="${escapeHtml(u.name)}" onclick="setPerson(this.dataset.user)" id="btnUserSelector_${escapeId(u.name)}"
+            class="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition active:scale-95"
+            style="${isActive ? `background-color: ${color.bg}; border: 1px solid ${color.border}; color: ${color.text}; font-weight: bold;` : 'background-color: #0f172a; border: 1px solid #334155; color: #94a3b8;'}">
+            <span class="inline-block w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
+            ${escapeHtml(u.name)}
+          </button>
+        `;
+      }).join('');
     }
 
     function setPerson(person) {
       activePerson = person;
-      const p1 = config.person1 || 'Person 1';
-      const btn1 = document.getElementById('btnToggle1');
-      const btn2 = document.getElementById('btnToggle2');
+      if (!config.users) return;
 
-      if (btn1 && btn2) {
-        if (person === p1) {
-          btn1.className = "px-2.5 py-1 rounded-md font-bold text-sky-200 bg-sky-600/40 border border-sky-500/40 transition flex items-center gap-1";
-          btn2.className = "px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition flex items-center gap-1";
-        } else {
-          btn2.className = "px-2.5 py-1 rounded-md font-bold text-purple-200 bg-purple-600/40 border border-purple-500/40 transition flex items-center gap-1";
-          btn1.className = "px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition flex items-center gap-1";
+      config.users.forEach(u => {
+        const btn = document.getElementById(`btnUserSelector_${escapeId(u.name)}`);
+        if (btn) {
+          const color = getUserColor(u.name);
+          const isActive = u.name === person;
+          if (isActive) {
+            btn.style.backgroundColor = color.bg;
+            btn.style.border = `1px solid ${color.border}`;
+            btn.style.color = color.text;
+            btn.style.fontWeight = 'bold';
+          } else {
+            btn.style.backgroundColor = '#0f172a';
+            btn.style.border = '1px solid #334155';
+            btn.style.color = '#94a3b8';
+            btn.style.fontWeight = 'normal';
+          }
         }
+      });
+    }
+
+    function toggleDeviceOwner() {
+      if (!config.users || config.users.length === 0) return;
+      const currentIdx = config.users.findIndex(u => u.name === config.deviceOwner);
+      const nextIdx = (currentIdx + 1) % config.users.length;
+      const newOwner = config.users[nextIdx].name;
+
+      config.deviceOwner = newOwner;
+      safeStore.setItem('logbuch_device_owner_set', 'true');
+      saveConfig();
+      updateHouseholdUI();
+      showToast(`Erfasser eingestellt: ${newOwner}`);
+    }
+
+    // Wizard: Neuer Haushalt anlegen (Erster Start)
+    let wizardTempUsers = [
+      { name: 'Person 1', colorIdx: 0 },
+      { name: 'Person 2', colorIdx: 1 }
+    ];
+    let wizardSelectedOwner = 'Person 1';
+
+    function checkFirstLaunch() {
+      const isInitialized = safeStore.getItem('logbuch_household_initialized');
+      if (!isInitialized) {
+        openSetupWizard();
+      }
+    }
+
+    function openSetupWizard() {
+      const modal = document.getElementById('setupWizardModal');
+      if (!modal) return;
+
+      document.getElementById('wizardHouseholdName').value = config.householdName !== 'Haushalt' ? config.householdName : '';
+      document.getElementById('wizardMonthlyBudget').value = config.monthlyBudget || 1500;
+      document.getElementById('wizardGoogleWebhook').value = config.googleWebhook || '';
+
+      if (config.users && config.users.length > 0) {
+        wizardTempUsers = JSON.parse(JSON.stringify(config.users));
+        wizardSelectedOwner = config.deviceOwner || wizardTempUsers[0].name;
+      }
+
+      renderWizardUsers();
+      renderWizardOwnerOptions();
+      modal.classList.remove('hidden');
+    }
+
+    function renderWizardUsers() {
+      const c = document.getElementById('wizardUsersContainer');
+      if (!c) return;
+
+      c.innerHTML = wizardTempUsers.map((u, i) => {
+        const color = PALETTE[u.colorIdx % PALETTE.length];
+        return `
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${color.hex}"></span>
+            <input type="text" value="${escapeHtml(u.name)}" oninput="updateWizardUserName(${i}, this.value)" placeholder="Name"
+              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white">
+            ${wizardTempUsers.length > 1 ? `
+              <button type="button" onclick="removeWizardUser(${i})" class="text-slate-500 hover:text-rose-400 p-1 text-xs shrink-0">✕</button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateWizardUserName(idx, val) {
+      if (wizardTempUsers[idx]) {
+        wizardTempUsers[idx].name = val;
+        renderWizardOwnerOptions();
+      }
+    }
+
+    function addWizardUser() {
+      const nextIdx = wizardTempUsers.length;
+      wizardTempUsers.push({
+        name: `Person ${nextIdx + 1}`,
+        colorIdx: nextIdx % PALETTE.length
+      });
+      renderWizardUsers();
+      renderWizardOwnerOptions();
+    }
+
+    function removeWizardUser(idx) {
+      if (wizardTempUsers.length <= 1) return;
+      wizardTempUsers.splice(idx, 1);
+      renderWizardUsers();
+      renderWizardOwnerOptions();
+    }
+
+    function renderWizardOwnerOptions() {
+      const c = document.getElementById('wizardOwnerOptions');
+      if (!c) return;
+
+      c.innerHTML = wizardTempUsers.map((u, i) => {
+        const color = PALETTE[u.colorIdx % PALETTE.length];
+        const isSelected = wizardSelectedOwner === u.name || (!wizardSelectedOwner && i === 0);
+        return `
+          <button type="button" data-user="${escapeHtml(u.name)}" onclick="selectWizardOwner(this.dataset.user)"
+            class="py-2 px-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95"
+            style="${isSelected ? `background-color: ${color.bg}; border: 1.5px solid ${color.border}; color: ${color.text}; font-weight: bold;` : 'background-color: #0f172a; border: 1px solid #334155; color: #94a3b8;'}">
+            <span class="inline-block w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
+            ${escapeHtml(u.name || `Person ${i+1}`)}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectWizardOwner(owner) {
+      wizardSelectedOwner = owner;
+      renderWizardOwnerOptions();
+    }
+
+    function finishSetupWizard() {
+      const hName = document.getElementById('wizardHouseholdName').value.trim() || 'Haushalt';
+      const bVal = parseFloat(document.getElementById('wizardMonthlyBudget').value);
+      const hook = document.getElementById('wizardGoogleWebhook').value.trim();
+
+      config.householdName = hName;
+      config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
+      config.googleWebhook = hook;
+
+      config.users = wizardTempUsers.map((u, i) => ({
+        id: `u_${i+1}`,
+        name: u.name.trim() || `Person ${i+1}`,
+        colorIdx: u.colorIdx !== undefined ? u.colorIdx : (i % PALETTE.length)
+      }));
+
+      const ownerExists = config.users.some(u => u.name === wizardSelectedOwner);
+      config.deviceOwner = ownerExists ? wizardSelectedOwner : config.users[0].name;
+
+      saveConfig();
+      safeStore.setItem('logbuch_device_owner_set', 'true');
+      safeStore.setItem('logbuch_household_initialized', 'true');
+
+      document.getElementById('setupWizardModal').classList.add('hidden');
+      updateHouseholdUI();
+      render();
+      showToast(`Willkommen im ${hName}!`);
+
+      if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
+        syncWithGoogleSheet(true);
       }
     }
 
@@ -653,7 +898,7 @@
         return;
       }
 
-      // 1. Eindeutige ID generieren (für Google Sheet & Lokalspeicher)
+      // Eindeutige ID generieren
       const uniqueId = 'exp_' + date.replace(/-/g, '') + '_' + Math.round(amount * 100) + '_' + Math.random().toString(36).substr(2, 4);
 
       const newEntry = {
@@ -667,29 +912,27 @@
         pendingSync: true
       };
 
-      // 2. SOFORT LOKAL SPEICHERN (0.05 ms) - 100% geschützt gegen Funklöcher an der Supermarktkasse!
+      // 1. Sofort lokal sichern (< 0.1 ms)
       expenses.unshift(newEntry);
       saveData();
 
-      // 3. In die Offline-Warteschlange (Outbox) legen
+      // 2. In Outbox legen
       outbox.push(newEntry);
       saveOutbox();
 
-      // 4. Formular sofort resetten & Tastatur einklappen für flüssige Bedienung
+      // 3. Formular zurücksetzen
       inputAmt.value = '';
       document.getElementById('inputMerchant').value = '';
       inputAmt.blur();
 
-      // 5. Immer auf den Standard-Inhaber DIESES Telefons zurücksetzen
+      // 4. Immer auf den Standard-Inhaber dieses Telefons zurücksetzen
       setPerson(config.deviceOwner);
 
-      // 6. Ansicht sofort aktualisieren
+      // 5. Ansicht aktualisieren & Feedback
       render();
-
-      // 7. Sofortige Bestätigung (Toast oben)
       showToast(`✓ ${amount.toFixed(2).replace('.', ',')} € gespeichert`);
 
-      // 8. Hintergrund-Sync asynchron starten (blockiert niemals das Telefon!)
+      // 6. Asynchron im Hintergrund übertragen
       setTimeout(() => {
         drainOutbox();
       }, 50);
@@ -719,30 +962,31 @@
 
     function render() {
       let total = 0;
-      let totalP1 = 0;
-      let totalP2 = 0;
+      const userTotals = {};
       const purposeMap = {};
 
-      const p1 = config.person1 || 'Person 1';
-      const p2 = config.person2 || 'Person 2';
+      if (config.users) {
+        config.users.forEach(u => { userTotals[u.name] = 0; });
+      }
 
       expenses.forEach(exp => {
         total += exp.amount;
-        if (exp.person === p1) totalP1 += exp.amount;
-        else totalP2 += exp.amount;
-
+        userTotals[exp.person] = (userTotals[exp.person] || 0) + exp.amount;
         purposeMap[exp.purpose] = (purposeMap[exp.purpose] || 0) + exp.amount;
       });
 
       // Total Card
       document.getElementById('totalExpensesMonth').innerText = total.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
-      document.getElementById('sumPerson1').innerText = totalP1.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
-      document.getElementById('sumPerson2').innerText = totalP2.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
 
-      const labelP1 = document.getElementById('labelPerson1');
-      const labelP2 = document.getElementById('labelPerson2');
-      if (labelP1) labelP1.innerText = p1 + ':';
-      if (labelP2) labelP2.innerText = '• ' + p2 + ':';
+      // Aufteilung nach Person dynamisch für alle User mit individuellen Farben
+      const splitEl = document.getElementById('userSplitBreakdown');
+      if (splitEl) {
+        const userSpans = Object.entries(userTotals).map(([name, sum]) => {
+          const color = getUserColor(name);
+          return `<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full inline-block" style="background-color: ${color.hex}"></span> ${escapeHtml(name)}: <strong style="color: ${color.hex}">${sum.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}</strong></span>`;
+        });
+        splitEl.innerHTML = `<span>Aufteilung:</span> <div class="flex flex-wrap items-center gap-x-2 gap-y-1">${userSpans.join('')}</div>`;
+      }
 
       // Nautical Seegang & Wasserlinie Berechnungen
       const budget = Number(config.monthlyBudget) || 1500;
@@ -792,7 +1036,7 @@
       const badgeEl = document.getElementById('entryCountBadge');
       if (badgeEl) badgeEl.innerText = `${expenses.length} Einträge`;
 
-      // Einträge Liste
+      // Einträge Liste mit Personen-Farbindikatoren
       const listEl = document.getElementById('expenseList');
       if (listEl) {
         if (expenses.length === 0) {
@@ -800,23 +1044,23 @@
         } else {
           listEl.innerHTML = expenses.map(exp => {
             const isPending = exp.pendingSync || outbox.some(o => String(o.id) === String(exp.id));
-            const isP1 = exp.person === p1;
+            const color = getUserColor(exp.person);
             return `
             <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs hover:border-slate-700 transition">
               <div class="flex items-center gap-2">
-                <span class="w-1.5 h-8 rounded-full ${isP1 ? 'bg-blue-500' : 'bg-purple-500'}"></span>
+                <span class="w-1.5 h-8 rounded-full shrink-0" style="background-color: ${color.hex}"></span>
                 <div>
                   <div class="font-bold text-white flex items-center gap-1.5">
-                    <span>${exp.purpose}</span>
-                    <span class="text-[10px] font-normal text-slate-400">(${exp.merchant})</span>
+                    <span>${escapeHtml(exp.purpose)}</span>
+                    <span class="text-[10px] font-normal text-slate-400">(${escapeHtml(exp.merchant)})</span>
                     ${isPending ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30">Lokal</span>' : ''}
                   </div>
-                  <div class="text-[10px] text-slate-400">${exp.date} • <span class="${isP1 ? 'text-blue-400' : 'text-purple-400'} font-medium">${exp.person}</span></div>
+                  <div class="text-[10px] text-slate-400">${exp.date} • <span class="font-medium" style="color: ${color.hex}">${escapeHtml(exp.person)}</span></div>
                 </div>
               </div>
               <div class="flex items-center gap-2.5">
                 <span class="font-extrabold text-white text-sm">${exp.amount.toFixed(2).replace('.', ',')} €</span>
-                <button onclick="deleteExpense('${exp.id}')" class="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Löschen">
+                <button data-id="${escapeHtml(exp.id)}" onclick="deleteExpense(this.dataset.id)" class="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Löschen">
                   <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                 </button>
               </div>
@@ -836,7 +1080,7 @@
           const pct = total > 0 ? Math.round((val / total) * 100) : 0;
           return `
             <div class="flex items-center justify-between py-1 border-b border-slate-800/60">
-              <span class="text-slate-300">${p}</span>
+              <span class="text-slate-300">${escapeHtml(p)}</span>
               <span class="font-bold text-white">${val.toFixed(2).replace('.', ',')} € <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span></span>
             </div>
           `;
@@ -898,21 +1142,17 @@
       const fileName = `Haushalt_${config.deviceOwner}_${new Date().toISOString().slice(0,10)}.csv`;
       const file = new File([csv], fileName, { type: 'text/csv' });
 
-      // Native iOS Share Sheet (WhatsApp, AirDrop, Mail, Dateien)
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
-            title: `Haushaltsbuch ${config.deviceOwner}`,
-            text: `Hier sind meine Ausgaben für unser Haushaltsbuch:`,
+            title: `Haushaltsbuch ${config.householdName}`,
+            text: `Hier sind unsere Haushaltsausgaben:`,
             files: [file]
           });
           return;
-        } catch (e) {
-          // Fallback zu Download
-        }
+        } catch (e) {}
       }
 
-      // Fallback normaler Download
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
@@ -922,7 +1162,7 @@
       document.body.removeChild(link);
     }
 
-    // Partner-CSV importieren (Intelligenter Merge ohne Duplikate!)
+    // Partner-CSV importieren
     function importPartnerCSV(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -954,60 +1194,155 @@
           }
         }
 
-        // Sortieren nach Datum absteigend
         expenses.sort((a,b) => new Date(b.date) - new Date(a.date));
         saveData();
         render();
 
-        alert(`${newCount} Ausgaben vom Partner erfolgreich zusammengeführt!`);
+        alert(`${newCount} Ausgaben erfolgreich zusammengeführt!`);
       };
       reader.readAsText(file);
     }
 
     // Settings Modal
+    let settingsTempUsers = [];
+    let settingsSelectedOwner = '';
+
     function openSettingsModal() {
       document.getElementById('settingsModal').classList.remove('hidden');
-      document.getElementById('inputPerson1').value = config.person1 || '';
-      document.getElementById('inputPerson2').value = config.person2 || '';
-      document.getElementById('inputMonthlyBudget').value = config.monthlyBudget || 1500;
+      document.getElementById('settingsHouseholdName').value = config.householdName || '';
+      document.getElementById('settingsMonthlyBudget').value = config.monthlyBudget || 1500;
       document.getElementById('inputGoogleWebhook').value = config.googleWebhook || '';
-      setDeviceOwner(config.deviceOwner);
+
+      settingsTempUsers = JSON.parse(JSON.stringify(config.users || []));
+      settingsSelectedOwner = config.deviceOwner;
+
+      renderSettingsUsers();
+      renderSettingsOwnerOptions();
     }
 
     function closeSettingsModal() {
       document.getElementById('settingsModal').classList.add('hidden');
     }
 
-    function setDeviceOwner(owner) {
-      config.deviceOwner = owner;
-      safeStore.setItem('logbuch_device_owner_set', 'true');
-      const btnOwner1 = document.getElementById('btnOwner1');
-      const btnOwner2 = document.getElementById('btnOwner2');
-      const p1 = config.person1 || 'Person 1';
+    function renderSettingsUsers() {
+      const c = document.getElementById('settingsUsersList');
+      if (!c) return;
 
-      if (btnOwner1 && btnOwner2) {
-        if (owner === p1 || owner === 'Person 1') {
-          btnOwner1.className = "py-2.5 rounded-xl border border-sky-500 bg-sky-600/40 text-sky-200 font-bold text-xs flex items-center justify-center gap-1.5 transition";
-          btnOwner2.className = "py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-400 font-medium text-xs flex items-center justify-center gap-1.5 transition";
-        } else {
-          btnOwner2.className = "py-2.5 rounded-xl border border-purple-500 bg-purple-600/40 text-purple-200 font-bold text-xs flex items-center justify-center gap-1.5 transition";
-          btnOwner1.className = "py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-400 font-medium text-xs flex items-center justify-center gap-1.5 transition";
-        }
+      c.innerHTML = settingsTempUsers.map((u, i) => {
+        const color = PALETTE[u.colorIdx % PALETTE.length];
+        return `
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${color.hex}"></span>
+            <input type="text" value="${escapeHtml(u.name)}" oninput="updateSettingsUserName(${i}, this.value)"
+              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1 text-xs text-white">
+            ${settingsTempUsers.length > 1 ? `
+              <button type="button" onclick="removeSettingsUser(${i})" class="text-slate-500 hover:text-rose-400 p-1 text-xs shrink-0">✕</button>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function updateSettingsUserName(idx, val) {
+      if (settingsTempUsers[idx]) {
+        settingsTempUsers[idx].name = val;
+        renderSettingsOwnerOptions();
       }
     }
 
+    function addSettingsUser() {
+      const nextIdx = settingsTempUsers.length;
+      settingsTempUsers.push({
+        id: `u_${nextIdx + 1}`,
+        name: `Person ${nextIdx + 1}`,
+        colorIdx: nextIdx % PALETTE.length
+      });
+      renderSettingsUsers();
+      renderSettingsOwnerOptions();
+    }
+
+    function removeSettingsUser(idx) {
+      if (settingsTempUsers.length <= 1) return;
+      settingsTempUsers.splice(idx, 1);
+      renderSettingsUsers();
+      renderSettingsOwnerOptions();
+    }
+
+    function renderSettingsOwnerOptions() {
+      const c = document.getElementById('settingsDeviceOwnerOptions');
+      if (!c) return;
+
+      c.innerHTML = settingsTempUsers.map((u, i) => {
+        const color = PALETTE[u.colorIdx % PALETTE.length];
+        const isSelected = settingsSelectedOwner === u.name || (!settingsSelectedOwner && i === 0);
+        return `
+          <button type="button" data-user="${escapeHtml(u.name)}" onclick="selectSettingsOwner(this.dataset.user)"
+            class="py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95"
+            style="${isSelected ? `background-color: ${color.bg}; border: 1.5px solid ${color.border}; color: ${color.text}; font-weight: bold;` : 'background-color: #0f172a; border: 1px solid #334155; color: #94a3b8;'}">
+            <span class="inline-block w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
+            ${escapeHtml(u.name || `Person ${i+1}`)}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectSettingsOwner(owner) {
+      settingsSelectedOwner = owner;
+      renderSettingsOwnerOptions();
+    }
+
     function saveSettings() {
-      config.person1 = document.getElementById('inputPerson1').value.trim() || 'Person 1';
-      config.person2 = document.getElementById('inputPerson2').value.trim() || 'Person 2';
-      const bVal = parseFloat(document.getElementById('inputMonthlyBudget').value);
+      config.householdName = document.getElementById('settingsHouseholdName').value.trim() || 'Haushalt';
+      const bVal = parseFloat(document.getElementById('settingsMonthlyBudget').value);
       config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
       config.googleWebhook = document.getElementById('inputGoogleWebhook').value.trim();
+
+      config.users = settingsTempUsers.map((u, i) => ({
+        id: `u_${i+1}`,
+        name: u.name.trim() || `Person ${i+1}`,
+        colorIdx: u.colorIdx !== undefined ? u.colorIdx : (i % PALETTE.length)
+      }));
+
+      const ownerExists = config.users.some(u => u.name === settingsSelectedOwner);
+      config.deviceOwner = ownerExists ? settingsSelectedOwner : config.users[0].name;
+
       saveConfig();
-      updateOwnerUI();
+      updateHouseholdUI();
+      render();
       closeSettingsModal();
       showToast(`Einstellungen gespeichert: ${config.deviceOwner}`);
+
       if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
         syncWithGoogleSheet(true);
+      }
+    }
+
+    // Erzeugt den Setup-Link für den Partner zum schnellen Teilen
+    function copyPartnerSetupLink() {
+      const baseUrl = window.location.origin + window.location.pathname;
+      const hName = encodeURIComponent(config.householdName || 'Haushalt');
+      const budget = config.monthlyBudget || 1500;
+      const userList = encodeURIComponent(config.users.map(u => u.name).join(','));
+      
+      // Für den Partner standardmäßig die andere Person auswählen
+      let partnerOwner = config.users[0] ? config.users[0].name : '';
+      if (config.users.length > 1) {
+        const other = config.users.find(u => u.name !== config.deviceOwner);
+        if (other) partnerOwner = other.name;
+      }
+      const ownerParam = encodeURIComponent(partnerOwner);
+      const hookParam = config.googleWebhook ? `&hook=${encodeURIComponent(config.googleWebhook)}` : '';
+
+      const shareUrl = `${baseUrl}#setup?h=${hName}&b=${budget}&users=${userList}&owner=${ownerParam}${hookParam}`;
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          showToast("✓ Setup-Link für Partner kopiert!");
+        }).catch(() => {
+          prompt("Kopiere diesen Link für deinen Partner:", shareUrl);
+        });
+      } else {
+        prompt("Kopiere diesen Link für deinen Partner:", shareUrl);
       }
     }
 
@@ -1035,11 +1370,9 @@
             });
             clearTimeout(timeoutId);
 
-            // Erfolgreich übertragen: Aus Outbox entfernen
             outbox.shift();
             saveOutbox();
 
-            // In lokaler Liste als synchronisiert markieren
             const localIdx = expenses.findIndex(e => String(e.id) === String(item.id));
             if (localIdx !== -1) {
               expenses[localIdx].pendingSync = false;
@@ -1048,7 +1381,7 @@
           } catch (postErr) {
             clearTimeout(timeoutId);
             console.warn("Outbox sync deferred (offline/timeout):", postErr);
-            break; // Abbrechen und später bei wiederhergestellter Verbindung fortsetzen
+            break;
           }
         }
       } finally {
@@ -1069,10 +1402,8 @@
       const icon = document.getElementById('iconSync');
       if (icon) icon.classList.add('animate-spin');
 
-      // 1. Erst eventuell wartende Offline-Einträge hochladen
       drainOutbox();
 
-      // 2. Ausreichender Timeout für Google Apps Script Kaltstart (12s)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 12000);
 
@@ -1098,15 +1429,12 @@
           const cloudIds = new Set(cloudList.map(c => c.id));
           const outboxIds = new Set(outbox.map(o => String(o.id)));
 
-          // UNVERLIERBAR: Alle lokalen Einträge, die Google noch nicht kennt (weil gerade offline an der Kasse eingetragen)
           const unsyncedLocal = expenses.filter(e => 
             !cloudIds.has(String(e.id)) || outboxIds.has(String(e.id)) || e.pendingSync === true
           );
 
-          // Google Sheet ist der Master für synchronisierte Zeilen, lokale Offline-Buchungen bleiben oben erhalten!
           expenses = [...unsyncedLocal, ...cloudList];
 
-          // Doppelte IDs filtern
           const seen = new Set();
           expenses = expenses.filter(e => {
             const id = String(e.id);
@@ -1119,7 +1447,6 @@
           saveData();
           render();
 
-          // Sync Badge aktualisieren
           const badge = document.getElementById('syncStatusBadge');
           if (badge) {
             badge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1 animate-pulse"></span> Google Sheet aktiv`;
@@ -1127,12 +1454,12 @@
           }
 
           if (showFeedback) {
-            showToast(`✓ Synchronisiert! ${cloudList.length} Einträge aktuell.`);
+            showToast(`✓ Synchronisiert! ${cloudList.length} Einträge geladen.`);
           }
         }
       } catch (err) {
         clearTimeout(timeoutId);
-        console.warn("Sync aborted or offline:", err.name === 'AbortError' ? '2.5s Timeout erreicht' : err);
+        console.warn("Sync aborted or offline:", err);
 
         const badge = document.getElementById('syncStatusBadge');
         if (badge) {
@@ -1141,7 +1468,7 @@
         }
 
         if (showFeedback) {
-          showToast("Cloud-Sync dauerte > 2s. Daten sind lokal 100% sicher!", true);
+          showToast("Cloud-Sync dauerte > 12s. Daten sind lokal sicher!", true);
         }
       } finally {
         isSyncing = false;
@@ -1157,9 +1484,16 @@
       }
     }
 
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function escapeId(str) {
+      return String(str || '').replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       init();
-      // Falls Webhook hinterlegt, automatisch beim Start leise im Hintergrund synchronisieren
       if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
         syncWithGoogleSheet(false);
       }

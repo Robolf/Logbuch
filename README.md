@@ -12,11 +12,10 @@
 
 * **🌍 Mehrsprachig & Multi-Währung:** Unterstützt Englisch, Deutsch und Französisch (automatische Geräteerkennung & manueller Switcher) sowie EUR (€), USD ($), GBP (£) und CHF mit lokalisierter Währungsformatierung.
 * **⚡ Fokus auf die Kasse:** Beim Öffnen der Web-App ist das Betragsfeld sofort im Fokus mit Ziffernblock. 1-Tap Schnell-Chips für Kategorien und Händler.
-* **🔒 100 % Privat & Autark:** Keine Drittanbieter-Server, keine Registrierung, keine Tracker. Alle Buchungen liegen lokal auf dem Gerät (`localStorage`) und optional in deiner eigenen privaten Google Drive Tabelle.
+* **🔒 100 % Privat & Autark:** Offline-first auf dem Smartphone (`localStorage`). Synchronisation über eine moderne, DSGVO-konforme PostgreSQL Cloud-Datenbank (Supabase) in Frankfurt (`eu-central-1`).
 * **📶 Offline-First mit Outbox:** Funktioniert auch bei absolutem Funkloch im Supermarkt oder Keller. Buchungen werden in unter 0,1 ms lokal gesichert und automatisch im Hintergrund synchronisiert, sobald wieder Netz vorhanden ist.
 * **⛵ Wasserlinien-Budget:** Visuelle Anzeige deines monatlichen Soll-Budgets mit Puffer-Berechnung und Seegang-Metapher (*Ruhige See*, *Frische Brise*, etc.).
-* **👥 Multi-User & Farbcodierung:** Beliebig viele Personen im Haushalt anlegbar, jeweils mit individueller Akzentfarbe und Standard-Erfasser je Gerät.
-* **📊 Direkter Google Sheet & Drive Link:** 1-Klick-Zugriff auf die Google-Tabelle zur direkten Ansicht aller historischen Buchungen und Auswertungen.
+* **👥 Multi-User & Echtzeit-Sync:** Beliebig viele Personen im Haushalt anlegbar. Änderungen eines Partners werden über WebSocket-Push in Millisekunden auf allen Partner-Geräten aktualisiert.
 * **📲 Nahtlose PWA-Integration:** Kann auf iOS (Safari) und Android direkt als vollwertige App auf den Home-Bildschirm gelegt werden.
 
 ---
@@ -42,35 +41,23 @@ Die Web-App kann direkt im Browser getestet werden:
 Du kannst die App für beliebige Geräte über Parameter im URL-Hash vorkonfigurieren (ohne dass diese Parameter an einen Server übertragen werden):
 
 ```text
-https://robolf.github.io/Logbuch/#setup?h=Unser%20Haushalt&b=1500&users=Alex,Sam&owner=Alex&lang=de&curr=€&hook=...&sheet=...
+https://robolf.github.io/Logbuch/#setup?hid=DEINE_HAUSHALTS_ID&h=Unser%20Haushalt&b=1500&users=Alex,Sam&owner=Alex&lang=de&curr=€
 ```
 
+* `hid`: Deine Haushalts-ID (Cloud-Schlüssel für die Echtzeit-Synchronisation)
 * `h`: Name des Haushalts (z. B. `Unser Haushalt`)
 * `b`: Monatliches Soll-Budget (z. B. `1500`)
 * `users`: Kommagetrennte Liste aller Personen (z. B. `Alex,Sam`)
 * `owner`: Besitzer dieses Geräts (z. B. `Alex`)
 * `lang`: (Optional) Sprache (`de`, `en`, `fr`)
 * `curr`: (Optional) Währungssymbol (`€`, `$`, `£`, `CHF`)
-* `hook`: (Optional) Deine Google Apps Script Webhook-URL
-* `sheet`: (Optional) Direkter Link zu eurer Google-Tabelle für den 1-Klick-Zugriff
 
 In der App gibt es in den Einstellungen außerdem den Button **"Einrichtungs-Link für Partner kopieren"**, der automatisch den passenden Link für das Smartphone des Partners erzeugt.
 
 ---
 
-## ☁️ Optional: Privates Google Sheets Backend einrichten
+## 🛡️ Datenschutz & Sicherheit
 
-Wenn ihr Buchungen automatisch in einer gemeinsamen Google Drive Tabelle zusammenführen möchtet:
-
-1. Öffne [Google Apps Script](https://script.google.com/) und erstelle ein neues Projekt.
-2. Kopiere den Code aus der Datei [`google_apps_script.js`](google_apps_script.js) in dein Skript.
-3. Klicke auf **Bereitstellen** > **Neue Bereitstellung** > Typ: **Web-App** (Ausführen als: *Ich*, Wer hat Zugriff: *Jeder*).
-4. Kopiere die Web-App-URL und trage sie in Logbuch unter **Einstellungen** > **Google Sheet Webhook** ein.
-
----
-
-## 🛡️ Datenschutz
-
-* Sämtliche Eingaben verbleiben lokal auf deinem Smartphone.
-* Bei Verwendung des Google Sheet Webhooks kommuniziert die App ausschließlich direkt zwischen deinem Browser und deinem persönlichen Google-Account.
+* Sämtliche Eingaben werden sofort lokal auf deinem Smartphone gesichert.
+* Die Cloud-Synchronisation erfolgt über eine dedizierte Datenbank im Rechenzentrum Frankfurt am Main (Deutschland) nach europäischen Datenschutzstandards (DSGVO).
 * Es werden keinerlei Analysedaten, Telemetrie oder Werbe-Tracker eingesetzt.

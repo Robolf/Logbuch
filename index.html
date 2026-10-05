@@ -17,6 +17,7 @@
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Lucide Icons -->
@@ -126,22 +127,7 @@
           </div>
         </div>
 
-        <!-- 5. Google Sheet Webhook (Optional) -->
-        <div class="pt-2 border-t border-slate-800 space-y-1">
-          <label id="lblWizardWebhook" class="text-[11px] font-bold text-slate-300 block">Google Sheet Webhook (Optional)</label>
-          <input type="url" id="wizardGoogleWebhook" placeholder="https://script.google.com/macros/s/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
-          <p id="lblWizardWebhookHint" class="text-[10px] text-slate-500 leading-tight">Kann auch jederzeit später in den Einstellungen hinterlegt werden.</p>
-        </div>
-
-        <!-- 6. Google Sheet / Drive Link (Optional) -->
-        <div class="pt-2 border-t border-slate-800 space-y-1">
-          <label id="lblWizardSheet" class="text-[11px] font-bold text-slate-300 block">Google Sheet / Drive Link (Optional)</label>
-          <input type="url" id="wizardGoogleSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
-          <p id="lblWizardSheetHint" class="text-[10px] text-slate-500 leading-tight">Direktlink zur Google-Tabelle für den 1-Klick-Zugriff auf alle Buchungen & Historie.</p>
-        </div>
-      </div>
-
-      <button id="btnWizardStart" onclick="finishSetupWizard()" class="w-full mt-2 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 text-white font-extrabold rounded-xl text-xs transition shadow-lg shadow-sky-500/20 active:scale-[0.98]">
+        <button id="btnWizardStart" onclick="finishSetupWizard()" class="w-full mt-2 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 text-white font-extrabold rounded-xl text-xs transition shadow-lg shadow-sky-500/20 active:scale-[0.98]">
         Haushalt jetzt starten 🚀
       </button>
     </div>
@@ -165,7 +151,7 @@
       </div>
       <div class="flex items-center gap-1.5">
         <!-- Live Cloud Sync Button -->
-        <button onclick="syncWithGoogleSheet(true)" id="btnCloudSync" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 flex items-center justify-center shrink-0" title="Google Sheet synchronisieren">
+        <button onclick="syncWithSupabase(true)" id="btnCloudSync" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 flex items-center justify-center shrink-0" title="Supabase synchronisieren">
           <svg id="iconSync" class="w-4 h-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
             <path d="M3 3v5h5"/>
@@ -180,16 +166,7 @@
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         </button>
-        <!-- Google Sheet Button -->
-        <button onclick="openGoogleSheetDirectly()" class="w-9 h-9 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-semibold flex items-center justify-center shrink-0 transition active:scale-95" title="Google Tabelle (Historie) öffnen">
-          <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="8" y1="13" x2="16" y2="13"/>
-            <line x1="8" y1="17" x2="16" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
-          </svg>
-        </button>
+        
       </div>
     </div>
   </header>
@@ -326,34 +303,39 @@
       </div>
     </div>
 
-    <!-- Google Drive / Sheet Direktdatenbank Link & Aktionen -->
+    <!-- Supabase Cloud-Datenbank & Echtzeit-Sync -->
     <div class="glass-card rounded-2xl p-4 text-xs space-y-3">
       <div class="flex items-center justify-between">
         <h4 id="dbCardTitle" class="font-bold text-slate-200 flex items-center gap-1.5">
           <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14 2 14 8 20 8"/>
-            <line x1="8" y1="13" x2="16" y2="13"/>
-            <line x1="8" y1="17" x2="16" y2="17"/>
-            <polyline points="10 9 9 9 8 9"/>
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
           </svg>
-          Google Tabelle & Historie
+          ⚡ Supabase Cloud Sync
         </h4>
-        <span id="dbCardBadge" class="text-[10px] text-slate-500 flex items-center gap-1">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Live Cloud
+        <span id="dbCardBadge" class="text-[10px] text-slate-400 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="dbCardStatusText">Live (Frankfurt)</span>
         </span>
       </div>
       <p id="dbCardDesc" class="text-slate-400 text-[11px] leading-relaxed">
-        All entries are synchronized in your cloud sheet. Open the spreadsheet to view all historical records and reports:
+        DSGVO-konform in Frankfurt gehostet. Deine Ausgaben werden in Echtzeit zwischen allen Smartphones synchronisiert.
       </p>
-      <div>
-        <button onclick="openGoogleSheetDirectly()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 font-semibold flex items-center justify-center gap-2 active:scale-95 transition">
-          <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-            <polyline points="15 3 21 3 21 9"/>
-            <line x1="10" y1="14" x2="21" y2="3"/>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="syncWithSupabase(true)" id="btnManualSyncNow" class="py-2.5 px-3 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-400/30 font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+            <path d="M16 21h5v-5"/>
           </svg>
-          <span id="btnOpenSheetBottomText">Open Cloud Sheet (History)</span>
+          <span id="btnSyncNowText">Jetzt synchronisieren</span>
+        </button>
+        <button onclick="shareOrExport()" class="py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition">
+          <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+          <span id="btnExportCsvText">CSV Export</span>
         </button>
       </div>
       <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-400">
@@ -361,8 +343,7 @@
         <button onclick="clearCurrentMonth()" id="linkClearMonthBottom" class="text-rose-400 hover:text-rose-300">Clear Month</button>
       </div>
     </div>
-
-  </main>
+</main>
 
   <!-- Modal: Einstellungen & Haushalt verwalten -->
   <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
@@ -445,22 +426,21 @@
           </div>
         </div>
 
-        <!-- Google Sheet Webhook Sync -->
-        <div class="pt-2 border-t border-slate-800 space-y-1">
-          <label id="lblSettingsWebhook" class="text-[11px] font-semibold text-slate-300 block">Google Sheet Webhook (Gemeinsame Cloud)</label>
-          <p id="lblSettingsWebhookDesc" class="text-[10px] text-slate-400 leading-tight">
-            Synchronisiert alle Einträge automatisch mit eurer Google-Tabelle.
+        <!-- Supabase Cloud Sync Info -->
+        <div class="pt-2 border-t border-slate-800 space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label id="lblSettingsCloudSync" class="text-[11px] font-semibold text-slate-300">Cloud-Sync (Supabase)</label>
+            <span class="text-[10px] text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Frankfurt (DSGVO)
+            </span>
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5">Haushalts-ID (Cloud-Schlüssel)</label>
+            <input type="text" id="settingsHouseholdId" readonly onclick="this.select()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300 font-mono select-all">
+          </div>
+          <p id="lblSettingsCloudSyncDesc" class="text-[10px] text-slate-500 leading-tight">
+            Eure gemeinsame ID. Alle Geräte mit dieser ID synchronisieren Buchungen automatisch in Echtzeit.
           </p>
-          <input type="url" id="inputGoogleWebhook" placeholder="https://script.google.com/macros/s/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
-        </div>
-
-        <!-- Google Sheet Link -->
-        <div class="pt-2 border-t border-slate-800 space-y-1">
-          <label id="lblSettingsSheet" class="text-[11px] font-semibold text-slate-300 block">Google Sheet / Drive Link (Historie & Tabelle)</label>
-          <p class="text-[10px] text-slate-400 leading-tight">
-            Direkter Link zur Google-Tabelle zum Einsehen aller Buchungen.
-          </p>
-          <input type="url" id="settingsGoogleSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
         </div>
 
         <!-- Magischer Setup-Link für Partner kopieren -->
@@ -501,7 +481,7 @@
       { name: 'Fuchsia', hex: '#e879f9', bg: 'rgba(217, 70, 239, 0.22)', border: '#e879f9', text: '#f5d0fe' }
     ];
 
-    // Safe LocalStorage Wrapper (protects against iOS Safari private browsing / iframe security restrictions)
+    // Safe LocalStorage Wrapper
     const memStore = {};
     const safeStore = {
       getItem: (k) => {
@@ -517,8 +497,23 @@
     const STORAGE_KEY_CONFIG = 'logbuch_haushalt_config_v2';
     const STORAGE_KEY_OUTBOX = 'logbuch_haushalt_outbox_v1';
 
-    const DEFAULT_WEBHOOK = "";
-    const DEFAULT_SHEET_URL = "";
+    // Supabase Backend Konfiguration (Frankfurt eu-central-1, DSGVO-konform)
+    const SUPABASE_URL = "https://krdunxtbpgpdmutlicdt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZHVueHRicGdwZG11dGxpY2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzgzODQsImV4cCI6MjA5ODMxNDM4NH0.yd_LcTldUl9uHGCQ-bX-QI154TA80M7Dvav5lWFtXCM";
+
+    let supabaseClient = null;
+    function getSupabaseClient() {
+      if (supabaseClient) return supabaseClient;
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        try {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          return supabaseClient;
+        } catch(e) {
+          console.warn("Supabase SDK init warn:", e);
+        }
+      }
+      return null;
+    }
 
     // Multi-Language Dictionary (EN base, DE, FR)
     const I18N = {
@@ -526,9 +521,8 @@
         app_title: "Logbook",
         household: "Household",
         header_user_hint: "Tap to switch user",
-        sync_btn_title: "Sync with Cloud Sheet",
+        sync_btn_title: "Supabase Cloud Sync",
         settings_btn_title: "Settings",
-        sheet_btn_title: "Open Cloud Sheet (History)",
         card_add_title: "Record Expense",
         category_label: "Category",
         cat_supermarket: "🛒 Groceries & Food",
@@ -542,8 +536,8 @@
         merchant_label: "Merchant / Place",
         merchant_placeholder: "Merchant / Note (optional)",
         btn_save: "Save Expense",
-        badge_local: "Local on Device",
-        badge_sync_active: "Cloud Sheet active",
+        badge_local: "Local",
+        badge_sync_active: "⚡ Supabase Live",
         spent_label: "spent",
         target_budget_label: "Target Budget:",
         buffer_label: "Buffer",
@@ -557,27 +551,21 @@
         chart_title: "Where is our money going?",
         entries_count: "entries",
         receipts_title: "Recorded Receipts",
-        db_title: "Cloud Database & History",
-        db_live_badge: "Live Cloud",
-        db_desc: "All entries are synchronized with your cloud database. Click here to open the spreadsheet and view full historical records and reports:",
-        btn_open_sheet: "Open Cloud Sheet (History)",
+        db_title: "⚡ Supabase Cloud Sync",
+        db_live_badge: "Live (Frankfurt)",
+        db_desc: "Hosted GDPR-compliant in Frankfurt, Germany. Receipts synchronize across all partner smartphones in real-time.",
+        btn_sync_now: "Sync Now",
         link_settings: "Household Settings",
         link_clear_month: "Clear Month",
-        // Wizard
-        wizard_title: "Set up New Household",
-        wizard_subtitle: "Set up your private shared budget in 30 seconds.",
+        wizard_title: "Create Household",
+        wizard_subtitle: "Set up your private logbook in 10 seconds.",
         wizard_name_label: "Household Name",
-        wizard_name_placeholder: "e.g. Our Home",
+        wizard_name_placeholder: "e.g. Our Household",
         wizard_budget_label: "Monthly Target Budget",
         wizard_users_label: "People in Household",
         wizard_add_user: "+ Add Person",
-        wizard_owner_label: "Who owns this smartphone?",
-        wizard_webhook_label: "Cloud Webhook (Optional)",
-        wizard_webhook_hint: "Can also be configured anytime in settings.",
-        wizard_sheet_label: "Cloud Sheet / Drive Link (Optional)",
-        wizard_sheet_hint: "Direct link to your spreadsheet for 1-click access.",
-        wizard_start_btn: "Start Household Now 🚀",
-        // Settings
+        wizard_owner_label: "Who owns this phone?",
+        wizard_start_btn: "Create Household & Start ⛵",
         settings_title: "Household Settings",
         settings_lang_label: "Language / Sprache / Langue",
         settings_curr_label: "Currency / Währung / Devise",
@@ -585,43 +573,43 @@
         settings_budget_label: "Monthly Target Budget",
         settings_users_label: "People in Household",
         settings_add_user_btn: "+ Add Person",
-        settings_owner_label: "Default Person on this Phone",
-        settings_webhook_label: "Cloud Webhook (Shared Cloud)",
-        settings_webhook_desc: "Automatically syncs all receipts with your Google Sheet.",
-        settings_sheet_label: "Cloud Sheet / Drive Link (History)",
-        settings_sheet_desc: "Direct link to open your Google Sheet in 1 tap.",
+        settings_owner_label: "Default user on this device",
+        settings_cloud_sync_label: "Cloud Sync (Supabase)",
+        settings_cloud_sync_desc: "Shared household ID. All devices with this ID sync in real time.",
         settings_partner_link_btn: "🔗 Copy Setup Link for Partner",
-        settings_partner_link_hint: "Send via WhatsApp / iMessage – configures partner's phone in 1 tap!",
-        settings_backup_btn: "Export Local Entries as CSV",
+        settings_partner_link_hint: "Send via WhatsApp / iMessage – sets up your partner's phone in 1 tap!",
+        settings_backup_btn: "Export Local Receipts as CSV",
         settings_save_btn: "Save Settings",
         toast_saved: "Saved",
         toast_welcome: "Welcome to ",
         toast_partner_copied: "✓ Partner setup link copied!",
-        confirm_clear_month: "Do you really want to clear all entries for this month on this device?",
-        no_expenses: "No receipts recorded yet."
+        toast_sync_success: "✓ Supabase Cloud-Sync active",
+        toast_sync_offline: "Saved locally (Offline)",
+        toast_config_loaded: "✓ Setup loaded: ",
+        confirm_clear_month: "Do you really want to clear this month's receipts from this device?",
+        no_expenses: "No expenses recorded this month."
       },
       de: {
         app_title: "Logbuch",
         household: "Haushalt",
         header_user_hint: "Tippen zum Wechseln",
-        sync_btn_title: "Google Sheet synchronisieren",
+        sync_btn_title: "Supabase Cloud Sync",
         settings_btn_title: "Einstellungen",
-        sheet_btn_title: "Google Tabelle (Historie) öffnen",
         card_add_title: "Ausgabe erfassen",
         category_label: "Kategorie",
         cat_supermarket: "🛒 Supermarkt & Essen",
-        cat_kids: "👶 Kinder & Baby",
-        cat_auto: "⛽ Auto & Tanken",
+        cat_kids: "👶 Kinder & Familie",
+        cat_auto: "⛽ Auto & Mobilität",
         cat_drugstore: "💊 Drogerie & Pflege",
-        cat_leisure: "☕ Restaurant & Café",
+        cat_leisure: "☕ Restaurant & Freizeit",
         cat_home: "🏠 Haus & Garten",
         cat_clothing: "👗 Kleidung & Schuhe",
         cat_other: "📦 Sonstiges",
-        merchant_label: "Ort / Händler",
-        merchant_placeholder: "Händler / Notiz (optional)",
-        btn_save: "Ausgabe speichern",
-        badge_local: "Lokal auf Gerät",
-        badge_sync_active: "Google Sheet aktiv",
+        merchant_label: "Händler / Ort",
+        merchant_placeholder: "z. B. Rewe, DM, Tankstelle (optional)",
+        btn_save: "Ausgabe buchen",
+        badge_local: "Lokal",
+        badge_sync_active: "⚡ Supabase Live",
         spent_label: "ausgegeben",
         target_budget_label: "Soll-Budget:",
         buffer_label: "Puffer",
@@ -631,43 +619,35 @@
         status_storm: "Sturmwarnung",
         status_wreck: "Schiffbruch!",
         status_over: "Drüber",
-        split_label: "Aufteilung:",
-        chart_title: "Wofür geben wir Geld aus?",
+        split_label: "Verteilung:",
+        chart_title: "Wo bleibt das Geld?",
         entries_count: "Einträge",
-        receipts_title: "Erfasste Quittungen",
-        db_title: "Google Tabelle & Historie",
-        db_live_badge: "Live-Cloud",
-        db_desc: "Alle Buchungen werden direkt in eurer Google-Tabelle synchronisiert. Öffne die Tabelle, um alle historischen Einträge und Auswertungen direkt einzusehen:",
-        btn_open_sheet: "Google Tabelle öffnen (Historie)",
-        link_settings: "Einstellungen & Haushalt",
-        link_clear_month: "Monat leeren",
-        // Wizard
+        receipts_title: "Erfasste Belege",
+        db_title: "⚡ Supabase Cloud Sync",
+        db_live_badge: "Live (Frankfurt)",
+        db_desc: "DSGVO-konform in Frankfurt gehostet. Deine Ausgaben werden in Echtzeit zwischen allen Smartphones synchronisiert.",
+        btn_sync_now: "Jetzt synchronisieren",
+        link_settings: "Haushalts-Einstellungen",
+        link_clear_month: "Monat zurücksetzen",
         wizard_title: "Neuen Haushalt anlegen",
-        wizard_subtitle: "Richte dein persönliches Haushaltsbuch in 30 Sekunden ein.",
+        wizard_subtitle: "Richte dein persönliches Haushaltsbuch in 10 Sekunden ein.",
         wizard_name_label: "Name des Haushalts",
         wizard_name_placeholder: "z. B. Unser Haushalt",
         wizard_budget_label: "Monatliches Soll-Budget",
         wizard_users_label: "Personen im Haushalt",
         wizard_add_user: "+ Person hinzufügen",
         wizard_owner_label: "Wem gehört dieses Smartphone?",
-        wizard_webhook_label: "Google Sheet Webhook (Optional)",
-        wizard_webhook_hint: "Kann auch jederzeit später in den Einstellungen hinterlegt werden.",
-        wizard_sheet_label: "Google Sheet / Drive Link (Optional)",
-        wizard_sheet_hint: "Direktlink zur Google-Tabelle für den 1-Klick-Zugriff auf alle Buchungen.",
-        wizard_start_btn: "Haushalt jetzt starten 🚀",
-        // Settings
+        wizard_start_btn: "Haushalt anlegen & Starten ⛵",
         settings_title: "Haushalts-Einstellungen",
-        settings_lang_label: "Sprache / Language / Langue",
-        settings_curr_label: "Währung / Currency / Devise",
+        settings_lang_label: "Language / Sprache / Langue",
+        settings_curr_label: "Currency / Währung / Devise",
         settings_name_label: "Name des Haushalts",
         settings_budget_label: "Monatliches Soll-Budget",
         settings_users_label: "Personen im Haushalt",
         settings_add_user_btn: "+ Person hinzufügen",
         settings_owner_label: "Standard-Erfasser auf diesem Gerät",
-        settings_webhook_label: "Google Sheet Webhook (Gemeinsame Cloud)",
-        settings_webhook_desc: "Synchronisiert alle Einträge automatisch mit eurer Google-Tabelle.",
-        settings_sheet_label: "Google Sheet / Drive Link (Historie & Tabelle)",
-        settings_sheet_desc: "Direkter Link zur Google-Tabelle zum Einsehen aller Buchungen.",
+        settings_cloud_sync_label: "Cloud-Sync (Supabase)",
+        settings_cloud_sync_desc: "Eure gemeinsame ID. Alle Geräte mit dieser ID synchronisieren Buchungen automatisch in Echtzeit.",
         settings_partner_link_btn: "🔗 Einrichtungs-Link für Partner kopieren",
         settings_partner_link_hint: "Per WhatsApp / iMessage senden – richtet das Handy des Partners sofort ein!",
         settings_backup_btn: "Lokale Einträge als CSV exportieren",
@@ -675,136 +655,97 @@
         toast_saved: "Gespeichert",
         toast_welcome: "Willkommen im ",
         toast_partner_copied: "✓ Setup-Link für Partner kopiert!",
-        confirm_clear_month: "Möchtest du wirklich alle Einträge dieses Monats auf diesem Gerät löschen?",
-        no_expenses: "Noch keine Ausgaben erfasst."
+        toast_sync_success: "✓ Supabase Cloud-Sync aktiv",
+        toast_sync_offline: "Lokal gesichert (Offline)",
+        toast_config_loaded: "✓ Konfiguration geladen: ",
+        confirm_clear_month: "Möchtest du wirklich alle Belege dieses Monats auf diesem Gerät löschen?",
+        no_expenses: "Noch keine Ausgaben in diesem Monat."
       },
       fr: {
-        app_title: "Journal",
+        app_title: "Logbook",
         household: "Foyer",
         header_user_hint: "Appuyez pour changer",
-        sync_btn_title: "Synchroniser avec Google Sheet",
+        sync_btn_title: "Supabase Cloud Sync",
         settings_btn_title: "Paramètres",
-        sheet_btn_title: "Ouvrir la feuille Google (Historique)",
-        card_add_title: "Ajouter une dépense",
+        card_add_title: "Enregistrer une dépense",
         category_label: "Catégorie",
         cat_supermarket: "🛒 Supermarché & Repas",
         cat_kids: "👶 Enfants & Famille",
-        cat_auto: "⛽ Transport & Carburant",
+        cat_auto: "⛽ Transport & Voiture",
         cat_drugstore: "💊 Pharmacie & Soins",
-        cat_leisure: "☕ Restaurant & Sorties",
+        cat_leisure: "☕ Restaurant & Loisirs",
         cat_home: "🏠 Maison & Jardin",
         cat_clothing: "👗 Vêtements & Mode",
         cat_other: "📦 Divers",
         merchant_label: "Commerçant / Lieu",
-        merchant_placeholder: "Commerçant / Note (optionnel)",
+        merchant_placeholder: "ex. Carrefour, Total (optionnel)",
         btn_save: "Enregistrer la dépense",
-        badge_local: "Local sur l'appareil",
-        badge_sync_active: "Google Sheet actif",
+        badge_local: "Local",
+        badge_sync_active: "⚡ Supabase Live",
         spent_label: "dépensé",
         target_budget_label: "Budget cible :",
         buffer_label: "Marge",
-        status_calm: "Mer calme",
-        status_breeze: "Brise légère",
-        status_waves: "Fortes vagues",
-        status_storm: "Avis de tempête",
+        status_calm: "Mer Calme",
+        status_breeze: "Brise Légère",
+        status_waves: "Vagues Hautes",
+        status_storm: "Avis de Tempête",
         status_wreck: "Naufrage !",
-        status_over: "Dépassement",
+        status_over: "Dépassé",
         split_label: "Répartition :",
-        chart_title: "Où va notre argent ?",
-        entries_count: "entrées",
+        chart_title: "Où va l'argent ?",
+        entries_count: "dépenses",
         receipts_title: "Reçus enregistrés",
-        db_title: "Base Cloud & Historique",
-        db_live_badge: "Cloud en direct",
-        db_desc: "Toutes les écritures sont synchronisées dans votre feuille Google. Ouvrez-la pour consulter tout l'historique et les rapports :",
-        btn_open_sheet: "Ouvrir la feuille Cloud (Historique)",
+        db_title: "⚡ Supabase Cloud Sync",
+        db_live_badge: "En direct (Francfort)",
+        db_desc: "Hébergé en conformité RGPD à Francfort. Les reçus se synchronisent en temps réel entre tous les smartphones.",
+        btn_sync_now: "Synchroniser",
         link_settings: "Paramètres du foyer",
-        link_clear_month: "Vider le mois",
-        // Wizard
-        wizard_title: "Créer un nouveau foyer",
-        wizard_subtitle: "Configurez votre budget partagé en 30 secondes.",
+        link_clear_month: "Réinitialiser le mois",
+        wizard_title: "Créer un foyer",
+        wizard_subtitle: "Configurez votre journal en 10 secondes.",
         wizard_name_label: "Nom du foyer",
         wizard_name_placeholder: "ex. Notre Foyer",
         wizard_budget_label: "Budget mensuel cible",
-        wizard_users_label: "Personnes dans le foyer",
-        wizard_add_user: "+ Ajouter une personne",
+        wizard_users_label: "Membres du foyer",
+        wizard_add_user: "+ Ajouter un membre",
         wizard_owner_label: "À qui appartient ce smartphone ?",
-        wizard_webhook_label: "Webhook Google Sheet (Optionnel)",
-        wizard_webhook_hint: "Peut être ajouté plus tard dans les paramètres.",
-        wizard_sheet_label: "Lien Google Sheet (Optionnel)",
-        wizard_sheet_hint: "Lien direct pour un accès en 1 clic à vos données.",
-        wizard_start_btn: "Démarrer le foyer maintenant 🚀",
-        // Settings
+        wizard_start_btn: "Créer le foyer & Commencer ⛵",
         settings_title: "Paramètres du foyer",
-        settings_lang_label: "Langue / Language / Sprache",
-        settings_curr_label: "Devise / Currency / Währung",
+        settings_lang_label: "Language / Sprache / Langue",
+        settings_curr_label: "Currency / Währung / Devise",
         settings_name_label: "Nom du foyer",
         settings_budget_label: "Budget mensuel cible",
-        settings_users_label: "Personnes dans le foyer",
-        settings_add_user_btn: "+ Ajouter une personne",
+        settings_users_label: "Membres du foyer",
+        settings_add_user_btn: "+ Ajouter un membre",
         settings_owner_label: "Utilisateur par défaut sur cet appareil",
-        settings_webhook_label: "Webhook Google Sheet (Partagé)",
-        settings_webhook_desc: "Synchronise automatiquement les reçus avec votre Google Sheet.",
-        settings_sheet_label: "Lien Google Sheet (Historique)",
-        settings_sheet_desc: "Lien direct pour ouvrir votre feuille Google en 1 clic.",
+        settings_cloud_sync_label: "Synchro Cloud (Supabase)",
+        settings_cloud_sync_desc: "Votre ID de foyer partagé. Tous les appareils avec cet ID se synchronisent en temps réel.",
         settings_partner_link_btn: "🔗 Copier le lien pour le partenaire",
-        settings_partner_link_hint: "Envoyer par WhatsApp / iMessage – configure le téléphone en 1 clic !",
-        settings_backup_btn: "Exporter les entrées en CSV",
+        settings_partner_link_hint: "Envoyez par WhatsApp / iMessage – configure le smartphone du partenaire en 1 clic !",
+        settings_backup_btn: "Exporter les dépenses en CSV",
         settings_save_btn: "Enregistrer les paramètres",
         toast_saved: "Enregistré",
         toast_welcome: "Bienvenue dans ",
         toast_partner_copied: "✓ Lien partenaire copié !",
-        confirm_clear_month: "Voulez-vous vraiment effacer toutes les entrées de ce mois sur cet appareil ?",
-        no_expenses: "Aucune dépense enregistrée."
+        toast_sync_success: "✓ Supabase Cloud-Sync actif",
+        toast_sync_offline: "Enregistré localement (Hors ligne)",
+        toast_config_loaded: "✓ Configuration chargée : ",
+        confirm_clear_month: "Voulez-vous vraiment effacer les reçus de ce mois sur cet appareil ?",
+        no_expenses: "Aucune dépense ce mois-ci."
       }
     };
 
-    const CATEGORIES = [
-      { key: 'groceries', icon: '🛒', i18nKey: 'cat_supermarket' },
-      { key: 'kids', icon: '👶', i18nKey: 'cat_kids' },
-      { key: 'auto', icon: '⛽', i18nKey: 'cat_auto' },
-      { key: 'drugstore', icon: '💊', i18nKey: 'cat_drugstore' },
-      { key: 'leisure', icon: '☕', i18nKey: 'cat_leisure' },
-      { key: 'home', icon: '🏠', i18nKey: 'cat_home' },
-      { key: 'clothing', icon: '👗', i18nKey: 'cat_clothing' },
-      { key: 'other', icon: '📦', i18nKey: 'cat_other' }
-    ];
-
-    let expenses = [];
-    let outbox = [];
-    let isDrainingOutbox = false;
-    let isSyncing = false;
-
-    let config = {
-      householdName: 'Household',
-      monthlyBudget: 1500,
-      currency: '€',
-      lang: 'en',
-      users: [
-        { id: 'u_1', name: 'Person 1', colorIdx: 0 },
-        { id: 'u_2', name: 'Person 2', colorIdx: 1 }
-      ],
-      deviceOwner: 'Person 1',
-      googleWebhook: DEFAULT_WEBHOOK,
-      googleSheetUrl: DEFAULT_SHEET_URL
-    };
-
-    let activePerson = 'Person 1';
-    let chartInstance = null;
-
     function getAutoLang() {
-      try {
-        const nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-        if (nav.startsWith('de')) return 'de';
-        if (nav.startsWith('fr')) return 'fr';
-      } catch(e){}
+      const navLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+      if (navLang.startsWith('de')) return 'de';
+      if (navLang.startsWith('fr')) return 'fr';
       return 'en';
     }
 
     function t(key) {
       const lang = config.lang || getAutoLang();
-      if (I18N[lang] && I18N[lang][key] !== undefined) return I18N[lang][key];
-      if (I18N['en'] && I18N['en'][key] !== undefined) return I18N['en'][key];
-      return key;
+      const dict = I18N[lang] || I18N['en'];
+      return dict[key] || I18N['en'][key] || key;
     }
 
     function getLocale() {
@@ -826,6 +767,18 @@
       return formatted + ' ' + (config.currency || '€');
     }
 
+    // Kategorien Definition
+    const CATEGORIES = [
+      { key: 'groceries', i18nKey: 'cat_supermarket' },
+      { key: 'kids', i18nKey: 'cat_kids' },
+      { key: 'auto', i18nKey: 'cat_auto' },
+      { key: 'drugstore', i18nKey: 'cat_drugstore' },
+      { key: 'leisure', i18nKey: 'cat_leisure' },
+      { key: 'home', i18nKey: 'cat_home' },
+      { key: 'clothing', i18nKey: 'cat_clothing' },
+      { key: 'other', i18nKey: 'cat_other' }
+    ];
+
     function getLocalizedCategory(catKey) {
       if (!catKey) return t('cat_other');
       const lk = String(catKey).toLowerCase();
@@ -833,9 +786,9 @@
       if (lk.includes('kinder') || lk.includes('baby') || lk.includes('kid') || lk.includes('enfant')) return t('cat_kids');
       if (lk.includes('auto') || lk.includes('tanken') || lk.includes('mobil') || lk.includes('transport') || lk.includes('fuel') || lk.includes('carburant')) return t('cat_auto');
       if (lk.includes('drogerie') || lk.includes('pflege') || lk.includes('drug') || lk.includes('health') || lk.includes('pharmacie') || lk.includes('soins')) return t('cat_drugstore');
-      if (lk.includes('freizeit') || lk.includes('gastro') || lk.includes('restaurant') || lk.includes('caf') || lk.includes('leisure') || lk.includes('sorties')) return t('cat_leisure');
-      if (lk.includes('haus') || lk.includes('garten') || lk.includes('home') || lk.includes('garden') || lk.includes('maison') || lk.includes('jardin')) return t('cat_home');
-      if (lk.includes('kleidung') || lk.includes('mode') || lk.includes('schuhe') || lk.includes('cloth') || lk.includes('shoe') || lk.includes('vêtement')) return t('cat_clothing');
+      if (lk.includes('freizeit') || lk.includes('restaurant') || lk.includes('leisure') || lk.includes('loisir') || lk.includes('cafe')) return t('cat_leisure');
+      if (lk.includes('haus') || lk.includes('garten') || lk.includes('home') || lk.includes('garden') || lk.includes('maison')) return t('cat_home');
+      if (lk.includes('kleidung') || lk.includes('schuhe') || lk.includes('cloth') || lk.includes('mode') || lk.includes('vetement')) return t('cat_clothing');
       return t('cat_other');
     }
 
@@ -852,6 +805,7 @@
       saveConfig();
       updateCurrencyUI();
       render();
+      saveHouseholdToSupabase();
     }
 
     function updateCurrencyUI() {
@@ -869,34 +823,19 @@
 
       container.innerHTML = CATEGORIES.map(c => {
         const fullLabel = t(c.i18nKey);
-        const isActive = (currentKey === c.key || currentKey === fullLabel || (c.key === 'groceries' && currentKey === 'Supermarkt & Essen'));
-        // Clean text without icon for button text
+        const isActive = (currentKey === c.key || currentKey === fullLabel);
         const textOnly = fullLabel.replace(/^[^\s]+\s*/, '');
         return `
-          <button type="button" data-key="${c.key}" onclick="selectCategory('${c.key}', this)" class="purpose-btn ${isActive ? 'active-chip' : ''} py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
-            <span>${c.icon}</span> ${escapeHtml(textOnly)}
+          <button type="button" 
+                  data-catkey="${escapeHtml(c.key)}" 
+                  data-fullname="${escapeHtml(fullLabel)}"
+                  onclick="selectPurpose('${escapeHtml(c.key)}', '${escapeHtml(fullLabel)}', this)" 
+                  class="purpose-btn py-2 px-1 rounded-xl text-[11px] font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5 ${isActive ? 'bg-sky-500/25 border-sky-400 text-sky-200' : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'}">
+            <span class="text-sm">${fullLabel.split(' ')[0]}</span>
+            <span class="truncate max-w-[85px] leading-tight text-center">${escapeHtml(textOnly)}</span>
           </button>
         `;
       }).join('');
-
-      const curCat = CATEGORIES.find(c => c.key === currentKey || (c.key === 'groceries' && currentKey === 'Supermarkt & Essen')) || CATEGORIES[0];
-      const selLabel = document.getElementById('selectedCategoryLabel');
-      if (selLabel) selLabel.innerText = t(curCat.i18nKey);
-    }
-
-    function selectCategory(catKey, btn) {
-      const inputEl = document.getElementById('inputPurpose');
-      if (inputEl) inputEl.value = catKey;
-      const curCat = CATEGORIES.find(c => c.key === catKey) || CATEGORIES[0];
-      const selLabel = document.getElementById('selectedCategoryLabel');
-      if (selLabel) selLabel.innerText = t(curCat.i18nKey);
-
-      document.querySelectorAll('.purpose-btn').forEach(b => b.classList.remove('active-chip'));
-      if (btn) btn.classList.add('active-chip');
-    }
-
-    function selectPurpose(purposeKey, label, btn) {
-      selectCategory(purposeKey, btn);
     }
 
     function renderSettingsPills() {
@@ -950,7 +889,6 @@
     }
 
     function updateI18nUI() {
-      // Titles and Header
       const pageTitle = document.getElementById('pageTitle');
       if (pageTitle) pageTitle.innerText = `${t('app_title')} - ${config.householdName || t('household')}`;
       const headerTitle = document.getElementById('headerTitleText');
@@ -961,7 +899,6 @@
       const btnCloudSync = document.getElementById('btnCloudSync');
       if (btnCloudSync) btnCloudSync.title = t('sync_btn_title');
 
-      // Card 1
       const cardAddTitle = document.getElementById('cardAddTitle');
       if (cardAddTitle) {
         cardAddTitle.innerHTML = `<svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> ${t('card_add_title')}`;
@@ -977,45 +914,33 @@
 
       renderCategoryButtons();
 
-      // Card 2
       const spentSub = document.getElementById('spentSubtitle');
       if (spentSub) spentSub.innerText = t('spent_label');
       const targetLbl = document.getElementById('targetBudgetLabel');
       if (targetLbl) targetLbl.innerText = t('target_budget_label');
 
-      // Card 3
       const chartTitle = document.getElementById('chartCardTitle');
       if (chartTitle) {
         chartTitle.innerHTML = `<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg> ${t('chart_title')}`;
       }
 
-      // Card 4
       const receiptsTitle = document.getElementById('receiptsCardTitle');
       if (receiptsTitle) receiptsTitle.innerText = t('receipts_title');
 
-      // Card 5
       const dbTitle = document.getElementById('dbCardTitle');
       if (dbTitle) {
-        dbTitle.innerHTML = `<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> ${t('db_title')}`;
+        dbTitle.innerHTML = `<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> ${t('db_title')}`;
       }
-      const dbBadge = document.getElementById('dbCardBadge');
-      if (dbBadge) {
-        dbBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ${t('db_live_badge')}`;
-      }
+      const dbStatus = document.getElementById('dbCardStatusText');
+      if (dbStatus) dbStatus.innerText = t('db_live_badge');
       const dbDesc = document.getElementById('dbCardDesc');
       if (dbDesc) dbDesc.innerText = t('db_desc');
-      const btnOpenSheetBottomText = document.getElementById('btnOpenSheetBottomText');
-      if (btnOpenSheetBottomText) btnOpenSheetBottomText.innerText = t('btn_open_sheet');
+      const btnSyncNowText = document.getElementById('btnSyncNowText');
+      if (btnSyncNowText) btnSyncNowText.innerText = t('btn_sync_now');
       const linkSettingsBottom = document.getElementById('linkSettingsBottom');
       if (linkSettingsBottom) linkSettingsBottom.innerText = t('link_settings');
       const linkClearMonthBottom = document.getElementById('linkClearMonthBottom');
       if (linkClearMonthBottom) linkClearMonthBottom.innerText = t('link_clear_month');
-
-      // Settings Labels
-      const lblSettingsLang = document.getElementById('lblSettingsLang');
-      if (lblSettingsLang) lblSettingsLang.innerText = t('settings_lang_label');
-      const lblSettingsCurr = document.getElementById('lblSettingsCurr');
-      if (lblSettingsCurr) lblSettingsCurr.innerText = t('settings_curr_label');
 
       // Setup Wizard Labels
       const wTitle = document.getElementById('wizardTitle');
@@ -1032,14 +957,6 @@
       if (wAddUserBtn) wAddUserBtn.innerText = t('wizard_add_user');
       const wOwnerLbl = document.getElementById('lblWizardOwner');
       if (wOwnerLbl) wOwnerLbl.innerText = t('wizard_owner_label');
-      const wHookLbl = document.getElementById('lblWizardWebhook');
-      if (wHookLbl) wHookLbl.innerText = t('wizard_webhook_label');
-      const wHookHint = document.getElementById('lblWizardWebhookHint');
-      if (wHookHint) wHookHint.innerText = t('wizard_webhook_hint');
-      const wSheetLbl = document.getElementById('lblWizardSheet');
-      if (wSheetLbl) wSheetLbl.innerText = t('wizard_sheet_label');
-      const wSheetHint = document.getElementById('lblWizardSheetHint');
-      if (wSheetHint) wSheetHint.innerText = t('wizard_sheet_hint');
       const wStartBtn = document.getElementById('btnWizardStart');
       if (wStartBtn) wStartBtn.innerText = t('wizard_start_btn');
 
@@ -1056,14 +973,10 @@
       if (sAddUserBtn) sAddUserBtn.innerText = t('settings_add_user_btn');
       const sOwnerLbl = document.getElementById('lblSettingsDeviceOwner');
       if (sOwnerLbl) sOwnerLbl.innerText = t('settings_owner_label');
-      const sHookLbl = document.getElementById('lblSettingsWebhook');
-      if (sHookLbl) sHookLbl.innerText = t('settings_webhook_label');
-      const sHookDesc = document.getElementById('lblSettingsWebhookDesc');
-      if (sHookDesc) sHookDesc.innerText = t('settings_webhook_desc');
-      const sSheetLbl = document.getElementById('lblSettingsSheet');
-      if (sSheetLbl) sSheetLbl.innerText = t('settings_sheet_label');
-      const sSheetDesc = document.getElementById('lblSettingsSheetDesc');
-      if (sSheetDesc) sSheetDesc.innerText = t('settings_sheet_desc');
+      const sCloudSyncLbl = document.getElementById('lblSettingsCloudSync');
+      if (sCloudSyncLbl) sCloudSyncLbl.innerText = t('settings_cloud_sync_label');
+      const sCloudSyncDesc = document.getElementById('lblSettingsCloudSyncDesc');
+      if (sCloudSyncDesc) sCloudSyncDesc.innerText = t('settings_cloud_sync_desc');
       const sPartnerBtn = document.getElementById('btnSettingsPartnerLink');
       if (sPartnerBtn) sPartnerBtn.innerHTML = `<span>🔗</span> ${t('settings_partner_link_btn')}`;
       const sPartnerHint = document.getElementById('lblSettingsPartnerLinkHint');
@@ -1097,7 +1010,6 @@
       return hash;
     }
 
-    // Sofortiges Kassen-Feedback (Toast)
     function showToast(message, isWarning = false) {
       const toast = document.getElementById('toastNotification');
       const msg = document.getElementById('toastMessage');
@@ -1117,6 +1029,18 @@
       }, 2400);
     }
 
+    function updateCloudSyncBadge(isLive) {
+      const badge = document.getElementById('dbCardBadge');
+      if (!badge) return;
+      if (isLive) {
+        badge.className = "text-[10px] text-emerald-400 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full";
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> <span>Live (Frankfurt)</span>`;
+      } else {
+        badge.className = "text-[10px] text-amber-400 flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full";
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> <span>Offline</span>`;
+      }
+    }
+
     function loadOutbox() {
       try {
         const stored = safeStore.getItem(STORAGE_KEY_OUTBOX);
@@ -1127,10 +1051,40 @@
     }
 
     function saveOutbox() {
-      safeStore.setItem(STORAGE_KEY_OUTBOX, JSON.stringify(outbox));
+      try {
+        safeStore.setItem(STORAGE_KEY_OUTBOX, JSON.stringify(outbox));
+      } catch(e) {}
     }
 
-    // Initialisierung & URL Setup
+    // Default Konfiguration
+    let config = {
+      householdId: generateHouseholdId(),
+      householdName: 'Household',
+      monthlyBudget: 1500,
+      currency: '€',
+      lang: 'en',
+      users: [
+        { id: 'u_1', name: 'Person 1', colorIdx: 0 },
+        { id: 'u_2', name: 'Person 2', colorIdx: 1 }
+      ],
+      deviceOwner: 'Person 1'
+    };
+
+    let expenses = [];
+    let outbox = [];
+    let isDrainingOutbox = false;
+    let isSyncing = false;
+    let chartInstance = null;
+    let activePerson = 'User';
+    let wizardTempUsers = [];
+    let wizardSelectedOwner = '';
+    let realtimeChannel = null;
+
+    function generateHouseholdId() {
+      return 'hh_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).slice(-4);
+    }
+
+    // URL Setup Hash prüfen
     function checkUrlSetup() {
       try {
         const hash = window.location.hash;
@@ -1138,14 +1092,11 @@
           const qStr = hash.split('?')[1] || hash.replace('#setup', '').replace('#', '');
           const params = new URLSearchParams(qStr);
 
-          // Haushaltsname
-          if (params.get('h')) config.householdName = decodeURIComponent(params.get('h'));
-
-          // Budget
+          if (params.get('hid')) config.householdId = decodeURIComponent(params.get('hid')).trim();
+          if (params.get('h')) config.householdName = decodeURIComponent(params.get('h')).trim();
           if (params.get('budget')) config.monthlyBudget = parseFloat(params.get('budget')) || 1500;
           if (params.get('b')) config.monthlyBudget = parseFloat(params.get('b')) || 1500;
 
-          // User-Liste: Entweder als "users=Name1,Name2,Name3" oder als "p1=Name1&p2=Name2"
           if (params.get('users')) {
             const rawUsers = decodeURIComponent(params.get('users')).split(',');
             config.users = rawUsers.map((uStr, i) => {
@@ -1162,16 +1113,7 @@
             }
           }
 
-          // Geräte-Inhaber
           if (params.get('owner')) config.deviceOwner = decodeURIComponent(params.get('owner')).trim();
-
-          // Webhook
-          if (params.get('hook')) config.googleWebhook = decodeURIComponent(params.get('hook'));
-
-          // Google Sheet URL
-          if (params.get('sheet')) config.googleSheetUrl = decodeURIComponent(params.get('sheet'));
-
-          // Language & Currency
           if (params.get('lang')) config.lang = decodeURIComponent(params.get('lang'));
           if (params.get('curr')) config.currency = decodeURIComponent(params.get('curr'));
 
@@ -1179,7 +1121,7 @@
           safeStore.setItem('logbuch_device_owner_set', 'true');
           safeStore.setItem('logbuch_household_initialized', 'true');
           window.history.replaceState(null, '', window.location.pathname);
-          showToast('✓ Konfiguration geladen: ' + config.deviceOwner);
+          showToast(t('toast_config_loaded') + config.deviceOwner);
         }
       } catch(e) {
         console.error('Setup hash parse error', e);
@@ -1187,16 +1129,13 @@
     }
 
     function init() {
-      // Datum vorbefüllen
       const dateEl = document.getElementById('inputDate');
       if (dateEl) dateEl.valueAsDate = new Date();
 
-      // Config laden
       const storedConfig = safeStore.getItem(STORAGE_KEY_CONFIG);
       if (storedConfig) {
         try {
           const parsed = JSON.parse(storedConfig);
-          // Migration von alter Version (person1 / person2)
           if (!parsed.users && (parsed.person1 || parsed.person2)) {
             parsed.users = [
               { id: 'u_1', name: parsed.person1 || 'Person 1', colorIdx: 0 },
@@ -1207,9 +1146,9 @@
         } catch(e){}
       }
 
-      // URL Setup Hash prüfen (überschreibt bestehende Config falls vorhanden)
       checkUrlSetup();
 
+      if (!config.householdId) config.householdId = generateHouseholdId();
       if (!config.users || config.users.length === 0) {
         config.users = [
           { id: 'u_1', name: 'Person 1', colorIdx: 0 },
@@ -1218,8 +1157,6 @@
       }
 
       if (!config.monthlyBudget) config.monthlyBudget = 1500;
-      if (!config.googleWebhook) config.googleWebhook = DEFAULT_WEBHOOK;
-      if (!config.googleSheetUrl) config.googleSheetUrl = DEFAULT_SHEET_URL;
       if (!config.lang) config.lang = getAutoLang();
       if (!config.currency) config.currency = '€';
       saveConfig();
@@ -1230,15 +1167,14 @@
       updateHouseholdUI();
       checkFirstLaunch();
 
-      // Outbox laden
       loadOutbox();
 
-      // Daten laden
       const storedData = safeStore.getItem(STORAGE_KEY_DATA);
       if (storedData) {
         try { expenses = JSON.parse(storedData); } catch(e){ expenses = []; }
       } else {
-        initRealData();
+        expenses = [];
+        saveData();
       }
 
       render();
@@ -1246,94 +1182,27 @@
         try { lucide.createIcons(); } catch(e){}
       }
 
-      // Bei Netzwerk-Wiederherstellung Outbox leeren
+      // Initialer Sync mit Supabase & Realtime-Abonnement
+      syncWithSupabase(false);
+      subscribeToRealtime();
+
       window.addEventListener('online', () => {
         drainOutbox();
+        syncWithSupabase(false);
       });
     }
 
-    function initRealData() {
-      expenses = [];
-      saveData();
-    }
-
     function saveData() {
-      safeStore.setItem(STORAGE_KEY_DATA, JSON.stringify(expenses));
+      try {
+        safeStore.setItem(STORAGE_KEY_DATA, JSON.stringify(expenses));
+      } catch(e){}
     }
 
     function saveConfig() {
-      safeStore.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config));
+      try {
+        safeStore.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config));
+      } catch(e){}
     }
-
-    function updateHouseholdUI() {
-      const titleEl = document.getElementById('headerHouseholdSubtitle');
-      if (titleEl) titleEl.innerText = config.householdName || t('household');
-
-      const ownerBadge = document.getElementById('headerOwnerBadge');
-      if (ownerBadge) {
-        const uColor = getUserColor(config.deviceOwner);
-        ownerBadge.innerText = config.deviceOwner;
-        ownerBadge.style.backgroundColor = uColor.bg;
-        ownerBadge.style.borderColor = uColor.border;
-        ownerBadge.style.color = uColor.text;
-      }
-
-      renderFormPersonSelectors();
-
-      const syncBadge = document.getElementById('syncStatusBadge');
-      if (syncBadge && config.googleWebhook && config.googleWebhook.startsWith('http')) {
-        syncBadge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-sky-400 mr-1 animate-pulse"></span> ${t('badge_sync_active')}`;
-      } else if (syncBadge) {
-        syncBadge.innerText = t('badge_local');
-      }
-    }
-
-    function renderFormPersonSelectors() {
-      const container = document.getElementById('formPersonSelectors');
-      if (!container) return;
-
-      container.innerHTML = (config.users || []).map((u, i) => {
-        const color = PALETTE[u.colorIdx % PALETTE.length];
-        const isCurrent = activePerson === u.name;
-        return `
-          <button type="button" data-user="${escapeHtml(u.name)}" onclick="setPerson(this.dataset.user)"
-            class="px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
-            style="${isCurrent ? `background-color: ${color.bg}; border: 1.5px solid ${color.border}; color: ${color.text}; font-weight: 800;` : 'background-color: #0f172a; border: 1px solid #334155; color: #94a3b8;'}">
-            <span class="inline-block w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
-            ${escapeHtml(u.name)}
-          </button>
-        `;
-      }).join('');
-    }
-
-    function setPerson(person) {
-      activePerson = person;
-      renderFormPersonSelectors();
-    }
-
-    function toggleDeviceOwner() {
-      if (!config.users || config.users.length === 0) return;
-      const curIdx = config.users.findIndex(u => u.name === config.deviceOwner);
-      const nextIdx = (curIdx + 1) % config.users.length;
-      config.deviceOwner = config.users[nextIdx].name;
-      activePerson = config.deviceOwner;
-      saveConfig();
-      updateHouseholdUI();
-      render();
-      showToast(`${config.deviceOwner}`);
-    }
-
-    function setMerchant(m) {
-      const input = document.getElementById('inputMerchant');
-      if (input) input.value = m;
-    }
-
-    // Wizard Logic
-    let wizardTempUsers = [
-      { name: 'Person 1', colorIdx: 0 },
-      { name: 'Person 2', colorIdx: 1 }
-    ];
-    let wizardSelectedOwner = 'Person 1';
 
     function checkFirstLaunch() {
       const isInitialized = safeStore.getItem('logbuch_household_initialized');
@@ -1348,14 +1217,16 @@
 
       document.getElementById('wizardHouseholdName').value = config.householdName !== 'Household' && config.householdName !== 'Haushalt' ? config.householdName : '';
       document.getElementById('wizardMonthlyBudget').value = config.monthlyBudget || 1500;
-      document.getElementById('wizardGoogleWebhook').value = config.googleWebhook || '';
-      if (document.getElementById('wizardGoogleSheetUrl')) {
-        document.getElementById('wizardGoogleSheetUrl').value = config.googleSheetUrl || '';
-      }
 
       if (config.users && config.users.length > 0) {
         wizardTempUsers = JSON.parse(JSON.stringify(config.users));
         wizardSelectedOwner = config.deviceOwner || wizardTempUsers[0].name;
+      } else {
+        wizardTempUsers = [
+          { id: 'u_1', name: 'Person 1', colorIdx: 0 },
+          { id: 'u_2', name: 'Person 2', colorIdx: 1 }
+        ];
+        wizardSelectedOwner = 'Person 1';
       }
 
       renderWizardPills();
@@ -1376,7 +1247,9 @@
             <input type="text" value="${escapeHtml(u.name)}" oninput="updateWizardUserName(${i}, this.value)" placeholder="Name"
               class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white">
             ${wizardTempUsers.length > 1 ? `
-              <button type="button" onclick="removeWizardUser(${i})" class="text-slate-500 hover:text-rose-400 p-1 text-xs shrink-0">✕</button>
+              <button type="button" onclick="removeWizardUser(${i})" class="text-slate-500 hover:text-rose-400 p-1">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
             ` : ''}
           </div>
         `;
@@ -1391,10 +1264,11 @@
     }
 
     function addWizardUser() {
-      const nextIdx = wizardTempUsers.length;
+      const newIdx = wizardTempUsers.length;
       wizardTempUsers.push({
-        name: `Person ${nextIdx + 1}`,
-        colorIdx: nextIdx % PALETTE.length
+        id: `u_${newIdx + 1}`,
+        name: `Person ${newIdx + 1}`,
+        colorIdx: newIdx % PALETTE.length
       });
       renderWizardUsers();
       renderWizardOwnerOptions();
@@ -1408,38 +1282,36 @@
     }
 
     function renderWizardOwnerOptions() {
-      const c = document.getElementById('wizardOwnerOptions');
-      if (!c) return;
+      const container = document.getElementById('wizardOwnerOptions');
+      if (!container) return;
 
-      c.innerHTML = wizardTempUsers.map((u, i) => {
+      container.innerHTML = wizardTempUsers.map(u => {
+        const isSelected = (wizardSelectedOwner === u.name);
         const color = PALETTE[u.colorIdx % PALETTE.length];
-        const isSelected = wizardSelectedOwner === u.name || (!wizardSelectedOwner && i === 0);
         return `
-          <button type="button" data-user="${escapeHtml(u.name)}" onclick="selectWizardOwner(this.dataset.user)"
-            class="py-2 px-2.5 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95"
-            style="${isSelected ? `background-color: ${color.bg}; border: 1.5px solid ${color.border}; color: ${color.text}; font-weight: bold;` : 'background-color: #0f172a; border: 1px solid #334155; color: #94a3b8;'}">
-            <span class="inline-block w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
-            ${escapeHtml(u.name || `Person ${i+1}`)}
+          <button type="button" onclick="setWizardOwner('${escapeHtml(u.name)}')"
+            class="py-2 px-2.5 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition ${isSelected ? 'border-sky-400 bg-sky-500/20 text-white' : 'border-slate-800 bg-slate-900 text-slate-400'}">
+            <span class="w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
+            <span class="truncate">${escapeHtml(u.name || 'User')}</span>
           </button>
         `;
       }).join('');
     }
 
-    function selectWizardOwner(owner) {
-      wizardSelectedOwner = owner;
+    function setWizardOwner(name) {
+      wizardSelectedOwner = name;
       renderWizardOwnerOptions();
     }
 
-    function finishSetupWizard() {
+    async function finishSetupWizard() {
       const hName = document.getElementById('wizardHouseholdName').value.trim() || t('household');
       const bVal = parseFloat(document.getElementById('wizardMonthlyBudget').value);
-      const hook = document.getElementById('wizardGoogleWebhook').value.trim();
-      const sheet = document.getElementById('wizardGoogleSheetUrl') ? document.getElementById('wizardGoogleSheetUrl').value.trim() : '';
 
+      if (!config.householdId) {
+        config.householdId = generateHouseholdId();
+      }
       config.householdName = hName;
       config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
-      config.googleWebhook = hook;
-      config.googleSheetUrl = sheet;
 
       config.users = wizardTempUsers.map((u, i) => ({
         id: `u_${i+1}`,
@@ -1449,6 +1321,7 @@
 
       const ownerExists = config.users.some(u => u.name === wizardSelectedOwner);
       config.deviceOwner = ownerExists ? wizardSelectedOwner : config.users[0].name;
+      activePerson = config.deviceOwner;
 
       saveConfig();
       safeStore.setItem('logbuch_device_owner_set', 'true');
@@ -1460,132 +1333,429 @@
       render();
       showToast(`${t('toast_welcome')}${hName}!`);
 
-      if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
-        syncWithGoogleSheet(true);
-      }
+      // In Supabase sichern & synchronisieren
+      await saveHouseholdToSupabase();
+      subscribeToRealtime();
+      syncWithSupabase(false);
     }
 
-    // Ausgabe hinzufügen
+    // Ausgabe erfassen
     async function addExpense(e) {
-      e.preventDefault();
-      const amountInput = document.getElementById('inputAmount');
-      const amount = parseFloat(amountInput.value);
-      const catKey = document.getElementById('inputPurpose').value;
-      const purpose = getLocalizedCategory(catKey);
-      const merchant = document.getElementById('inputMerchant').value.trim();
-      const date = document.getElementById('inputDate').value || new Date().toISOString().slice(0,10);
+      if (e) e.preventDefault();
+      const amountEl = document.getElementById('inputAmount');
+      const rawVal = (amountEl.value || '').trim().replace(',', '.');
+      const amount = parseFloat(rawVal);
+      if (isNaN(amount) || amount <= 0) {
+        amountEl.focus();
+        return;
+      }
 
-      if (isNaN(amount) || amount <= 0) return;
+      const dateEl = document.getElementById('inputDate');
+      const dateVal = (dateEl && dateEl.value) ? dateEl.value : new Date().toISOString().slice(0, 10);
+      const purposeEl = document.getElementById('inputPurpose');
+      const purposeVal = (purposeEl && purposeEl.value) ? purposeEl.value : 'groceries';
+      const merchantEl = document.getElementById('inputMerchant');
+      const merchantVal = (merchantEl && merchantEl.value) ? merchantEl.value.trim() : '';
 
-      const newExpense = {
-        id: 'exp_' + Date.now(),
-        date: date,
+      const newEntry = {
+        id: 'exp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        date: dateVal,
         person: activePerson,
-        purpose: purpose,
-        merchant: merchant,
+        purpose: purposeVal,
+        merchant: merchantVal,
         amount: amount,
-        pendingSync: true
+        createdAt: new Date().toISOString()
       };
 
-      expenses.unshift(newExpense);
+      expenses.unshift(newEntry);
       saveData();
+      render();
 
-      outbox.push(newExpense);
-      saveOutbox();
+      amountEl.value = '';
+      if (merchantEl) merchantEl.value = '';
+      amountEl.focus();
 
       showToast(`${t('toast_saved')}: ${formatMoney(amount)}`);
 
-      amountInput.value = '';
-      document.getElementById('inputMerchant').value = '';
-      amountInput.focus();
-
-      render();
-
-      if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
-        drainOutbox();
+      // Hintergrund-Sync mit Supabase
+      try {
+        await pushExpenseToSupabase(newEntry);
+        updateCloudSyncBadge(true);
+      } catch (err) {
+        console.warn('Supabase offline, queuing in outbox', err);
+        outbox.push({ action: 'add', entry: newEntry });
+        saveOutbox();
+        updateCloudSyncBadge(false);
       }
     }
 
-    function deleteExpense(id) {
-      const idx = expenses.findIndex(x => String(x.id) === String(id));
-      if (idx !== -1) {
-        expenses.splice(idx, 1);
-        outbox = outbox.filter(o => String(o.id) !== String(id));
-        saveData();
-        saveOutbox();
-        render();
-        showToast("Deleted");
+    async function deleteExpense(id) {
+      const idx = expenses.findIndex(e => e.id === id);
+      if (idx === -1) return;
 
-        if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
-          try {
-            fetch(config.googleWebhook, {
+      expenses.splice(idx, 1);
+      saveData();
+      render();
+
+      try {
+        await deleteExpenseFromSupabase(id);
+      } catch(err) {
+        outbox.push({ action: 'delete', id: id });
+        saveOutbox();
+      }
+    }
+
+    // Supabase Operationen
+    async function saveHouseholdToSupabase() {
+      if (!config.householdId) config.householdId = generateHouseholdId();
+      const client = getSupabaseClient();
+      const hhPayload = {
+        id: config.householdId,
+        name: config.householdName || 'Household',
+        monthly_budget: config.monthlyBudget || 1500,
+        currency: config.currency || '€',
+        updated_at: new Date().toISOString()
+      };
+
+      const membersPayload = config.users.map((u, i) => ({
+        id: `${config.householdId}_${u.name.toLowerCase().replace(/[^a-z0-9]/g, '')}_${i}`,
+        household_id: config.householdId,
+        name: u.name,
+        color_idx: u.colorIdx !== undefined ? u.colorIdx : i
+      }));
+
+      try {
+        if (client) {
+          await client.from('households').upsert(hhPayload);
+          if (membersPayload.length > 0) {
+            await client.from('household_members').upsert(membersPayload);
+          }
+        } else {
+          await fetch(`${SUPABASE_URL}/rest/v1/households`, {
+            method: 'POST',
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+              'Content-Type': 'application/json',
+              'Prefer': 'resolution=merge-duplicates'
+            },
+            body: JSON.stringify(hhPayload)
+          });
+          if (membersPayload.length > 0) {
+            await fetch(`${SUPABASE_URL}/rest/v1/household_members`, {
               method: 'POST',
-              mode: 'no-cors',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: "delete", id: String(id) })
-            }).catch(e => console.log(e));
-          } catch(e) {}
+              headers: {
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json',
+                'Prefer': 'resolution=merge-duplicates'
+              },
+              body: JSON.stringify(membersPayload)
+            });
+          }
+        }
+      } catch(e) {
+        console.warn('saveHouseholdToSupabase error:', e);
+      }
+    }
+
+    async function pushExpenseToSupabase(entry) {
+      if (!config.householdId) return;
+      const payload = {
+        id: entry.id,
+        household_id: config.householdId,
+        date: entry.date,
+        person: entry.person,
+        purpose: entry.purpose,
+        merchant: entry.merchant || '',
+        amount: parseFloat(entry.amount) || 0,
+        deleted: false,
+        updated_at: new Date().toISOString()
+      };
+
+      const client = getSupabaseClient();
+      if (client) {
+        const { error } = await client.from('expenses').upsert(payload);
+        if (error) throw error;
+      } else {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/expenses`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('PostgREST error: ' + res.status);
+      }
+    }
+
+    async function deleteExpenseFromSupabase(id) {
+      if (!config.householdId) return;
+      const client = getSupabaseClient();
+      if (client) {
+        await client.from('expenses').update({ deleted: true, updated_at: new Date().toISOString() }).eq('id', id);
+      } else {
+        await fetch(`${SUPABASE_URL}/rest/v1/expenses?id=eq.${id}`, {
+          method: 'PATCH',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ deleted: true, updated_at: new Date().toISOString() })
+        });
+      }
+    }
+
+    async function drainOutbox() {
+      if (isDrainingOutbox) return;
+      if (!config.householdId || outbox.length === 0) return;
+
+      isDrainingOutbox = true;
+      const remaining = [];
+
+      for (const item of outbox) {
+        try {
+          if (item.action === 'delete') {
+            await deleteExpenseFromSupabase(item.id);
+          } else {
+            await pushExpenseToSupabase(item.entry || item);
+          }
+        } catch(err) {
+          remaining.push(item);
+        }
+      }
+
+      outbox = remaining;
+      saveOutbox();
+      isDrainingOutbox = false;
+    }
+
+    // Synchronisation mit Supabase
+    async function syncWithSupabase(showToastNotice = false) {
+      if (isSyncing) return;
+      if (!config.householdId) return;
+
+      isSyncing = true;
+      const syncIcon = document.getElementById('iconSync');
+      if (syncIcon) syncIcon.classList.add('animate-spin');
+
+      try {
+        await drainOutbox();
+
+        const client = getSupabaseClient();
+        let remoteEntries = [];
+
+        if (client) {
+          const { data, error } = await client
+            .from('expenses')
+            .select('*')
+            .eq('household_id', config.householdId)
+            .eq('deleted', false)
+            .order('date', { ascending: false })
+            .order('created_at', { ascending: false });
+          if (!error && data) remoteEntries = data;
+        } else {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/expenses?household_id=eq.${config.householdId}&deleted=eq.false&order=date.desc,created_at.desc`, {
+            headers: {
+              'apikey': SUPABASE_ANON_KEY,
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            }
+          });
+          if (res.ok) {
+            remoteEntries = await res.json();
+          }
+        }
+
+        if (remoteEntries && remoteEntries.length >= 0) {
+          const outboxIds = new Set(outbox.map(item => (item.entry ? item.entry.id : item.id)));
+          const localPending = expenses.filter(e => outboxIds.has(e.id));
+          
+          const remoteMapped = remoteEntries.map(r => ({
+            id: r.id,
+            date: r.date,
+            person: r.person,
+            purpose: r.purpose,
+            merchant: r.merchant || '',
+            amount: parseFloat(r.amount) || 0,
+            createdAt: r.created_at
+          }));
+
+          const mergedMap = new Map();
+          remoteMapped.forEach(e => mergedMap.set(e.id, e));
+          localPending.forEach(e => mergedMap.set(e.id, e));
+
+          expenses = Array.from(mergedMap.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
+          saveData();
+          render();
+        }
+
+        // Haushaltsdaten synchronisieren falls vom Partner aktualisiert
+        let remoteHh = null;
+        if (client) {
+          const { data } = await client.from('households').select('*').eq('id', config.householdId).maybeSingle();
+          remoteHh = data;
+        } else {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/households?id=eq.${config.householdId}`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          if (res.ok) {
+            const arr = await res.json();
+            if (arr && arr.length > 0) remoteHh = arr[0];
+          }
+        }
+
+        if (remoteHh) {
+          if (remoteHh.name) config.householdName = remoteHh.name;
+          if (remoteHh.monthly_budget) config.monthlyBudget = parseFloat(remoteHh.monthly_budget);
+          if (remoteHh.currency) config.currency = remoteHh.currency;
+          saveConfig();
+          updateHouseholdUI();
+          render();
+        }
+
+        updateCloudSyncBadge(true);
+        if (showToastNotice) {
+          showToast(t('toast_sync_success'));
+        }
+      } catch(e) {
+        console.warn('syncWithSupabase error:', e);
+        updateCloudSyncBadge(false);
+        if (showToastNotice) {
+          showToast(t('toast_sync_offline'), true);
+        }
+      } finally {
+        isSyncing = false;
+        if (syncIcon) syncIcon.classList.remove('animate-spin');
+      }
+    }
+
+    // Realtime-Abonnement
+    function subscribeToRealtime() {
+      if (realtimeChannel) return;
+      const client = getSupabaseClient();
+      if (!client || !config.householdId) return;
+
+      try {
+        realtimeChannel = client
+          .channel('public:expenses:' + config.householdId)
+          .on(
+            'postgres_changes',
+            { event: '*', schema: 'public', table: 'expenses', filter: `household_id=eq.${config.householdId}` },
+            payload => {
+              handleRemoteRealtimeChange(payload);
+            }
+          )
+          .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+              updateCloudSyncBadge(true);
+            }
+          });
+      } catch(e) {
+        console.warn('Realtime subscription error:', e);
+      }
+    }
+
+    function handleRemoteRealtimeChange(payload) {
+      const { eventType, new: newRec, old: oldRec } = payload;
+      if (eventType === 'INSERT' || eventType === 'UPDATE') {
+        if (newRec.deleted) {
+          expenses = expenses.filter(e => e.id !== newRec.id);
+        } else {
+          const mapped = {
+            id: newRec.id,
+            date: newRec.date,
+            person: newRec.person,
+            purpose: newRec.purpose,
+            merchant: newRec.merchant || '',
+            amount: parseFloat(newRec.amount) || 0,
+            createdAt: newRec.created_at
+          };
+          const idx = expenses.findIndex(e => e.id === newRec.id);
+          if (idx !== -1) {
+            expenses[idx] = mapped;
+          } else {
+            expenses.unshift(mapped);
+          }
+          expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+        saveData();
+        render();
+        if (navigator.vibrate) {
+          try { navigator.vibrate(20); } catch(e){}
+        }
+      } else if (eventType === 'DELETE') {
+        if (oldRec && oldRec.id) {
+          expenses = expenses.filter(e => e.id !== oldRec.id);
+          saveData();
+          render();
         }
       }
     }
 
+    // UI Rendering
     function render() {
-      let total = 0;
-      const userTotals = {};
-      const purposeMap = {};
+      const now = new Date();
+      const currentYear = now.getFullYear();
+      const currentMonth = now.getMonth();
 
-      if (config.users) {
-        config.users.forEach(u => { userTotals[u.name] = 0; });
-      }
-
-      expenses.forEach(exp => {
-        total += exp.amount;
-        userTotals[exp.person] = (userTotals[exp.person] || 0) + exp.amount;
-        const locP = getLocalizedCategory(exp.purpose);
-        purposeMap[locP] = (purposeMap[locP] || 0) + exp.amount;
+      const currentMonthExpenses = expenses.filter(exp => {
+        if (!exp.date) return false;
+        const d = new Date(exp.date);
+        return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
       });
 
-      // Total Card
+      let total = 0;
+      const userSums = {};
+      config.users.forEach(u => userSums[u.name] = 0);
+      const purposeMap = {};
+
+      currentMonthExpenses.forEach(exp => {
+        total += exp.amount;
+        if (userSums[exp.person] !== undefined) {
+          userSums[exp.person] += exp.amount;
+        } else {
+          userSums[exp.person] = (userSums[exp.person] || 0) + exp.amount;
+        }
+        const pLoc = getLocalizedCategory(exp.purpose);
+        purposeMap[pLoc] = (purposeMap[pLoc] || 0) + exp.amount;
+      });
+
       document.getElementById('totalExpensesMonth').innerText = formatMoney(total);
 
-      // Localized current month
-      const currentMonthLabel = document.getElementById('currentMonthLabel');
-      if (currentMonthLabel) {
-        try {
-          currentMonthLabel.innerText = new Intl.DateTimeFormat(getLocale(), { month: 'long', year: 'numeric' }).format(new Date());
-        } catch(e){}
-      }
-
-      // Aufteilung nach Person dynamisch für alle User mit individuellen Farben
-      const splitEl = document.getElementById('userSplitBreakdown');
+      const splitEl = document.getElementById('userSplitDisplay');
       if (splitEl) {
-        const userSpans = Object.entries(userTotals).map(([name, sum]) => {
+        splitEl.innerHTML = Object.entries(userSums).map(([name, sum]) => {
           const color = getUserColor(name);
           return `<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full inline-block" style="background-color: ${color.hex}"></span> ${escapeHtml(name)}: <strong style="color: ${color.hex}">${formatMoneyCompact(sum)}</strong></span>`;
-        });
-        splitEl.innerHTML = `<span>${t('split_label')}</span> <div class="flex flex-wrap items-center gap-x-2 gap-y-1">${userSpans.join('')}</div>`;
+        }).join('<span class="text-slate-600">•</span>');
       }
 
-      // Nautical Seegang & Wasserlinie Berechnungen
-      const budget = Number(config.monthlyBudget) || 1500;
-      const budgetDisplay = document.getElementById('budgetDisplay');
+      const budget = config.monthlyBudget || 1500;
+      const budgetDisplay = document.getElementById('targetBudgetDisplay');
       if (budgetDisplay) budgetDisplay.innerText = formatMoneyCompact(budget);
 
-      const depthPct = Math.round((total / budget) * 100);
-      const freeboard = budget - total;
-
-      // Segelboot & Welle animieren
-      const barEl = document.getElementById('waterProgressBar');
-      const boatEl = document.getElementById('sailboatMarker');
-      const freeboardLabel = document.getElementById('waterFreeboardLabel');
-      const statusText = document.getElementById('nauticalStatusText');
-
-      if (barEl && boatEl) {
-        const visualWidth = Math.min(94, Math.max(4, depthPct));
-        barEl.style.width = visualWidth + '%';
-        boatEl.style.left = visualWidth + '%';
+      const pct = Math.min(100, Math.round((total / budget) * 100));
+      const waterFill = document.getElementById('waterFill');
+      if (waterFill) {
+        waterFill.style.height = `${pct}%`;
+        if (pct < 60) {
+          waterFill.style.background = 'linear-gradient(to top, rgba(14, 165, 233, 0.45), rgba(56, 189, 248, 0.25))';
+        } else if (pct < 85) {
+          waterFill.style.background = 'linear-gradient(to top, rgba(234, 179, 8, 0.45), rgba(250, 204, 21, 0.25))';
+        } else {
+          waterFill.style.background = 'linear-gradient(to top, rgba(244, 63, 94, 0.55), rgba(251, 113, 133, 0.35))';
+        }
       }
 
+      const boat = document.getElementById('sailboat');
+      if (boat) boat.style.bottom = `calc(${pct}% - 8px)`;
+
+      const freeboard = budget - total;
+      const freeboardLabel = document.getElementById('freeboardLabel');
       if (freeboardLabel) {
         if (freeboard >= 0) {
           freeboardLabel.innerHTML = `${formatMoneyCompact(freeboard)} <span class="text-slate-300 font-bold">${t('buffer_label')}</span>`;
@@ -1594,34 +1764,37 @@
         }
       }
 
+      const statusText = document.getElementById('seawayStatusText');
       if (statusText) {
-        if (total <= (budget * 0.5)) {
-          statusText.className = "text-emerald-400 font-medium";
-          statusText.innerText = `⛵ ${t('status_calm')} (${depthPct}%)`;
-        } else if (total <= (budget * 0.8)) {
-          statusText.className = "text-sky-400 font-medium";
-          statusText.innerText = `🌊 ${t('status_breeze')} (${depthPct}%)`;
-        } else if (total <= budget) {
-          statusText.className = "text-amber-400 font-medium";
-          statusText.innerText = `⚠️ ${t('status_waves')} (${depthPct}%)`;
+        if (pct < 45) {
+          statusText.innerText = `⛵ ${t('status_calm')} (${pct}%)`;
+          statusText.className = 'text-xs font-bold text-sky-400';
+        } else if (pct < 75) {
+          statusText.innerText = `🌊 ${t('status_breeze')} (${pct}%)`;
+          statusText.className = 'text-xs font-bold text-emerald-400';
+        } else if (pct < 95) {
+          statusText.innerText = `⚠️ ${t('status_waves')} (${pct}%)`;
+          statusText.className = 'text-xs font-bold text-amber-400';
+        } else if (pct <= 100) {
+          statusText.innerText = `🚨 ${t('status_storm')} (${pct}%)`;
+          statusText.className = 'text-xs font-bold text-rose-400';
         } else {
-          statusText.className = "text-rose-400 font-bold animate-pulse";
           statusText.innerText = `🚨 ${t('status_storm')} (+${formatMoneyCompact(total - budget)})`;
+          statusText.className = 'text-xs font-bold text-rose-500 animate-pulse';
         }
       }
 
-      // Badge aktualisieren
-      const badgeEl = document.getElementById('entryCountBadge');
-      if (badgeEl) badgeEl.innerText = `${expenses.length} ${t('entries_count')}`;
+      const countEl = document.getElementById('recentReceiptsCount');
+      if (countEl) countEl.innerText = `${currentMonthExpenses.length} ${t('entries_count')}`;
 
-      // Einträge Liste mit Personen-Farbindikatoren
-      const listEl = document.getElementById('expenseList');
+      const outboxIds = new Set(outbox.map(item => (item.entry ? item.entry.id : item.id)));
+      const listEl = document.getElementById('recentReceiptsList');
       if (listEl) {
-        if (expenses.length === 0) {
-          listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">${t('no_expenses')}</p>`;
+        if (currentMonthExpenses.length === 0) {
+          listEl.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs italic">${t('no_expenses')}</div>`;
         } else {
-          listEl.innerHTML = expenses.map(exp => {
-            const isPending = exp.pendingSync || outbox.some(o => String(o.id) === String(exp.id));
+          listEl.innerHTML = currentMonthExpenses.slice(0, 20).map(exp => {
+            const isPending = outboxIds.has(exp.id);
             const color = getUserColor(exp.person);
             const locPurpose = getLocalizedCategory(exp.purpose);
             return `
@@ -1648,19 +1821,17 @@
         }
       }
 
-      // Kategorien-Chart
       renderCategoryChart(purposeMap);
 
-      // Kategorien-Liste
       const sorted = Object.entries(purposeMap).sort((a,b) => b[1] - a[1]);
       const breakdownEl = document.getElementById('categoryBreakdownList');
       if (breakdownEl) {
         breakdownEl.innerHTML = sorted.map(([p, val]) => {
-          const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+          const pctVal = total > 0 ? Math.round((val / total) * 100) : 0;
           return `
             <div class="flex items-center justify-between py-1 border-b border-slate-800/60">
               <span class="text-slate-300">${escapeHtml(p)}</span>
-              <span class="font-bold text-white">${formatMoney(val)} <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span></span>
+              <span class="font-bold text-white">${formatMoney(val)} <span class="text-[10px] text-slate-400 font-normal">(${pctVal}%)</span></span>
             </div>
           `;
         }).join('');
@@ -1673,7 +1844,7 @@
 
     function renderCategoryChart(purposeMap) {
       const ctx = document.getElementById('categoryChart');
-      if (!ctx) return;
+      if (!ctx || typeof Chart === 'undefined') return;
 
       const labels = Object.keys(purposeMap);
       const data = Object.values(purposeMap);
@@ -1702,7 +1873,6 @@
       });
     }
 
-    // CSV Generierung
     function buildCSV() {
       let csv = "ID;Datum;Person;Zweck;Haendler;Betrag\n";
       expenses.forEach(e => {
@@ -1711,14 +1881,13 @@
       return csv;
     }
 
-    // Teilen / Export
     async function shareOrExport() {
       if (expenses.length === 0) {
         alert(t('no_expenses'));
         return;
       }
       const csv = buildCSV();
-      const fileName = `Logbook_${config.deviceOwner}_${new Date().toISOString().slice(0,10)}.csv`;
+      const fileName = `Logbook_${config.householdName || 'Household'}_${new Date().toISOString().slice(0,10)}.csv`;
       const file = new File([csv], fileName, { type: 'text/csv' });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -1741,61 +1910,103 @@
       document.body.removeChild(link);
     }
 
-    // Direktes Öffnen der Google Tabelle / Drive
-    function openGoogleSheetDirectly() {
-      if (config.googleSheetUrl && config.googleSheetUrl.startsWith('http')) {
-        window.open(config.googleSheetUrl, '_blank');
-      } else {
-        const entered = prompt(
-          "Google Sheet URL (https://docs.google.com/spreadsheets/...):",
-          ""
-        );
-        if (entered && entered.trim().startsWith('http')) {
-          config.googleSheetUrl = entered.trim();
-          saveConfig();
-          window.open(config.googleSheetUrl, '_blank');
-        } else {
-          openSettingsModal();
-        }
-      }
+    function selectPurpose(key, fullName, btn) {
+      document.getElementById('inputPurpose').value = key;
+      document.querySelectorAll('.purpose-btn').forEach(b => {
+        b.className = "purpose-btn py-2 px-1 rounded-xl text-[11px] font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600";
+      });
+      btn.className = "purpose-btn py-2 px-1 rounded-xl text-[11px] font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5 bg-sky-500/25 border-sky-400 text-sky-200";
     }
 
-    // Settings Modal
-    let settingsTempUsers = [];
-    let settingsSelectedOwner = '';
+    function toggleDeviceOwner() {
+      if (!config.users || config.users.length === 0) return;
+      const currentIdx = config.users.findIndex(u => u.name === activePerson);
+      const nextIdx = (currentIdx + 1) % config.users.length;
+      activePerson = config.users[nextIdx].name;
+      config.deviceOwner = activePerson;
+      saveConfig();
+      updateHouseholdUI();
+      render();
+      showToast(`${activePerson}`);
+    }
+
+    function updateHouseholdUI() {
+      const sub = document.getElementById('headerHouseholdSubtitle');
+      if (sub) sub.innerText = config.householdName || t('household');
+
+      const ownerBadge = document.getElementById('headerOwnerBadge');
+      if (ownerBadge) {
+        const color = getUserColor(activePerson);
+        ownerBadge.innerText = activePerson;
+        ownerBadge.style.backgroundColor = color.bg;
+        ownerBadge.style.color = color.text;
+        ownerBadge.style.borderColor = color.border;
+        ownerBadge.style.borderWidth = '1px';
+      }
+
+      const pContainer = document.getElementById('personChipsContainer');
+      if (pContainer && config.users) {
+        pContainer.innerHTML = config.users.map(u => {
+          const isAct = (u.name === activePerson);
+          const color = PALETTE[u.colorIdx % PALETTE.length];
+          return `
+            <button type="button" onclick="setActivePerson('${escapeHtml(u.name)}')" 
+                    class="py-1 px-3 rounded-full text-xs font-bold border transition active:scale-95 flex items-center gap-1.5"
+                    style="
+                      background-color: ${isAct ? color.bg : 'rgba(15, 23, 42, 0.6)'}; 
+                      border-color: ${isAct ? color.border : 'rgba(51, 65, 85, 0.8)'}; 
+                      color: ${isAct ? '#ffffff' : '#94a3b8'}
+                    ">
+              <span class="w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
+              ${escapeHtml(u.name)}
+            </button>
+          `;
+        }).join('');
+      }
+
+      const hidInput = document.getElementById('settingsHouseholdId');
+      if (hidInput) hidInput.value = config.householdId || '';
+    }
+
+    function setActivePerson(name) {
+      activePerson = name;
+      updateHouseholdUI();
+    }
 
     function openSettingsModal() {
-      document.getElementById('settingsModal').classList.remove('hidden');
+      const modal = document.getElementById('settingsModal');
+      if (!modal) return;
       document.getElementById('settingsHouseholdName').value = config.householdName || '';
       document.getElementById('settingsMonthlyBudget').value = config.monthlyBudget || 1500;
-      document.getElementById('inputGoogleWebhook').value = config.googleWebhook || '';
-      document.getElementById('settingsGoogleSheetUrl').value = config.googleSheetUrl || '';
-
-      settingsTempUsers = JSON.parse(JSON.stringify(config.users || []));
-      settingsSelectedOwner = config.deviceOwner;
+      
+      const hidInput = document.getElementById('settingsHouseholdId');
+      if (hidInput) hidInput.value = config.householdId || '';
 
       renderSettingsPills();
-      renderSettingsUsers();
+      renderSettingsUsersList();
       renderSettingsOwnerOptions();
+      modal.classList.remove('hidden');
     }
 
     function closeSettingsModal() {
-      document.getElementById('settingsModal').classList.add('hidden');
+      const modal = document.getElementById('settingsModal');
+      if (modal) modal.classList.add('hidden');
     }
 
-    function renderSettingsUsers() {
-      const c = document.getElementById('settingsUsersList');
-      if (!c) return;
+    function renderSettingsUsersList() {
+      const list = document.getElementById('settingsUsersList');
+      if (!list) return;
 
-      c.innerHTML = settingsTempUsers.map((u, i) => {
+      list.innerHTML = config.users.map((u, i) => {
         const color = PALETTE[u.colorIdx % PALETTE.length];
         return `
           <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${color.hex}"></span>
-            <input type="text" value="${escapeHtml(u.name)}" oninput="updateSettingsUserName(${i}, this.value)"
-              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1 text-xs text-white">
-            ${settingsTempUsers.length > 1 ? `
-              <button type="button" onclick="removeSettingsUser(${i})" class="text-slate-500 hover:text-rose-400 p-1 text-xs shrink-0">✕</button>
+            <input type="text" value="${escapeHtml(u.name)}" oninput="updateSettingsUserName(${i}, this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1 text-xs text-white">
+            ${config.users.length > 1 ? `
+              <button type="button" onclick="removeSettingsUser(${i})" class="text-slate-500 hover:text-rose-400 p-1">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
             ` : ''}
           </div>
         `;
@@ -1803,84 +2014,86 @@
     }
 
     function updateSettingsUserName(idx, val) {
-      if (settingsTempUsers[idx]) {
-        settingsTempUsers[idx].name = val;
+      if (config.users[idx]) {
+        config.users[idx].name = val;
         renderSettingsOwnerOptions();
       }
     }
 
     function addSettingsUser() {
-      const nextIdx = settingsTempUsers.length;
-      settingsTempUsers.push({
-        id: `u_${nextIdx + 1}`,
-        name: `Person ${nextIdx + 1}`,
-        colorIdx: nextIdx % PALETTE.length
+      const newIdx = config.users.length;
+      config.users.push({
+        id: `u_${newIdx + 1}`,
+        name: `Person ${newIdx + 1}`,
+        colorIdx: newIdx % PALETTE.length
       });
-      renderSettingsUsers();
+      renderSettingsUsersList();
       renderSettingsOwnerOptions();
     }
 
     function removeSettingsUser(idx) {
-      if (settingsTempUsers.length <= 1) return;
-      settingsTempUsers.splice(idx, 1);
-      renderSettingsUsers();
+      if (config.users.length <= 1) return;
+      config.users.splice(idx, 1);
+      renderSettingsUsersList();
       renderSettingsOwnerOptions();
     }
 
     function renderSettingsOwnerOptions() {
-      const c = document.getElementById('settingsDeviceOwnerOptions');
-      if (!c) return;
+      const container = document.getElementById('settingsDeviceOwnerOptions');
+      if (!container) return;
 
-      c.innerHTML = settingsTempUsers.map((u, i) => {
+      container.innerHTML = config.users.map(u => {
+        const isSelected = (config.deviceOwner === u.name);
         const color = PALETTE[u.colorIdx % PALETTE.length];
-        const isSelected = settingsSelectedOwner === u.name || (!settingsSelectedOwner && i === 0);
         return `
-          <button type="button" data-user="${escapeHtml(u.name)}" onclick="selectSettingsOwner(this.dataset.user)"
-            class="py-2 px-2 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95"
-            style="${isSelected ? `background-color: ${color.bg}; border: 1.5px solid ${color.border}; color: ${color.text}; font-weight: bold;` : 'background-color: #0f172a; border: 1px solid #334155; color: #94a3b8;'}">
-            <span class="inline-block w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
-            ${escapeHtml(u.name || `Person ${i+1}`)}
+          <button type="button" onclick="setDeviceOwner('${escapeHtml(u.name)}')"
+            class="py-1.5 px-2.5 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition ${isSelected ? 'border-sky-400 bg-sky-500/20 text-white' : 'border-slate-800 bg-slate-900 text-slate-400'}">
+            <span class="w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
+            <span class="truncate">${escapeHtml(u.name || 'User')}</span>
           </button>
         `;
       }).join('');
     }
 
-    function selectSettingsOwner(owner) {
-      settingsSelectedOwner = owner;
+    function setDeviceOwner(name) {
+      config.deviceOwner = name;
+      activePerson = name;
       renderSettingsOwnerOptions();
     }
 
-    function saveSettings() {
-      config.householdName = document.getElementById('settingsHouseholdName').value.trim() || t('household');
+    async function saveSettings() {
+      const hName = document.getElementById('settingsHouseholdName').value.trim() || t('household');
       const bVal = parseFloat(document.getElementById('settingsMonthlyBudget').value);
-      config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
-      config.googleWebhook = document.getElementById('inputGoogleWebhook').value.trim();
-      config.googleSheetUrl = document.getElementById('settingsGoogleSheetUrl').value.trim();
 
-      config.users = settingsTempUsers.map((u, i) => ({
-        id: `u_${i+1}`,
+      config.householdName = hName;
+      config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
+
+      config.users = config.users.map((u, i) => ({
+        id: u.id || `u_${i+1}`,
         name: u.name.trim() || `Person ${i+1}`,
         colorIdx: u.colorIdx !== undefined ? u.colorIdx : (i % PALETTE.length)
       }));
 
-      const ownerExists = config.users.some(u => u.name === settingsSelectedOwner);
-      config.deviceOwner = ownerExists ? settingsSelectedOwner : config.users[0].name;
+      const ownerExists = config.users.some(u => u.name === config.deviceOwner);
+      if (!ownerExists && config.users[0]) {
+        config.deviceOwner = config.users[0].name;
+        activePerson = config.deviceOwner;
+      }
 
       saveConfig();
+      closeSettingsModal();
       updateI18nUI();
       updateHouseholdUI();
       render();
-      closeSettingsModal();
-      showToast(`${t('toast_saved')}: ${config.deviceOwner}`);
+      showToast(t('toast_saved'));
 
-      if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
-        syncWithGoogleSheet(true);
-      }
+      await saveHouseholdToSupabase();
+      syncWithSupabase(false);
     }
 
-    // Erzeugt den Setup-Link für den Partner zum schnellen Teilen
     function copyPartnerSetupLink() {
       const baseUrl = window.location.origin + window.location.pathname;
+      const hidParam = encodeURIComponent(config.householdId || '');
       const hName = encodeURIComponent(config.householdName || 'Household');
       const budget = config.monthlyBudget || 1500;
       const userList = encodeURIComponent(config.users.map(u => u.name).join(','));
@@ -1891,12 +2104,10 @@
         if (other) partnerOwner = other.name;
       }
       const ownerParam = encodeURIComponent(partnerOwner);
-      const hookParam = config.googleWebhook ? `&hook=${encodeURIComponent(config.googleWebhook)}` : '';
-      const sheetParam = config.googleSheetUrl ? `&sheet=${encodeURIComponent(config.googleSheetUrl)}` : '';
       const langParam = config.lang ? `&lang=${encodeURIComponent(config.lang)}` : '';
       const currParam = config.currency ? `&curr=${encodeURIComponent(config.currency)}` : '';
 
-      const shareUrl = `${baseUrl}#setup?h=${hName}&b=${budget}&users=${userList}&owner=${ownerParam}${hookParam}${sheetParam}${langParam}${currParam}`;
+      const shareUrl = `${baseUrl}#setup?hid=${hidParam}&h=${hName}&b=${budget}&users=${userList}&owner=${ownerParam}${langParam}${currParam}`;
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(shareUrl).then(() => {
@@ -1909,154 +2120,37 @@
       }
     }
 
-    // Outbox-Warteschlange im Hintergrund an Google Sheets übertragen
-    async function drainOutbox() {
-      if (isDrainingOutbox) return;
-      if (!config.googleWebhook || !config.googleWebhook.startsWith('http')) return;
-      if (outbox.length === 0) return;
-
-      isDrainingOutbox = true;
-
-      try {
-        while (outbox.length > 0) {
-          const item = outbox[0];
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 12000);
-
-          try {
-            await fetch(config.googleWebhook, {
-              method: 'POST',
-              mode: 'no-cors',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: "add", entry: item }),
-              signal: controller.signal
-            });
-            clearTimeout(timeoutId);
-
-            outbox.shift();
-            saveOutbox();
-
-            const localIdx = expenses.findIndex(e => String(e.id) === String(item.id));
-            if (localIdx !== -1) {
-              expenses[localIdx].pendingSync = false;
-            }
-            saveData();
-          } catch (err) {
-            console.warn("Outbox-Drain pausiert (Offline oder Timeout):", err);
-            break;
-          }
-        }
-      } finally {
-        isDrainingOutbox = false;
-        render();
-      }
-    }
-
-    // Bidirektionaler Sync mit Google Sheet (GET)
-    async function syncWithGoogleSheet(showFeedback = false) {
-      if (isSyncing) return;
-      if (!config.googleWebhook || !config.googleWebhook.startsWith('http')) {
-        if (showFeedback) openSettingsModal();
-        return;
-      }
-
-      isSyncing = true;
-      const syncBtn = document.getElementById('btnCloudSync');
-      const syncIcon = document.getElementById('iconSync');
-      if (syncIcon) syncIcon.classList.add('animate-spin');
-
-      try {
-        await drainOutbox();
-
-        let reqUrl = config.googleWebhook;
-        reqUrl += (reqUrl.includes('?') ? '&' : '?') + 'api=json&t=' + Date.now();
-
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
-
-        const response = await fetch(reqUrl, { signal: controller.signal });
-        clearTimeout(timeoutId);
-
-        if (!response.ok) throw new Error("HTTP " + response.status);
-
-        const resData = await response.json();
-        if (resData.status === "success" && Array.isArray(resData.entries)) {
-          const cloudEntries = resData.entries;
-          const mergedMap = new Map();
-
-          expenses.forEach(e => mergedMap.set(String(e.id), e));
-
-          cloudEntries.forEach(ce => {
-            const id = String(ce.id);
-            if (!mergedMap.has(id)) {
-              mergedMap.set(id, {
-                id: id,
-                date: ce.date,
-                person: ce.person,
-                purpose: ce.purpose,
-                merchant: ce.merchant || '',
-                amount: parseFloat(ce.amount) || 0,
-                pendingSync: false
-              });
-            } else {
-              const existing = mergedMap.get(id);
-              existing.pendingSync = false;
-            }
-          });
-
-          expenses = Array.from(mergedMap.values());
-          expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-          saveData();
-          render();
-
-          const badge = document.getElementById('syncStatusBadge');
-          if (badge) {
-            badge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1 animate-pulse"></span> ${t('badge_sync_active')}`;
-          }
-
-          if (showFeedback) {
-            showToast("✓ " + (resData.count || cloudEntries.length) + " " + t('entries_count'));
-          }
-        }
-      } catch (err) {
-        console.error("Sync-Fehler:", err);
-        if (showFeedback) {
-          showToast("Sync: Offline / Cloud nicht erreichbar", true);
-        }
-      } finally {
-        isSyncing = false;
-        if (syncIcon) syncIcon.classList.remove('animate-spin');
-      }
-    }
-
     function clearCurrentMonth() {
-      if (confirm(t('confirm_clear_month'))) {
-        expenses = [];
-        outbox = [];
-        saveData();
-        saveOutbox();
-        render();
-        showToast("Cleared");
-      }
+      if (!confirm(t('confirm_clear_month'))) return;
+      const now = new Date();
+      const cy = now.getFullYear();
+      const cm = now.getMonth();
+
+      expenses = expenses.filter(exp => {
+        if (!exp.date) return true;
+        const d = new Date(exp.date);
+        return !(d.getFullYear() === cy && d.getMonth() === cm);
+      });
+
+      saveData();
+      render();
+      showToast("Cleared");
     }
 
     function escapeHtml(str) {
       if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+      return String(str).replace(/[&<>"']/g, m => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[m]);
     }
 
     // App Start
     document.addEventListener('DOMContentLoaded', () => {
       init();
-      if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
-        syncWithGoogleSheet(false);
-      }
     });
 </script>
 </body>

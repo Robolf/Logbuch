@@ -1,0 +1,1169 @@
+<!DOCTYPE html>
+<html lang="de" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Logbuch - Haushaltsbuch</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Logbuch">
+  <meta name="theme-color" content="#060d17">
+  
+  <!-- PWA & Apple Touch Icons (Sailboat Theme) -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="apple-touch-icon.png">
+  <link rel="shortcut icon" href="favicon.png">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      background: radial-gradient(circle at top, #0f1f38 0%, #060d17 100%);
+    }
+    .glass-card {
+      background: rgba(15, 25, 45, 0.78);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(56, 189, 248, 0.12);
+    }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    .active-chip {
+      background-color: rgba(14, 165, 233, 0.22) !important;
+      border-color: #38bdf8 !important;
+      color: #7dd3fc !important;
+      font-weight: 700 !important;
+    }
+    @keyframes gentleWave {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-2px) rotate(2deg); }
+    }
+    .bobbing-boat {
+      animation: gentleWave 2.8s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col pb-20">
+
+  <!-- Dynamic Island Style Floating Toast Notification -->
+  <div id="toastNotification" class="fixed top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-slate-900/95 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-sky-400/30 backdrop-blur-xl transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-4">
+    <span class="text-sm text-sky-400" id="toastIcon">✓</span>
+    <span id="toastMessage">Gespeichert</span>
+  </div>
+
+  <!-- Welcome / Onboarding Modal (Wessen Telefon ist das?) -->
+  <div id="welcomeModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+    <div class="glass-card max-w-xs w-full rounded-3xl p-6 text-center shadow-2xl border border-slate-700 space-y-4">
+      <div class="w-14 h-14 mx-auto rounded-2xl bg-sky-500/15 text-sky-400 flex items-center justify-center border border-sky-400/20 text-2xl shadow">
+        ⛵
+      </div>
+      <div>
+        <h3 class="text-base font-extrabold text-white tracking-tight">Willkommen im Logbuch</h3>
+        <p class="text-xs text-slate-400 mt-1">Haushaltsbuch</p>
+        <p class="text-[11px] text-slate-400 mt-2">Wem gehört dieses Smartphone? Deine Auswahl bleibt dauerhaft gespeichert:</p>
+      </div>
+      <div class="space-y-2 pt-2">
+        <button onclick="confirmInitialOwner('Person 1')" class="w-full py-2.5 px-4 rounded-xl bg-sky-600/30 hover:bg-sky-600/50 text-sky-200 border border-sky-500/30 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95">
+          Person 1
+        </button>
+        <button onclick="confirmInitialOwner('Person 2')" class="w-full py-2.5 px-4 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/30 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95">
+          Person 2
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header: Logbuch - Haushaltsbuch -->
+  <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-40 backdrop-blur-md px-4 py-3">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <img src="apple-touch-icon.png" alt="Logbuch" class="w-8 h-8 rounded-xl border border-sky-400/20 shadow-sm object-cover">
+        <div>
+          <div class="flex items-center gap-1.5">
+            <h1 class="text-sm font-bold text-white tracking-tight leading-tight">Logbuch</h1>
+            <!-- Klickbarer Switcher direkt im Header -->
+            <button onclick="toggleDeviceOwner()" id="headerOwnerBadge" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30 flex items-center gap-1 transition active:scale-95" title="Tippen zum Wechseln">
+              Person 1
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-400">Haushaltsbuch</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <!-- Live Cloud Sync Button -->
+        <button onclick="syncWithGoogleSheet(true)" id="btnCloudSync" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 flex items-center justify-center shrink-0" title="Google Sheet synchronisieren">
+          <svg id="iconSync" class="w-4 h-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+            <path d="M16 21h5v-5"/>
+          </svg>
+        </button>
+        <!-- Settings Button -->
+        <button onclick="openSettingsModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 flex items-center justify-center shrink-0" title="Einstellungen">
+          <svg class="w-4 h-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </button>
+        <!-- Share Button -->
+        <button onclick="shareOrExport()" class="w-9 h-9 rounded-xl bg-sky-600/20 hover:bg-sky-600/40 text-sky-300 border border-sky-500/30 text-xs font-semibold flex items-center justify-center shrink-0 transition active:scale-95" title="Teilen & CSV">
+          <svg class="w-4 h-4 text-sky-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3"/>
+            <circle cx="6" cy="12" r="3"/>
+            <circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-md mx-auto px-4 py-3.5 w-full flex-1 space-y-3.5">
+
+    <!-- 1. CARD: AUSGABE ERFASSEN (HAUPTFOKUS BEIM APP-START) -->
+    <div class="glass-card rounded-2xl p-4 shadow-xl border border-slate-800 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Ausgabe erfassen
+        </h2>
+        <!-- Wer zahlt Umschalter (bleibt standardmäßig auf Handy-Besitzer) -->
+        <div class="inline-flex rounded-lg bg-slate-900 p-0.5 border border-slate-800 text-xs">
+          <button type="button" onclick="setPerson('Person 1')" id="btnToggle1" class="px-2.5 py-1 rounded-md font-bold text-sky-300 bg-sky-600/30 transition">
+            Person 1
+          </button>
+          <button type="button" onclick="setPerson('Person 2')" id="btnToggle2" class="px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition">
+            Person 2
+          </button>
+        </div>
+      </div>
+
+      <form id="expenseForm" onsubmit="addExpense(event)" class="space-y-3">
+        <!-- 1. Betrag (Groß, sauber, sofort im Fokus) -->
+        <div>
+          <div class="relative">
+            <input type="number" step="0.01" inputmode="decimal" id="inputAmount" placeholder="0,00" required class="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl px-4 py-3 text-3xl font-extrabold text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 text-right pr-11 tracking-tight">
+            <span class="absolute right-4 top-3.5 text-2xl font-bold text-slate-400">€</span>
+          </div>
+        </div>
+
+        <!-- 2. Kategorie (Zweck) - Aufgeräumtes 2-Spalten-Raster -->
+        <div>
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kategorie</label>
+            <span id="selectedCategoryLabel" class="text-[10px] text-sky-400 font-bold">🛒 Supermarkt & Essen</span>
+          </div>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" onclick="selectPurpose('Supermarkt & Essen', '🛒 Supermarkt & Essen', this)" class="purpose-btn active-chip py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
+              <span>🛒</span> Supermarkt & Essen
+            </button>
+            <button type="button" onclick="selectPurpose('Kinder & Baby', '👶 Kinder & Baby', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
+              <span>👶</span> Kinder & Baby
+            </button>
+            <button type="button" onclick="selectPurpose('Mobilität & Auto', '⛽ Auto & Tanken', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
+              <span>⛽</span> Auto & Tanken
+            </button>
+            <button type="button" onclick="selectPurpose('Drogerie & Gesundheit', '💊 Drogerie & Pflege', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
+              <span>💊</span> Drogerie & Pflege
+            </button>
+            <button type="button" onclick="selectPurpose('Freizeit & Gastro', '☕ Restaurant & Café', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
+              <span>☕</span> Restaurant & Café
+            </button>
+            <button type="button" onclick="selectPurpose('Haus & Garten', '🏠 Haus & Garten', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
+              <span>🏠</span> Haus & Garten
+            </button>
+            <button type="button" onclick="selectPurpose('Kleidung & Mode', '👗 Kleidung & Schuhe', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
+              <span>👗</span> Kleidung & Schuhe
+            </button>
+            <button type="button" onclick="selectPurpose('Sonstiges', '📦 Sonstiges', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
+              <span>📦</span> Sonstiges
+            </button>
+          </div>
+          <input type="hidden" id="inputPurpose" value="Supermarkt & Essen">
+        </div>
+
+        <!-- 3. Ort / Händler (Schnell-Chips + Eingabefeld) -->
+        <div>
+          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ort / Händler</label>
+          <div class="flex flex-wrap gap-1 mb-1.5">
+            <button type="button" onclick="setMerchant('Lidl')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Lidl</button>
+            <button type="button" onclick="setMerchant('Rewe')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Rewe</button>
+            <button type="button" onclick="setMerchant('Aldi')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Aldi</button>
+            <button type="button" onclick="setMerchant('Edeka')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Edeka</button>
+            <button type="button" onclick="setMerchant('Apotheke')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Apotheke</button>
+            <button type="button" onclick="setMerchant('DM')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">DM</button>
+            <button type="button" onclick="setMerchant('Bäcker')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Bäcker</button>
+            <button type="button" onclick="setMerchant('Tankstelle')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Tankstelle</button>
+            <button type="button" onclick="setMerchant('Amazon')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Amazon</button>
+          </div>
+          <div>
+            <input type="text" id="inputMerchant" placeholder="Händler / Notiz (optional)" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+          </div>
+          <!-- Datum ist automatisch Heute (im Hintergrund) -->
+          <input type="date" id="inputDate" class="hidden">
+        </div>
+
+        <!-- Speichern Button -->
+        <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 active:from-sky-700 text-white font-extrabold rounded-xl text-sm transition shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2 active:scale-[0.98]">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Ausgabe speichern
+        </button>
+      </form>
+    </div>
+
+    <!-- 2. CARD: STATUS & BUDGET (AUFGERÄUMT & IM HINTERGRUND) -->
+    <div class="glass-card rounded-2xl p-3.5 shadow-xl border border-slate-800 space-y-2">
+      <div class="flex items-center justify-between text-xs text-slate-400">
+        <span class="font-medium text-slate-300" id="currentMonthLabel">Monat</span>
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-medium" id="syncStatusBadge">
+          Lokal auf Gerät
+        </span>
+      </div>
+
+      <div class="flex items-baseline justify-between">
+        <div>
+          <span class="text-2xl font-extrabold text-white" id="totalExpensesMonth">0,00 €</span>
+          <span class="text-xs text-slate-400 ml-1">ausgegeben</span>
+        </div>
+        <div class="text-right text-xs text-slate-400">
+          Soll-Budget: <span class="font-bold text-slate-200" id="budgetDisplay">1.500 €</span>
+        </div>
+      </div>
+
+      <!-- Schlanke Wasserlinien-Leiste mit Segelboot -->
+      <div class="space-y-1 pt-0.5">
+        <div class="relative w-full h-2 bg-slate-900 rounded-full overflow-visible border border-slate-800">
+          <div id="waterProgressBar" class="h-full rounded-full transition-all duration-500 bg-sky-500" style="width: 0%;"></div>
+          <div id="sailboatMarker" class="absolute -top-2.5 transition-all duration-500 transform -translate-x-1/2 text-xs" style="left: 0%;">
+            ⛵
+          </div>
+        </div>
+        <div class="flex justify-between items-center text-[10px] text-slate-400 pt-0.5">
+          <span id="nauticalStatusText" class="text-emerald-400 font-medium">Ruhige See</span>
+          <span id="waterFreeboardLabel" class="text-slate-300 font-bold">Puffer</span>
+        </div>
+      </div>
+
+      <!-- Aufteilung nach Person -->
+      <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+        <span>Aufteilung:</span>
+        <span class="text-slate-300"><span id="labelPerson1">Person 1:</span> <strong id="sumPerson1" class="text-sky-400">0 €</strong> <span id="labelPerson2">• Person 2:</span> <strong id="sumPerson2" class="text-purple-400">0 €</strong></span>
+      </div>
+    </div>
+
+    <!-- Kategorien-Auswertung (Wofür geht das Geld drauf?) -->
+    <div class="glass-card rounded-2xl p-4 shadow-xl">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+          Wofür geben wir Geld aus?
+        </h3>
+        <span class="text-[11px] text-slate-400" id="entryCountBadge">0 Einträge</span>
+      </div>
+      <div class="h-44 w-full flex items-center justify-center">
+        <canvas id="categoryChart"></canvas>
+      </div>
+      <div id="categoryBreakdownList" class="mt-3 space-y-1.5 text-xs">
+        <!-- Dynamisch gefüllt -->
+      </div>
+    </div>
+
+    <!-- Letzte Einträge Liste -->
+    <div class="glass-card rounded-2xl p-4 shadow-xl">
+      <div class="flex items-center justify-between mb-2">
+        <h3 class="text-xs font-bold text-white uppercase tracking-wider">Erfasste Quittungen</h3>
+      </div>
+      <div id="expenseList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+        <!-- Dynamisch gerendert -->
+      </div>
+    </div>
+
+    <!-- Datenaustausch & Partner-Sync Bar -->
+    <div class="glass-card rounded-2xl p-4 text-xs space-y-3">
+      <h4 class="font-bold text-slate-200 flex items-center gap-1.5">
+        <svg class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+        Partner-Abgleich (Zwei iPhones zusammenführen)
+      </h4>
+      <p class="text-slate-400 text-[11px] leading-relaxed">
+        Jeder von euch trägt Quittungen auf seinem Handy ein. Am Monatsende oder sonntags:
+      </p>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="shareOrExport()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition">
+          <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          CSV an Partner senden
+        </button>
+        <button onclick="document.getElementById('importPartnerInput').click()" class="py-2.5 px-3 rounded-xl bg-blue-600/30 hover:bg-blue-600/40 text-blue-200 border border-blue-500/40 font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition">
+          <svg class="w-3.5 h-3.5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Partner-CSV einspielen
+        </button>
+        <input type="file" id="importPartnerInput" accept=".csv" class="hidden" onchange="importPartnerCSV(event)">
+      </div>
+      <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-400">
+        <button onclick="openSettingsModal()" class="hover:text-white underline">Gerät wechseln / Google Sync</button>
+        <button onclick="clearCurrentMonth()" class="text-rose-400 hover:text-rose-300">Monat leeren</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal: Einstellungen & Google Sheet Sync -->
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+          App-Einstellungen
+        </h3>
+        <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white">
+          <svg class="w-5 h-5 text-slate-400 hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Personen-Namen einstellen -->
+      <div class="space-y-2">
+        <label class="text-xs font-semibold text-slate-300 block">Namen der Erfasser</label>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Person 1</label>
+            <input type="text" id="inputPerson1" placeholder="Person 1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Person 2</label>
+            <input type="text" id="inputPerson2" placeholder="Person 2" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+          </div>
+        </div>
+      </div>
+
+      <!-- Wer ist Inhaber dieses Handys? -->
+      <div class="pt-2 border-t border-slate-800">
+        <label class="text-xs font-semibold text-slate-300 block mb-1.5">Wem gehört dieses Smartphone? (Standard-Erfasser)</label>
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="setDeviceOwner('Person 1')" id="btnOwner1" class="py-2.5 rounded-xl border border-sky-500 bg-sky-600/40 text-sky-200 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+            Person 1
+          </button>
+          <button type="button" onclick="setDeviceOwner('Person 2')" id="btnOwner2" class="py-2.5 rounded-xl border border-purple-500 bg-purple-600/40 text-purple-200 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+            Person 2
+          </button>
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1.5 leading-tight">
+          Auf diesem Smartphone bleibt die Eingabe dauerhaft auf den Besitzer gesperrt, sodass keine Verwechslungen passieren.
+        </p>
+      </div>
+
+      <!-- Monatliches Soll-Budget -->
+      <div class="space-y-1.5 pt-2 border-t border-slate-800">
+        <label class="text-xs font-semibold text-slate-300 block">Monatliches Soll-Budget (€)</label>
+        <input type="number" step="10" id="inputMonthlyBudget" placeholder="1500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
+      </div>
+
+      <!-- Google Sheet Webhook Sync (Optional) -->
+      <div class="space-y-1.5 pt-2 border-t border-slate-800">
+        <label class="text-xs font-semibold text-slate-300 block">Google Sheet Webhook (Gemeinsame Cloud-Tabelle)</label>
+        <p class="text-[11px] text-slate-400 leading-tight">
+          Synchronisiert alle Einträge von beiden iPhones automatisch mit der gemeinsamen Google Tabelle.
+        </p>
+        <input type="url" id="inputGoogleWebhook" placeholder="https://script.google.com/macros/s/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
+      </div>
+
+      <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
+        <button onclick="saveSettings()" class="w-full py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-sky-500/20">
+          Einstellungen speichern
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Safe LocalStorage Wrapper (protects against iOS Safari private browsing / iframe security restrictions)
+    const memStore = {};
+    const safeStore = {
+      getItem: (k) => {
+        try { return localStorage.getItem(k); } catch(e) { return memStore[k] || null; }
+      },
+      setItem: (k, v) => {
+        try { localStorage.setItem(k, v); } catch(e) { memStore[k] = String(v); }
+      }
+    };
+
+    // Storage Keys
+    const STORAGE_KEY_DATA = 'logbuch_haushalt_entries_v3';
+    const STORAGE_KEY_CONFIG = 'logbuch_haushalt_config_v2';
+    const STORAGE_KEY_OUTBOX = 'logbuch_haushalt_outbox_v1';
+
+    const DEFAULT_WEBHOOK = "";
+
+    let expenses = [];
+    let outbox = [];
+    let isDrainingOutbox = false;
+    let isSyncing = false;
+    let config = {
+      person1: 'Person 1',
+      person2: 'Person 2',
+      deviceOwner: 'Person 1',
+      monthlyBudget: 1500,
+      googleWebhook: DEFAULT_WEBHOOK
+    };
+    let activePerson = 'Person 1';
+    let chartInstance = null;
+
+    // Sofortiges Kassen-Feedback (Toast)
+    function showToast(message, isWarning = false) {
+      const toast = document.getElementById('toastNotification');
+      const msg = document.getElementById('toastMessage');
+      if (!toast || !msg) return;
+      msg.innerText = message;
+      
+      toast.className = isWarning 
+        ? "fixed top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-amber-600 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-amber-400/50 transition-all duration-300 opacity-100 pointer-events-auto transform translate-y-0"
+        : "fixed top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-emerald-400/50 transition-all duration-300 opacity-100 pointer-events-auto transform translate-y-0";
+      
+      if (navigator.vibrate) {
+        try { navigator.vibrate(25); } catch(e){}
+      }
+      
+      setTimeout(() => {
+        toast.className = "fixed top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-emerald-400/50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-4";
+      }, 2400);
+    }
+
+    function loadOutbox() {
+      try {
+        const stored = safeStore.getItem(STORAGE_KEY_OUTBOX);
+        outbox = stored ? JSON.parse(stored) : [];
+      } catch(e) {
+        outbox = [];
+      }
+    }
+
+    function saveOutbox() {
+      safeStore.setItem(STORAGE_KEY_OUTBOX, JSON.stringify(outbox));
+    }
+
+    // Initialisierung
+    function checkUrlSetup() {
+      try {
+        const hash = window.location.hash;
+        if (hash && hash.includes('setup')) {
+          const qStr = hash.split('?')[1] || hash.replace('#setup', '').replace('#', '');
+          const params = new URLSearchParams(qStr);
+          if (params.get('p1')) config.person1 = params.get('p1');
+          if (params.get('p2')) config.person2 = params.get('p2');
+          if (params.get('owner')) config.deviceOwner = params.get('owner');
+          if (params.get('budget')) config.monthlyBudget = parseFloat(params.get('budget')) || 1500;
+          if (params.get('hook')) config.googleWebhook = decodeURIComponent(params.get('hook'));
+          saveConfig();
+          safeStore.setItem('logbuch_device_owner_set', 'true');
+          window.history.replaceState(null, '', window.location.pathname);
+          showToast('✓ Konfiguration geladen: ' + config.deviceOwner);
+        }
+      } catch(e) {
+        console.error('Setup hash parse error', e);
+      }
+    }
+
+    function init() {
+      // Aktuellen Monat dynamisch anzeigen
+      try {
+        const mLabel = document.getElementById('currentMonthLabel');
+        if (mLabel) {
+          mLabel.innerText = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' }).format(new Date());
+        }
+      } catch(e){}
+
+      checkUrlSetup();
+
+      // Datum vorbefüllen
+      document.getElementById('inputDate').valueAsDate = new Date();
+
+      // Config laden
+      const storedConfig = safeStore.getItem(STORAGE_KEY_CONFIG);
+      if (storedConfig) {
+        try { config = Object.assign(config, JSON.parse(storedConfig)); } catch(e){}
+      }
+      if (!config.monthlyBudget) {
+        config.monthlyBudget = 1500;
+      }
+      if (!config.googleWebhook) {
+        config.googleWebhook = DEFAULT_WEBHOOK;
+      }
+      saveConfig();
+
+      activePerson = config.deviceOwner || 'Person 1';
+      updateOwnerUI();
+      checkFirstLaunch();
+
+      // Outbox laden
+      loadOutbox();
+
+      // Daten laden
+      const storedData = safeStore.getItem(STORAGE_KEY_DATA);
+      if (storedData) {
+        try { expenses = JSON.parse(storedData); } catch(e){ expenses = []; }
+      } else {
+        initRealData();
+      }
+
+      render();
+      if (window.lucide) {
+        try { lucide.createIcons(); } catch(e){}
+      }
+
+      // Wenn das Telefon nach einem Funkloch wieder Netz bekommt: Sofort Outbox leeren!
+      window.addEventListener('online', () => {
+        drainOutbox();
+      });
+    }
+
+    function initRealData() {
+      expenses = [];
+      saveData();
+    }
+
+    function saveData() {
+      safeStore.setItem(STORAGE_KEY_DATA, JSON.stringify(expenses));
+    }
+
+    function saveConfig() {
+      safeStore.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config));
+    }
+
+    function updateOwnerUI() {
+      const p1 = config.person1 || 'Person 1';
+      const p2 = config.person2 || 'Person 2';
+
+      const btnToggle1 = document.getElementById('btnToggle1');
+      const btnToggle2 = document.getElementById('btnToggle2');
+      if (btnToggle1) btnToggle1.textContent = p1;
+      if (btnToggle2) btnToggle2.textContent = p2;
+
+      const btnOwner1 = document.getElementById('btnOwner1');
+      const btnOwner2 = document.getElementById('btnOwner2');
+      if (btnOwner1) btnOwner1.textContent = p1;
+      if (btnOwner2) btnOwner2.textContent = p2;
+
+      const badge = document.getElementById('headerOwnerBadge');
+      if (badge) {
+        const isP1 = config.deviceOwner === p1;
+        badge.innerHTML = `<span>${isP1 ? '⚓' : '⛵'}</span> ${config.deviceOwner}`;
+        badge.className = isP1 
+          ? "text-[10px] px-2 py-0.5 rounded-full font-bold bg-sky-500/20 text-sky-300 border border-sky-500/30 flex items-center gap-1 transition active:scale-95"
+          : "text-[10px] px-2 py-0.5 rounded-full font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center gap-1 transition active:scale-95";
+      }
+
+      // Sync Badge Status
+      const syncBadge = document.getElementById('syncStatusBadge');
+      if (syncBadge && config.googleWebhook && config.googleWebhook.startsWith('http')) {
+        syncBadge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-sky-400 mr-1 animate-pulse"></span> Google Sheet aktiv`;
+        syncBadge.className = "text-[11px] px-2 py-0.5 rounded-full bg-sky-950/60 text-sky-300 border border-sky-500/40 font-medium";
+      }
+
+      setPerson(config.deviceOwner);
+    }
+
+    function toggleDeviceOwner() {
+      const p1 = config.person1 || 'Person 1';
+      const p2 = config.person2 || 'Person 2';
+      const newOwner = config.deviceOwner === p1 ? p2 : p1;
+      config.deviceOwner = newOwner;
+      safeStore.setItem('logbuch_device_owner_set', 'true');
+      saveConfig();
+      updateOwnerUI();
+      showToast(`Erfasser eingestellt: ${newOwner}`);
+    }
+
+    function checkFirstLaunch() {
+      const isSet = safeStore.getItem('logbuch_device_owner_set');
+      if (!isSet) {
+        const p1 = config.person1 || 'Person 1';
+        const p2 = config.person2 || 'Person 2';
+        const b1 = document.getElementById('btnWelcome1');
+        const b2 = document.getElementById('btnWelcome2');
+        if (b1) b1.textContent = p1;
+        if (b2) b2.textContent = p2;
+        const welcome = document.getElementById('welcomeModal');
+        if (welcome) welcome.classList.remove('hidden');
+      }
+    }
+
+    function confirmInitialOwner(owner) {
+      config.deviceOwner = owner;
+      activePerson = owner;
+      safeStore.setItem('logbuch_device_owner_set', 'true');
+      saveConfig();
+      updateOwnerUI();
+      const welcome = document.getElementById('welcomeModal');
+      if (welcome) welcome.classList.add('hidden');
+      showToast(`Eingestellt auf ${owner}`);
+    }
+
+    function setPerson(person) {
+      activePerson = person;
+      const p1 = config.person1 || 'Person 1';
+      const btn1 = document.getElementById('btnToggle1');
+      const btn2 = document.getElementById('btnToggle2');
+
+      if (btn1 && btn2) {
+        if (person === p1) {
+          btn1.className = "px-2.5 py-1 rounded-md font-bold text-sky-200 bg-sky-600/40 border border-sky-500/40 transition flex items-center gap-1";
+          btn2.className = "px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition flex items-center gap-1";
+        } else {
+          btn2.className = "px-2.5 py-1 rounded-md font-bold text-purple-200 bg-purple-600/40 border border-purple-500/40 transition flex items-center gap-1";
+          btn1.className = "px-2.5 py-1 rounded-md font-medium text-slate-400 hover:text-white transition flex items-center gap-1";
+        }
+      }
+    }
+
+    function selectPurpose(purposeKey, label, btn) {
+      document.getElementById('inputPurpose').value = purposeKey;
+      document.getElementById('selectedCategoryLabel').innerText = label;
+
+      document.querySelectorAll('.purpose-btn').forEach(b => b.classList.remove('active-chip'));
+      btn.classList.add('active-chip');
+    }
+
+    function setMerchant(merchantName) {
+      const input = document.getElementById('inputMerchant');
+      input.value = merchantName;
+      input.focus();
+    }
+
+    function addExpense(e) {
+      e.preventDefault();
+      const inputAmt = document.getElementById('inputAmount');
+      const amount = parseFloat(inputAmt.value);
+      const purpose = document.getElementById('inputPurpose').value;
+      const merchant = document.getElementById('inputMerchant').value.trim() || 'Alltag';
+      const date = document.getElementById('inputDate').value || new Date().toISOString().split('T')[0];
+
+      if (isNaN(amount) || amount <= 0) {
+        showToast("Bitte einen Betrag eingeben!", true);
+        return;
+      }
+
+      // 1. Eindeutige ID generieren (für Google Sheet & Lokalspeicher)
+      const uniqueId = 'exp_' + date.replace(/-/g, '') + '_' + Math.round(amount * 100) + '_' + Math.random().toString(36).substr(2, 4);
+
+      const newEntry = {
+        id: uniqueId,
+        date,
+        timestamp: new Date().toISOString(),
+        person: activePerson,
+        purpose,
+        merchant,
+        amount,
+        pendingSync: true
+      };
+
+      // 2. SOFORT LOKAL SPEICHERN (0.05 ms) - 100% geschützt gegen Funklöcher an der Supermarktkasse!
+      expenses.unshift(newEntry);
+      saveData();
+
+      // 3. In die Offline-Warteschlange (Outbox) legen
+      outbox.push(newEntry);
+      saveOutbox();
+
+      // 4. Formular sofort resetten & Tastatur einklappen für flüssige Bedienung
+      inputAmt.value = '';
+      document.getElementById('inputMerchant').value = '';
+      inputAmt.blur();
+
+      // 5. Immer auf den Standard-Inhaber DIESES Telefons zurücksetzen
+      setPerson(config.deviceOwner);
+
+      // 6. Ansicht sofort aktualisieren
+      render();
+
+      // 7. Sofortige Bestätigung (Toast oben)
+      showToast(`✓ ${amount.toFixed(2).replace('.', ',')} € gespeichert`);
+
+      // 8. Hintergrund-Sync asynchron starten (blockiert niemals das Telefon!)
+      setTimeout(() => {
+        drainOutbox();
+      }, 50);
+    }
+
+    function deleteExpense(id) {
+      if (confirm("Eintrag löschen?")) {
+        expenses = expenses.filter(e => String(e.id) !== String(id));
+        outbox = outbox.filter(o => String(o.id) !== String(id));
+        saveData();
+        saveOutbox();
+        render();
+        showToast("Eintrag gelöscht");
+
+        if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
+          try {
+            fetch(config.googleWebhook, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: "delete", id: String(id) })
+            }).catch(e => console.log(e));
+          } catch(e) {}
+        }
+      }
+    }
+
+    function render() {
+      let total = 0;
+      let totalP1 = 0;
+      let totalP2 = 0;
+      const purposeMap = {};
+
+      const p1 = config.person1 || 'Person 1';
+      const p2 = config.person2 || 'Person 2';
+
+      expenses.forEach(exp => {
+        total += exp.amount;
+        if (exp.person === p1) totalP1 += exp.amount;
+        else totalP2 += exp.amount;
+
+        purposeMap[exp.purpose] = (purposeMap[exp.purpose] || 0) + exp.amount;
+      });
+
+      // Total Card
+      document.getElementById('totalExpensesMonth').innerText = total.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+      document.getElementById('sumPerson1').innerText = totalP1.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+      document.getElementById('sumPerson2').innerText = totalP2.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+
+      const labelP1 = document.getElementById('labelPerson1');
+      const labelP2 = document.getElementById('labelPerson2');
+      if (labelP1) labelP1.innerText = p1 + ':';
+      if (labelP2) labelP2.innerText = '• ' + p2 + ':';
+
+      // Nautical Seegang & Wasserlinie Berechnungen
+      const budget = Number(config.monthlyBudget) || 1500;
+      const budgetDisplay = document.getElementById('budgetDisplay');
+      if (budgetDisplay) budgetDisplay.innerText = budget.toLocaleString('de-DE') + ' €';
+
+      const depthPct = Math.round((total / budget) * 100);
+      const freeboard = budget - total;
+
+      // Segelboot & Welle animieren
+      const barEl = document.getElementById('waterProgressBar');
+      const boatEl = document.getElementById('sailboatMarker');
+      const freeboardLabel = document.getElementById('waterFreeboardLabel');
+      const statusText = document.getElementById('nauticalStatusText');
+
+      if (barEl && boatEl) {
+        const visualWidth = Math.min(94, Math.max(4, depthPct));
+        barEl.style.width = visualWidth + '%';
+        boatEl.style.left = visualWidth + '%';
+      }
+
+      if (freeboardLabel) {
+        if (freeboard >= 0) {
+          freeboardLabel.innerHTML = `Noch <span class="text-emerald-400 font-bold">${freeboard.toFixed(0)} €</span> Puffer`;
+        } else {
+          freeboardLabel.innerHTML = `<span class="text-rose-400 font-bold">${Math.abs(freeboard).toFixed(0)} € über Budget!</span>`;
+        }
+      }
+
+      if (statusText) {
+        if (total <= (budget * 0.5)) {
+          statusText.className = "text-emerald-400 font-medium";
+          statusText.innerText = `⛵ Ruhige See (${depthPct}% vom Budget)`;
+        } else if (total <= (budget * 0.8)) {
+          statusText.className = "text-sky-400 font-medium";
+          statusText.innerText = `🌊 Frische Brise (${depthPct}% vom Budget)`;
+        } else if (total <= budget) {
+          statusText.className = "text-amber-400 font-medium";
+          statusText.innerText = `⚠️ Kabbelige See (${depthPct}% vom Budget)`;
+        } else {
+          statusText.className = "text-rose-400 font-bold animate-pulse";
+          statusText.innerText = `🚨 Budget überschritten (+${(total - budget).toFixed(0)} €)`;
+        }
+      }
+
+      // Badge aktualisieren
+      const badgeEl = document.getElementById('entryCountBadge');
+      if (badgeEl) badgeEl.innerText = `${expenses.length} Einträge`;
+
+      // Einträge Liste
+      const listEl = document.getElementById('expenseList');
+      if (listEl) {
+        if (expenses.length === 0) {
+          listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Noch keine Ausgaben erfasst.</p>`;
+        } else {
+          listEl.innerHTML = expenses.map(exp => {
+            const isPending = exp.pendingSync || outbox.some(o => String(o.id) === String(exp.id));
+            const isP1 = exp.person === p1;
+            return `
+            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs hover:border-slate-700 transition">
+              <div class="flex items-center gap-2">
+                <span class="w-1.5 h-8 rounded-full ${isP1 ? 'bg-blue-500' : 'bg-purple-500'}"></span>
+                <div>
+                  <div class="font-bold text-white flex items-center gap-1.5">
+                    <span>${exp.purpose}</span>
+                    <span class="text-[10px] font-normal text-slate-400">(${exp.merchant})</span>
+                    ${isPending ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30">Lokal</span>' : ''}
+                  </div>
+                  <div class="text-[10px] text-slate-400">${exp.date} • <span class="${isP1 ? 'text-blue-400' : 'text-purple-400'} font-medium">${exp.person}</span></div>
+                </div>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <span class="font-extrabold text-white text-sm">${exp.amount.toFixed(2).replace('.', ',')} €</span>
+                <button onclick="deleteExpense('${exp.id}')" class="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Löschen">
+                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                </button>
+              </div>
+            </div>
+          `}).join('');
+        }
+      }
+
+      // Kategorien-Chart
+      renderCategoryChart(purposeMap);
+
+      // Kategorien-Liste
+      const sorted = Object.entries(purposeMap).sort((a,b) => b[1] - a[1]);
+      const breakdownEl = document.getElementById('categoryBreakdownList');
+      if (breakdownEl) {
+        breakdownEl.innerHTML = sorted.map(([p, val]) => {
+          const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+          return `
+            <div class="flex items-center justify-between py-1 border-b border-slate-800/60">
+              <span class="text-slate-300">${p}</span>
+              <span class="font-bold text-white">${val.toFixed(2).replace('.', ',')} € <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span></span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      if (window.lucide) {
+        try { lucide.createIcons(); } catch(e){}
+      }
+    }
+
+    function renderCategoryChart(purposeMap) {
+      const ctx = document.getElementById('categoryChart');
+      if (!ctx) return;
+
+      const labels = Object.keys(purposeMap);
+      const data = Object.values(purposeMap);
+
+      if (labels.length === 0) {
+        labels.push("Keine Daten");
+        data.push(1);
+      }
+
+      const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16', '#64748b'];
+
+      if (chartInstance) chartInstance.destroy();
+
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{ data, backgroundColor: colors.slice(0, labels.length), borderWidth: 0 }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          cutout: '68%'
+        }
+      });
+    }
+
+    // CSV Generierung
+    function buildCSV() {
+      let csv = "ID;Datum;Person;Zweck;Haendler;Betrag_EUR\n";
+      expenses.forEach(e => {
+        csv += `${e.id};${e.date};${e.person};"${e.purpose}";"${e.merchant || ''}";${e.amount.toFixed(2).replace('.', ',')}\n`;
+      });
+      return csv;
+    }
+
+    // Teilen / Export
+    async function shareOrExport() {
+      if (expenses.length === 0) {
+        alert("Noch keine Ausgaben erfasst!");
+        return;
+      }
+      const csv = buildCSV();
+      const fileName = `Haushalt_${config.deviceOwner}_${new Date().toISOString().slice(0,10)}.csv`;
+      const file = new File([csv], fileName, { type: 'text/csv' });
+
+      // Native iOS Share Sheet (WhatsApp, AirDrop, Mail, Dateien)
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: `Haushaltsbuch ${config.deviceOwner}`,
+            text: `Hier sind meine Ausgaben für unser Haushaltsbuch:`,
+            files: [file]
+          });
+          return;
+        } catch (e) {
+          // Fallback zu Download
+        }
+      }
+
+      // Fallback normaler Download
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Partner-CSV importieren (Intelligenter Merge ohne Duplikate!)
+    function importPartnerCSV(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const text = e.target.result;
+        const lines = text.split('\n');
+        let newCount = 0;
+        const existingIds = new Set(expenses.map(x => String(x.id)));
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          const parts = line.split(';');
+          if (parts.length >= 6) {
+            const id = parts[0].trim();
+            const date = parts[1].trim();
+            const person = parts[2].trim();
+            const purpose = parts[3].replace(/"/g, '').trim();
+            const merchant = parts[4].replace(/"/g, '').trim();
+            const amount = parseFloat(parts[5].replace(',', '.').trim());
+
+            if (!isNaN(amount) && !existingIds.has(id)) {
+              expenses.push({ id, date, person, purpose, merchant, amount });
+              existingIds.add(id);
+              newCount++;
+            }
+          }
+        }
+
+        // Sortieren nach Datum absteigend
+        expenses.sort((a,b) => new Date(b.date) - new Date(a.date));
+        saveData();
+        render();
+
+        alert(`${newCount} Ausgaben vom Partner erfolgreich zusammengeführt!`);
+      };
+      reader.readAsText(file);
+    }
+
+    // Settings Modal
+    function openSettingsModal() {
+      document.getElementById('settingsModal').classList.remove('hidden');
+      document.getElementById('inputPerson1').value = config.person1 || '';
+      document.getElementById('inputPerson2').value = config.person2 || '';
+      document.getElementById('inputMonthlyBudget').value = config.monthlyBudget || 1500;
+      document.getElementById('inputGoogleWebhook').value = config.googleWebhook || '';
+      setDeviceOwner(config.deviceOwner);
+    }
+
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').classList.add('hidden');
+    }
+
+    function setDeviceOwner(owner) {
+      config.deviceOwner = owner;
+      safeStore.setItem('logbuch_device_owner_set', 'true');
+      const btnOwner1 = document.getElementById('btnOwner1');
+      const btnOwner2 = document.getElementById('btnOwner2');
+      const p1 = config.person1 || 'Person 1';
+
+      if (btnOwner1 && btnOwner2) {
+        if (owner === p1 || owner === 'Person 1') {
+          btnOwner1.className = "py-2.5 rounded-xl border border-sky-500 bg-sky-600/40 text-sky-200 font-bold text-xs flex items-center justify-center gap-1.5 transition";
+          btnOwner2.className = "py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-400 font-medium text-xs flex items-center justify-center gap-1.5 transition";
+        } else {
+          btnOwner2.className = "py-2.5 rounded-xl border border-purple-500 bg-purple-600/40 text-purple-200 font-bold text-xs flex items-center justify-center gap-1.5 transition";
+          btnOwner1.className = "py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-slate-400 font-medium text-xs flex items-center justify-center gap-1.5 transition";
+        }
+      }
+    }
+
+    function saveSettings() {
+      config.person1 = document.getElementById('inputPerson1').value.trim() || 'Person 1';
+      config.person2 = document.getElementById('inputPerson2').value.trim() || 'Person 2';
+      const bVal = parseFloat(document.getElementById('inputMonthlyBudget').value);
+      config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
+      config.googleWebhook = document.getElementById('inputGoogleWebhook').value.trim();
+      saveConfig();
+      updateOwnerUI();
+      closeSettingsModal();
+      showToast(`Einstellungen gespeichert: ${config.deviceOwner}`);
+      if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
+        syncWithGoogleSheet(true);
+      }
+    }
+
+    // Outbox-Warteschlange im Hintergrund an Google Sheets übertragen
+    async function drainOutbox() {
+      if (isDrainingOutbox) return;
+      if (!config.googleWebhook || !config.googleWebhook.startsWith('http')) return;
+      if (outbox.length === 0) return;
+
+      isDrainingOutbox = true;
+
+      try {
+        while (outbox.length > 0) {
+          const item = outbox[0];
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+          try {
+            await fetch(config.googleWebhook, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: "add", entry: item }),
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
+
+            // Erfolgreich übertragen: Aus Outbox entfernen
+            outbox.shift();
+            saveOutbox();
+
+            // In lokaler Liste als synchronisiert markieren
+            const localIdx = expenses.findIndex(e => String(e.id) === String(item.id));
+            if (localIdx !== -1) {
+              expenses[localIdx].pendingSync = false;
+            }
+            saveData();
+          } catch (postErr) {
+            clearTimeout(timeoutId);
+            console.warn("Outbox sync deferred (offline/timeout):", postErr);
+            break; // Abbrechen und später bei wiederhergestellter Verbindung fortsetzen
+          }
+        }
+      } finally {
+        isDrainingOutbox = false;
+        render();
+      }
+    }
+
+    // Bidirektionaler Sync mit Google Sheet (GET)
+    async function syncWithGoogleSheet(showFeedback = false) {
+      if (isSyncing) return;
+      if (!config.googleWebhook || !config.googleWebhook.startsWith('http')) {
+        if (showFeedback) openSettingsModal();
+        return;
+      }
+
+      isSyncing = true;
+      const icon = document.getElementById('iconSync');
+      if (icon) icon.classList.add('animate-spin');
+
+      // 1. Erst eventuell wartende Offline-Einträge hochladen
+      drainOutbox();
+
+      // 2. Striktes 2,5-Sekunden-Timeout! Kein endloses Drehen des Zahnrads!
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+      try {
+        let reqUrl = config.googleWebhook;
+        reqUrl += (reqUrl.includes('?') ? '&' : '?') + 'api=json';
+        const response = await fetch(reqUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        const data = await response.json();
+
+        if (data.status === 'success' && Array.isArray(data.entries)) {
+          const cloudList = data.entries.map(c => ({
+            id: String(c.id),
+            date: c.date,
+            timestamp: c.timestamp || '',
+            person: c.person,
+            purpose: c.purpose,
+            merchant: c.merchant,
+            amount: typeof c.amount === 'string' ? (parseFloat(c.amount.replace(',', '.')) || 0) : Number(c.amount),
+            pendingSync: false
+          }));
+
+          const cloudIds = new Set(cloudList.map(c => c.id));
+          const outboxIds = new Set(outbox.map(o => String(o.id)));
+
+          // UNVERLIERBAR: Alle lokalen Einträge, die Google noch nicht kennt (weil gerade offline an der Kasse eingetragen)
+          const unsyncedLocal = expenses.filter(e => 
+            !cloudIds.has(String(e.id)) || outboxIds.has(String(e.id)) || e.pendingSync === true
+          );
+
+          // Google Sheet ist der Master für synchronisierte Zeilen, lokale Offline-Buchungen bleiben oben erhalten!
+          expenses = [...unsyncedLocal, ...cloudList];
+
+          // Doppelte IDs filtern
+          const seen = new Set();
+          expenses = expenses.filter(e => {
+            const id = String(e.id);
+            if (seen.has(id)) return false;
+            seen.add(id);
+            return true;
+          });
+
+          expenses.sort((a,b) => new Date(b.date) - new Date(a.date));
+          saveData();
+          render();
+
+          // Sync Badge aktualisieren
+          const badge = document.getElementById('syncStatusBadge');
+          if (badge) {
+            badge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1 animate-pulse"></span> Google Sheet aktiv`;
+            badge.className = "text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 font-medium";
+          }
+
+          if (showFeedback) {
+            showToast(`✓ Synchronisiert! ${cloudList.length} Einträge aktuell.`);
+          }
+        }
+      } catch (err) {
+        clearTimeout(timeoutId);
+        console.warn("Sync aborted or offline:", err.name === 'AbortError' ? '2.5s Timeout erreicht' : err);
+
+        const badge = document.getElementById('syncStatusBadge');
+        if (badge) {
+          badge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-amber-400 mr-1"></span> Offline (Lokal gesichert)`;
+          badge.className = "text-[11px] px-2 py-0.5 rounded-full bg-amber-950/60 text-amber-300 border border-amber-500/40 font-medium";
+        }
+
+        if (showFeedback) {
+          showToast("Cloud-Sync dauerte > 2s. Daten sind lokal 100% sicher!", true);
+        }
+      } finally {
+        isSyncing = false;
+        if (icon) icon.classList.remove('animate-spin');
+      }
+    }
+
+    function clearCurrentMonth() {
+      if (confirm("Wirklich alle Ausgaben auf diesem Gerät löschen?")) {
+        expenses = [];
+        saveData();
+        render();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      init();
+      // Falls Webhook hinterlegt, automatisch beim Start leise im Hintergrund synchronisieren
+      if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
+        syncWithGoogleSheet(false);
+      }
+    });
+  </script>
+</body>
+</html>

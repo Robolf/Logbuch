@@ -11,10 +11,11 @@
 ## ✨ Features
 
 * **⚡ Fokus auf die Kasse:** Beim Öffnen der Web-App ist das Betragsfeld sofort im Fokus mit Ziffernblock. 1-Tap Schnell-Chips für Kategorien und Händler.
-* **🔒 100 % Privat & Autark:** Keine Drittanbieter-Server, keine Registrierung, keine Tracker. Alle Buchungen liegen verschlüsselt auf dem Gerät (`localStorage`) und optional in deiner eigenen privaten Google Drive Tabelle.
+* **🔒 100 % Privat & Autark:** Keine Drittanbieter-Server, keine Registrierung, keine Tracker. Alle Buchungen liegen lokal auf dem Gerät (`localStorage`) und optional in deiner eigenen privaten Google Drive Tabelle.
 * **📶 Offline-First mit Outbox:** Funktioniert auch bei absolutem Funkloch im Supermarkt oder Keller. Buchungen werden in unter 0,1 ms lokal gesichert und automatisch im Hintergrund synchronisiert, sobald wieder Netz vorhanden ist.
 * **⛵ Wasserlinien-Budget:** Visuelle Anzeige deines monatlichen Soll-Budgets mit Puffer-Berechnung und Seegang-Metapher (*Ruhige See*, *Frische Brise*, etc.).
-* **👥 2-Geräte-Erkennung:** Jedes Smartphone merkt sich seinen Standard-Erfasser. Keine versehentlichen Verwechslungen an der Kasse.
+* **👥 Multi-User & Farbcodierung:** Beliebig viele Personen im Haushalt anlegbar, jeweils mit individueller Akzentfarbe und Standard-Erfasser je Gerät.
+* **📊 Direkter Google Sheet & Drive Link:** 1-Klick-Zugriff auf die Google-Tabelle zur direkten Ansicht aller historischen Buchungen und Auswertungen.
 * **📲 Nahtlose PWA-Integration:** Kann auf iOS (Safari) und Android direkt als vollwertige App auf den Home-Bildschirm gelegt werden.
 
 ---
@@ -37,28 +38,31 @@ Die Web-App kann direkt im Browser getestet werden:
 
 ## ⚙️ Schnelleinrichtung via Setup-Link
 
-Du kannst die App für dein Gerät über Parameter im URL-Hash vorkonfigurieren (ohne dass diese Parameter an einen Server übertragen werden):
+Du kannst die App für beliebige Geräte über Parameter im URL-Hash vorkonfigurieren (ohne dass diese Parameter an einen Server übertragen werden):
 
 ```text
-https://robolf.github.io/Logbuch/#setup?p1=Alex&p2=Sam&owner=Alex&budget=1500
+https://robolf.github.io/Logbuch/#setup?h=Unser%20Haushalt&b=1500&users=Alex,Sam&owner=Alex&hook=...&sheet=...
 ```
 
-* `p1`: Name von Person 1
-* `p2`: Name von Person 2
-* `owner`: Besitzer dieses Geräts (`Alex` oder `Sam`)
-* `budget`: Monatliches Soll-Budget in Euro
+* `h`: Name des Haushalts (z. B. `Unser Haushalt`)
+* `b`: Monatliches Soll-Budget in Euro (z. B. `1500`)
+* `users`: Kommagetrennte Liste aller Personen (z. B. `Alex,Sam`)
+* `owner`: Besitzer dieses Geräts (z. B. `Alex`)
 * `hook`: (Optional) Deine Google Apps Script Webhook-URL
+* `sheet`: (Optional) Direkter Link zu eurer Google-Tabelle für den 1-Klick-Zugriff
+
+In der App gibt es in den Einstellungen außerdem den Button **"Einrichtungs-Link für Partner kopieren"**, der automatisch den passenden Link für das Smartphone des Partners erzeugt.
 
 ---
 
 ## ☁️ Optional: Privates Google Sheets Backend einrichten
 
-Wenn beide Partner Buchungen automatisch in einer gemeinsamen Google Drive Tabelle zusammenführen möchten:
+Wenn ihr Buchungen automatisch in einer gemeinsamen Google Drive Tabelle zusammenführen möchtet:
 
 1. Öffne [Google Apps Script](https://script.google.com/) und erstelle ein neues Projekt.
-2. Erstelle ein Skript mit `doGet()` und `doPost()` zur Synchronisation mit Google Sheets.
-3. Klicke auf **Bereitstellen** > **Neue Bereitstellung** > Typ: **Web-App** (Zugriff: *Jeder*).
-4. Kopiere die Web-App-URL und füge sie in den App-Einstellungen unter **Google Sheet Webhook** ein.
+2. Kopiere den Code aus der Datei [`google_apps_script.js`](google_apps_script.js) in dein Skript.
+3. Klicke auf **Bereitstellen** > **Neue Bereitstellung** > Typ: **Web-App** (Ausführen als: *Ich*, Wer hat Zugriff: *Jeder*).
+4. Kopiere die Web-App-URL und trage sie in Logbuch unter **Einstellungen** > **Google Sheet Webhook** ein.
 
 ---
 

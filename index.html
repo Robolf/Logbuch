@@ -1,62 +1,56 @@
 <!DOCTYPE html>
-<html lang="de" class="dark">
+<html lang="de" class="h-full bg-slate-950 text-slate-100">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title id="pageTitle">Logbook - Household Budget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title id="pageTitle">Logbuch - Haushalt</title>
+  
+  <!-- PWA Meta Tags & Icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Logbuch">
-  <meta name="theme-color" content="#060d17">
+  <meta name="theme-color" content="#020617">
   
-  <!-- PWA & Apple Touch Icons (Sailboat Theme) -->
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="apple-touch-icon.png">
-  <link rel="shortcut icon" href="favicon.png">
-
-  <!-- Tailwind CSS CDN -->
+  
+  <!-- Tailwind CSS & Libraries -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-      background: radial-gradient(circle at top, #0f1f38 0%, #060d17 100%);
-    }
-    .glass-card {
-      background: rgba(15, 25, 45, 0.78);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(56, 189, 248, 0.12);
+    @supports (-webkit-touch-callout: none) {
+      .min-h-screen { min-height: -webkit-fill-available; }
     }
     input[type="number"]::-webkit-inner-spin-button,
     input[type="number"]::-webkit-outer-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
-    .active-chip {
-      background-color: rgba(14, 165, 233, 0.22) !important;
-      border-color: #38bdf8 !important;
-      color: #7dd3fc !important;
-      font-weight: 700 !important;
+    .waterline-container {
+      background: linear-gradient(to bottom, #0f172a, #020617);
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
     }
-    @keyframes gentleWave {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-2px) rotate(2deg); }
+    .water-fill {
+      transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.6s ease;
     }
-    .bobbing-boat {
-      animation: gentleWave 2.8s ease-in-out infinite;
+    .boat-indicator {
+      transition: bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.5);
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col pb-20">
+<body class="h-full flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white pb-safe">
 
-  <!-- Dynamic Island Style Floating Toast Notification -->
+  <!-- Toast Benachrichtigung -->
   <div id="toastNotification" class="fixed top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-slate-900/95 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-sky-400/30 backdrop-blur-xl transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-4">
     <span class="text-sm text-sky-400" id="toastIcon">✓</span>
     <span id="toastMessage">Gespeichert</span>
@@ -70,7 +64,7 @@
           ⛵
         </div>
         <h3 id="wizardTitle" class="text-base font-extrabold text-white tracking-tight">Neuen Haushalt anlegen</h3>
-        <p id="wizardSubtitle" class="text-xs text-slate-400">Richte dein persönliches Haushaltsbuch in 30 Sekunden ein.</p>
+        <p id="wizardSubtitle" class="text-xs text-slate-400">Richte dein persönliches Haushaltsbuch in 10 Sekunden ein.</p>
       </div>
 
       <div class="space-y-3 pt-1">
@@ -94,6 +88,7 @@
             </div>
           </div>
         </div>
+
         <!-- 1. Haushaltsname -->
         <div>
           <label id="lblWizardHouseholdName" class="text-[11px] font-bold text-slate-300 block mb-1">Name des Haushalts</label>
@@ -102,7 +97,7 @@
 
         <!-- 2. Monatliches Budget -->
         <div>
-          <label id="lblWizardMonthlyBudget" class="text-[11px] font-bold text-slate-300 block mb-1">Monatliches Soll-Budget (€)</label>
+          <label id="lblWizardMonthlyBudget" class="text-[11px] font-bold text-slate-300 block mb-1">Monatliches Soll-Budget</label>
           <input type="number" step="10" id="wizardMonthlyBudget" placeholder="1500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
         </div>
 
@@ -128,11 +123,35 @@
         </div>
 
         <button id="btnWizardStart" onclick="finishSetupWizard()" class="w-full mt-2 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 text-white font-extrabold rounded-xl text-xs transition shadow-lg shadow-sky-500/20 active:scale-[0.98]">
-        Haushalt jetzt starten 🚀
-      </button>
+          Haushalt jetzt anlegen 🚀
+        </button>
+      </div>
     </div>
   </div>
-</div>
+
+  <!-- Modal: Partner einladen (Nach Setup) -->
+  <div id="shareInviteModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl my-auto text-center">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-2xl text-emerald-400">
+        🔗
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-white">Partner einladen</h3>
+        <p class="text-xs text-slate-400 mt-1">Sende diesen Link an deinen Partner. Er öffnet direkt euren gemeinsamen Haushalt!</p>
+      </div>
+      <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-400 font-mono break-all text-left" id="shareInviteLinkText">
+        -
+      </div>
+      <div class="space-y-2">
+        <button onclick="copyPartnerSetupLink()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-sky-500/20 active:scale-95 transition">
+          <span>📋</span> Link kopieren & per WhatsApp teilen
+        </button>
+        <button onclick="closeShareInviteModal()" class="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 text-xs">
+          Fertig / Später teilen
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- Header: Logbuch - Haushalt -->
   <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-40 backdrop-blur-md px-4 py-3">
@@ -150,24 +169,36 @@
           <p class="text-[10px] text-slate-400" id="headerHouseholdSubtitle">Haushalt</p>
         </div>
       </div>
+      
       <div class="flex items-center gap-1.5">
-        <!-- Live Cloud Sync Button -->
-        <button onclick="syncWithSupabase(true)" id="btnCloudSync" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 flex items-center justify-center shrink-0" title="Supabase synchronisieren">
-          <svg id="iconSync" class="w-4 h-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-            <path d="M3 3v5h5"/>
-            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-            <path d="M16 21h5v-5"/>
+        <!-- 1. Fixkosten & Budget-Rechner Button (Punkt h) -->
+        <button onclick="openPlannerModal()" id="btnOpenPlanner" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 flex items-center justify-center shrink-0" title="Fixkosten & Budget-Rechner">
+          <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <line x1="6" y1="8" x2="6" y2="8"/>
+            <line x1="10" y1="8" x2="10" y2="8"/>
+            <line x1="14" y1="8" x2="14" y2="8"/>
+            <line x1="18" y1="8" x2="18" y2="8"/>
+            <line x1="6" y1="12" x2="18" y2="12"/>
+            <line x1="6" y1="16" x2="18" y2="16"/>
           </svg>
         </button>
-        <!-- Settings Button -->
+
+        <!-- 2. Gesamtes Logbuch aller Zeiten & Excel Export Button (Punkt f) -->
+        <button onclick="openHistoryModal()" id="btnOpenHistory" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 flex items-center justify-center shrink-0" title="Gesamtes Logbuch & Excel Export">
+          <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </button>
+
+        <!-- 3. Settings Button -->
         <button onclick="openSettingsModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 flex items-center justify-center shrink-0" title="Einstellungen">
           <svg class="w-4 h-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         </button>
-        
       </div>
     </div>
   </header>
@@ -182,14 +213,14 @@
           <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           Ausgabe erfassen
         </h2>
-        <!-- Dynamischer Personen-Wähler (Beliebig viele Personen mit Farben) -->
+        <!-- Dynamischer Personen-Wähler -->
         <div id="formPersonSelectors" class="flex flex-wrap gap-1">
           <!-- Dynamisch gerendert -->
         </div>
       </div>
 
       <form id="expenseForm" onsubmit="addExpense(event)" class="space-y-3">
-        <!-- 1. Betrag (Groß, sauber, sofort im Fokus) -->
+        <!-- Betrag -->
         <div>
           <div class="relative">
             <input type="number" step="0.01" inputmode="decimal" id="inputAmount" placeholder="0,00" required class="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl px-4 py-3 text-3xl font-extrabold text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 text-right pr-11 tracking-tight">
@@ -197,149 +228,285 @@
           </div>
         </div>
 
-        <!-- 2. Kategorie (Zweck) - Aufgeräumtes 2-Spalten-Raster -->
+        <!-- Kategorie (Zweck) -->
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label id="lblCategory" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
+            <label id="lblCategory" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kategorie</label>
             <span id="selectedCategoryLabel" class="text-[10px] text-sky-400 font-bold">🛒 Supermarkt & Essen</span>
           </div>
           <div class="grid grid-cols-2 gap-1.5" id="purposeButtonsGrid">
-            <!-- Dynamically rendered via renderCategoryButtons() -->
+            <!-- Dynamisch gerendert -->
           </div>
           <input type="hidden" id="inputPurpose" value="groceries">
         </div>
 
-        <!-- 3. Ort / Händler (Schnell-Chips + Eingabefeld) -->
+        <!-- Ort / Shop (Generisch ohne Markennamen - Punkt d) -->
         <div>
-          <label id="lblMerchant" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Merchant / Place</label>
-          <div class="flex flex-wrap gap-1 mb-1.5">
-            <button type="button" onclick="setMerchant('Lidl')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Lidl</button>
-            <button type="button" onclick="setMerchant('Rewe')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Rewe</button>
-            <button type="button" onclick="setMerchant('Aldi')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Aldi</button>
-            <button type="button" onclick="setMerchant('Edeka')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Edeka</button>
-            <button type="button" onclick="setMerchant('Apotheke')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Apotheke</button>
-            <button type="button" onclick="setMerchant('DM')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">DM</button>
-            <button type="button" onclick="setMerchant('Bäcker')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Bäcker</button>
-            <button type="button" onclick="setMerchant('Tankstelle')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Tankstelle</button>
-            <button type="button" onclick="setMerchant('Amazon')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Amazon</button>
+          <label id="lblMerchant" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ort / Shop-Art</label>
+          <div class="flex flex-wrap gap-1 mb-1.5" id="shopChipsContainer">
+            <!-- Dynamisch generische Chips gerendert -->
           </div>
           <div>
-            <input type="text" id="inputMerchant" id="inputMerchant" placeholder="Merchant / Note (optional)" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+            <input type="text" id="inputMerchant" placeholder="z. B. Supermarkt, Notiz oder Kommentar" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
           </div>
-          <!-- Datum ist automatisch Heute (im Hintergrund) -->
           <input type="date" id="inputDate" class="hidden">
         </div>
 
         <!-- Speichern Button -->
-        <button type="submit" id="btnSubmitExpense" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 active:from-sky-700 text-white font-extrabold rounded-xl text-sm transition shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2 active:scale-[0.98]">
+        <button type="submit" id="btnSubmitExpense" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-extrabold rounded-xl text-sm transition shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2 active:scale-[0.98]">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          <span id="btnSubmitExpenseText">Save Expense</span>
+          <span id="btnSubmitExpenseText">Ausgabe buchen</span>
         </button>
       </form>
     </div>
 
-    <!-- 2. CARD: STATUS & BUDGET (AUFGERÄUMT & IM HINTERGRUND) -->
+    <!-- 2. CARD: STATUS & WASSERLINIEN-BUDGET -->
     <div class="glass-card rounded-2xl p-3.5 shadow-xl border border-slate-800 space-y-2">
       <div class="flex items-center justify-between text-xs text-slate-400">
-        <span class="font-medium text-slate-300" id="currentMonthLabel">Monat</span>
-        <span class="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-medium" id="syncStatusBadge">
-          Lokal auf Gerät
+        <span class="font-medium text-slate-300" id="currentMonthLabel">Aktueller Monat</span>
+        <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium flex items-center gap-1" id="syncStatusBadge">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Supabase Live
         </span>
       </div>
 
       <div class="flex items-baseline justify-between">
         <div>
           <span class="text-2xl font-extrabold text-white" id="totalExpensesMonth">0,00 €</span>
-          <span id="spentSubtitle" class="text-xs text-slate-400 ml-1">spent</span>
+          <span id="spentSubtitle" class="text-xs text-slate-400 ml-1">ausgegeben</span>
         </div>
         <div class="text-right text-xs text-slate-400">
-          <span id="targetBudgetLabel">Target Budget:</span> <span class="font-bold text-slate-200" id="budgetDisplay">1,500 €</span>
+          <span id="targetBudgetLabel">Soll-Budget:</span> <span class="font-bold text-slate-200" id="targetBudgetDisplay">1.500 €</span>
         </div>
       </div>
 
-      <!-- Schlanke Wasserlinien-Leiste mit Segelboot -->
-      <div class="space-y-1 pt-0.5">
-        <div class="relative w-full h-2 bg-slate-900 rounded-full overflow-visible border border-slate-800">
-          <div id="waterProgressBar" class="h-full rounded-full transition-all duration-500 bg-sky-500" style="width: 0%;"></div>
-          <div id="sailboatMarker" class="absolute -top-2.5 transition-all duration-500 transform -translate-x-1/2 text-xs" style="left: 0%;">
-            ⛵
+      <!-- Wasserlinien-Leiste mit Segelboot -->
+      <div class="pt-1">
+        <div class="relative w-full h-11 rounded-xl overflow-hidden waterline-container border border-slate-800 flex items-end">
+          <div id="waterFill" class="water-fill w-full absolute bottom-0 left-0" style="height: 0%;"></div>
+          
+          <div class="absolute inset-0 flex items-center justify-between px-3 z-10 pointer-events-none">
+            <span id="seawayStatusText" class="text-xs font-bold text-sky-400 drop-shadow">⛵ Ruhige See</span>
+            <span id="freeboardLabel" class="text-xs font-semibold text-slate-200 drop-shadow"></span>
+          </div>
+
+          <div id="sailboat" class="boat-indicator absolute left-3 z-20 pointer-events-none transition-all duration-500 transform -translate-y-1" style="bottom: 0px;">
+            <svg class="w-5 h-5 text-amber-300 drop-shadow-md" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L4.5 15h15L12 2zm0 3.5l4.5 7.5h-9L12 5.5zM2 17l2 4h16l2-4H2z"/>
+            </svg>
           </div>
         </div>
-        <div class="flex justify-between items-center text-[10px] text-slate-400 pt-0.5">
-          <span id="nauticalStatusText" class="text-emerald-400 font-medium">Ruhige See</span>
-          <span id="waterFreeboardLabel" class="text-slate-300 font-bold">Puffer</span>
+      </div>
+
+      <!-- Personen-Aufteilung -->
+      <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+        <span class="text-slate-400" id="lblSplit">Verteilung:</span>
+        <div id="userSplitDisplay" class="flex items-center gap-2 font-medium">
+          <!-- Dynamisch -->
         </div>
       </div>
-
-      <!-- Aufteilung nach Person (Beliebig viele User dynamisch gerendert) -->
-      <div class="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-y-1 text-[11px] text-slate-400" id="userSplitBreakdown">
-        <!-- Dynamisch gefüllt -->
-      </div>
     </div>
 
-    <!-- Kategorien-Auswertung (Wofür geht das Geld drauf?) -->
-    <div class="glass-card rounded-2xl p-4 shadow-xl">
-      <div class="flex items-center justify-between mb-2">
-        <h3 id="chartCardTitle" class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+    <!-- 3. CARD: KATEGORIEN-CHART -->
+    <div class="glass-card rounded-2xl p-4 shadow-xl border border-slate-800 space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 id="chartCardTitle" class="text-xs font-bold text-slate-200 flex items-center gap-1.5 uppercase tracking-wider">
           <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-          Where is our money going?
+          Wo bleibt das Geld?
         </h3>
-        <span class="text-[11px] text-slate-400" id="entryCountBadge">0 Einträge</span>
       </div>
-      <div class="h-44 w-full flex items-center justify-center">
+      
+      <div class="relative h-40 w-full flex items-center justify-center">
         <canvas id="categoryChart"></canvas>
       </div>
-      <div id="categoryBreakdownList" class="mt-3 space-y-1.5 text-xs">
-        <!-- Dynamisch gefüllt -->
+
+      <div id="categoryBreakdownList" class="space-y-1.5 text-xs pt-1 border-t border-slate-800/60 max-h-36 overflow-y-auto">
+        <!-- Dynamisch -->
       </div>
     </div>
 
-    <!-- Letzte Einträge Liste -->
-    <div class="glass-card rounded-2xl p-4 shadow-xl">
-      <div class="flex items-center justify-between mb-2">
-        <h3 id="receiptsCardTitle" class="text-xs font-bold text-white uppercase tracking-wider">Recorded Receipts</h3>
+    <!-- 4. CARD: ERFASSTE BELEGE (MIT LÖSCHEN & BESTÄTIGUNG - Punkt e) -->
+    <div class="glass-card rounded-2xl p-4 shadow-xl border border-slate-800 space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 id="receiptsCardTitle" class="text-xs font-bold text-slate-200 uppercase tracking-wider">
+          Erfasste Belege
+        </h3>
+        <span id="recentReceiptsCount" class="text-[10px] text-slate-400">0 Einträge</span>
       </div>
-      <div id="expenseList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
+
+      <div id="recentReceiptsList" class="space-y-2 max-h-64 overflow-y-auto pr-1">
         <!-- Dynamisch gerendert -->
       </div>
     </div>
 
-    <!-- Supabase Cloud-Datenbank & Echtzeit-Sync -->
-    <div class="glass-card rounded-2xl p-4 text-xs space-y-3">
+    <!-- 5. CARD: HISTORISCHE MONATS-BILANZ (IST VS. SOLL - Punkt g) -->
+    <div class="glass-card rounded-2xl p-4 shadow-xl border border-slate-800 space-y-3">
       <div class="flex items-center justify-between">
-        <h4 id="dbCardTitle" class="font-bold text-slate-200 flex items-center gap-1.5">
-          <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-          </svg>
-          ⚡ Supabase Cloud Sync
-        </h4>
-        <span id="dbCardBadge" class="text-[10px] text-slate-400 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="dbCardStatusText">Live (Frankfurt)</span>
-        </span>
-      </div>
-      <p id="dbCardDesc" class="text-slate-400 text-[11px] leading-relaxed">
-        DSGVO-konform in Frankfurt gehostet. Deine Ausgaben werden in Echtzeit zwischen allen Smartphones synchronisiert.
-      </p>
-      <div>
-        <button onclick="syncWithSupabase(true)" id="btnManualSyncNow" class="w-full py-2.5 px-3 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-400/30 font-semibold flex items-center justify-center gap-2 active:scale-95 transition">
+        <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
           <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-            <path d="M3 3v5h5"/>
-            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
-            <path d="M16 21h5v-5"/>
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
           </svg>
-          <span id="btnSyncNowText">Jetzt synchronisieren</span>
-        </button>
+          Monats-Bilanz (IST / SOLL)
+        </h3>
+        <span class="text-[10px] text-slate-400">Historie</span>
       </div>
-      <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-400">
-        <button onclick="openSettingsModal()" id="linkSettingsBottom" class="hover:text-white underline">Household Settings</button>
-        <button onclick="clearCurrentMonth()" id="linkClearMonthBottom" class="text-rose-400 hover:text-rose-300">Clear Month</button>
+      <div id="monthlyHistoryList" class="space-y-2">
+        <!-- Dynamisch mit IST / SOLL / Saldo gerendert -->
       </div>
     </div>
-</main>
 
-  <!-- Modal: Einstellungen & Haushalt verwalten -->
+    <!-- 6. MINIMALES CLOUD-SYNC MODUL (Punkt c) -->
+    <div class="glass-card rounded-2xl py-3 px-4 flex items-center justify-between text-xs">
+      <div class="flex items-center gap-2.5">
+        <div class="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        </div>
+        <div>
+          <div class="font-bold text-white flex items-center gap-1.5">
+            Cloud-Synchronisation aktiv
+          </div>
+          <div class="text-[10px] text-slate-400 flex items-center gap-1">
+            <span>🇩🇪</span> Hosted in Germany • 100% GDPR compliant
+          </div>
+        </div>
+      </div>
+      <button onclick="syncWithSupabase(true)" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 active:scale-95 transition" title="Jetzt synchronisieren">
+        <svg id="iconSyncBottom" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+          <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+          <path d="M16 21h5v-5"/>
+        </svg>
+      </button>
+    </div>
+
+  </main>
+
+  <!-- MODAL: GESAMTES LOGBUCH ALLER ZEITEN & EXCEL EXPORT (Punkt f) -->
+  <div id="historyModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-lg w-full p-4 sm:p-5 space-y-3.5 border border-slate-700 shadow-2xl my-auto max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800 shrink-0">
+        <div>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            Gesamtes Logbuch aller Zeiten
+          </h3>
+          <p class="text-[10px] text-slate-400" id="historyModalSubtitle">0 Einträge insgesamt</p>
+        </div>
+        <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <!-- Filter & Search + Excel Download Button -->
+      <div class="space-y-2 shrink-0">
+        <div class="flex items-center gap-2">
+          <input type="text" id="historySearchInput" oninput="renderFullHistoryList()" placeholder="Suchen nach Händler, Kategorie, Person..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+          <button onclick="exportAllExpensesCSV()" class="py-1.5 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 shrink-0 transition active:scale-95">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Excel / CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Scrollbare Gesamt-Liste -->
+      <div class="overflow-y-auto flex-1 space-y-1.5 pr-1 min-h-[220px]" id="fullHistoryContainer">
+        <!-- Dynamisch gefüllt -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: FIXKOSTEN & BUDGET-RECHNER (Punkt h) -->
+  <div id="plannerModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="glass-card rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-4 border border-slate-700 shadow-2xl my-auto max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-800 shrink-0">
+        <div>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <line x1="6" y1="8" x2="6" y2="8"/>
+              <line x1="10" y1="8" x2="10" y2="8"/>
+              <line x1="14" y1="8" x2="14" y2="8"/>
+              <line x1="18" y1="8" x2="18" y2="8"/>
+              <line x1="6" y1="12" x2="18" y2="12"/>
+              <line x1="6" y1="16" x2="18" y2="16"/>
+            </svg>
+            Fixkosten & Budget-Rechner
+          </h3>
+          <p class="text-[10px] text-slate-400">Errechne dein optimales monatliches Haushalts-Budget</p>
+        </div>
+        <button onclick="closePlannerModal()" class="text-slate-400 hover:text-white p-1">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 space-y-4 pr-1">
+        <!-- 1. Einnahmen (Netto) -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+              <span>+</span> Monatliche Einnahmen (Gehälter)
+            </label>
+            <button type="button" onclick="addPlannerIncome()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
+              + Einnahme hinzufügen
+            </button>
+          </div>
+          <div id="plannerIncomesList" class="space-y-1.5">
+            <!-- Dynamisch gerendert -->
+          </div>
+          <div class="flex justify-between text-xs text-slate-400 px-1 font-medium">
+            <span>Einnahmen Gesamt:</span>
+            <span class="text-emerald-400 font-bold" id="plannerIncomesTotal">0,00 €</span>
+          </div>
+        </div>
+
+        <!-- 2. Fixkosten, Abos & Verträge -->
+        <div class="space-y-2 pt-2 border-t border-slate-800">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-rose-400 flex items-center gap-1">
+              <span>−</span> Feste Ausgaben & Abos
+            </label>
+            <button type="button" onclick="addPlannerFixedCost()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
+              + Posten hinzufügen
+            </button>
+          </div>
+          <div id="plannerFixedCostsList" class="space-y-1.5">
+            <!-- Dynamisch gerendert mit Intervall (monatlich / jährlich) -->
+          </div>
+          <div class="flex justify-between text-xs text-slate-400 px-1 font-medium">
+            <span>Fixkosten Monatlich:</span>
+            <span class="text-rose-400 font-bold" id="plannerFixedCostsTotal">0,00 €</span>
+          </div>
+        </div>
+
+        <!-- 3. Zusammenfassung & Übernahme -->
+        <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Verfügbarer Überschuss</div>
+              <div class="text-lg font-extrabold text-emerald-400" id="plannerSurplusAmount">0,00 €</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] text-slate-400">Empfohlenes Budget</div>
+              <div class="text-xs font-bold text-white" id="plannerRecommendationText">0,00 € / Monat</div>
+            </div>
+          </div>
+          
+          <button type="button" onclick="applyPlannerBudget()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 active:scale-95 transition flex items-center justify-center gap-1.5">
+            <span>⛵</span> Diesen Betrag als Soll-Budget übernehmen
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EINSTELLUNGEN & HAUSHALT VERWALTEN -->
   <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
     <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl my-auto">
       <div class="flex items-center justify-between pb-2 border-b border-slate-800">
@@ -387,6 +554,7 @@
             </div>
           </div>
         </div>
+
         <!-- Haushaltsname -->
         <div>
           <label id="lblSettingsHouseholdName" class="text-[11px] font-semibold text-slate-300 block mb-1">Name des Haushalts</label>
@@ -395,11 +563,16 @@
 
         <!-- Monatliches Soll-Budget -->
         <div>
-          <label id="lblSettingsMonthlyBudget" class="text-[11px] font-semibold text-slate-300 block mb-1">Monatliches Soll-Budget (€)</label>
+          <div class="flex items-center justify-between mb-1">
+            <label id="lblSettingsMonthlyBudget" class="text-[11px] font-semibold text-slate-300">Monatliches Soll-Budget</label>
+            <button type="button" onclick="closeSettingsModal(); openPlannerModal();" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
+              Fixkosten-Rechner 💼
+            </button>
+          </div>
           <input type="number" step="10" id="settingsMonthlyBudget" placeholder="1500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
         </div>
 
-        <!-- Personen verwalten (Beliebig viele mit Farben) -->
+        <!-- Personen verwalten -->
         <div class="pt-2 border-t border-slate-800">
           <div class="flex items-center justify-between mb-1.5">
             <label id="lblSettingsUsers" class="text-[11px] font-semibold text-slate-300">Personen im Haushalt</label>
@@ -412,7 +585,7 @@
           </div>
         </div>
 
-        <!-- Wer ist Inhaber dieses Handys? -->
+        <!-- Standard-Erfasser auf diesem Handy -->
         <div class="pt-2 border-t border-slate-800">
           <label id="lblSettingsDeviceOwner" class="text-[11px] font-semibold text-slate-300 block mb-1.5">Standard-Erfasser auf diesem Gerät</label>
           <div id="settingsDeviceOwnerOptions" class="grid grid-cols-2 gap-1.5">
@@ -420,7 +593,7 @@
           </div>
         </div>
 
-        <!-- Supabase Cloud Sync Info -->
+        <!-- Supabase Cloud Sync Info & Haushalts-ID -->
         <div class="pt-2 border-t border-slate-800 space-y-1.5">
           <div class="flex items-center justify-between">
             <label id="lblSettingsCloudSync" class="text-[11px] font-semibold text-slate-300">Cloud-Sync (Supabase)</label>
@@ -429,12 +602,9 @@
             </span>
           </div>
           <div>
-            <label class="text-[10px] text-slate-400 block mb-0.5">Haushalts-ID (Cloud-Schlüssel)</label>
+            <label class="text-[10px] text-slate-400 block mb-0.5">Gemeinsame Haushalts-ID</label>
             <input type="text" id="settingsHouseholdId" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-sky-400 font-mono focus:border-sky-400 focus:outline-none" placeholder="z. B. hh_home123">
           </div>
-          <p id="lblSettingsCloudSyncDesc" class="text-[10px] text-slate-500 leading-tight">
-            Eure gemeinsame ID. Alle Geräte mit dieser ID synchronisieren Buchungen automatisch in Echtzeit.
-          </p>
         </div>
 
         <!-- Magischer Setup-Link für Partner kopieren -->
@@ -444,8 +614,6 @@
           </button>
           <p id="lblSettingsPartnerLinkHint" class="text-[9px] text-slate-400 text-center mt-1">Per WhatsApp / iMessage senden – richtet das Handy des Partners sofort ein!</p>
         </div>
-
-
       </div>
 
       <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
@@ -457,7 +625,7 @@
   </div>
 
   <script>
-    // Farb-Palette für unbegrenzt viele Personen
+    // Farb-Palette für Personen
     const PALETTE = [
       { name: 'Sky', hex: '#38bdf8', bg: 'rgba(14, 165, 233, 0.22)', border: '#38bdf8', text: '#7dd3fc' },
       { name: 'Purple', hex: '#c084fc', bg: 'rgba(168, 85, 247, 0.22)', border: '#c084fc', text: '#e9d5ff' },
@@ -485,7 +653,7 @@
     const STORAGE_KEY_CONFIG = 'logbuch_haushalt_config_v2';
     const STORAGE_KEY_OUTBOX = 'logbuch_haushalt_outbox_v1';
 
-    // Supabase Backend Konfiguration (Frankfurt eu-central-1, DSGVO-konform)
+    // Supabase Konfiguration (Frankfurt eu-central-1, DSGVO-konform)
     const SUPABASE_URL = "https://krdunxtbpgpdmutlicdt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZHVueHRicGdwZG11dGxpY2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzgzODQsImV4cCI6MjA5ODMxNDM4NH0.yd_LcTldUl9uHGCQ-bX-QI154TA80M7Dvav5lWFtXCM";
 
@@ -497,20 +665,18 @@
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
           return supabaseClient;
         } catch(e) {
-          console.warn("Supabase SDK init warn:", e);
+          console.warn("Supabase SDK init:", e);
         }
       }
       return null;
     }
 
-    // Multi-Language Dictionary (EN base, DE, FR)
+    // Mehrsprachiges Wörterbuch
     const I18N = {
       en: {
         app_title: "Logbook",
         household: "Household",
         header_user_hint: "Tap to switch user",
-        sync_btn_title: "Supabase Cloud Sync",
-        settings_btn_title: "Settings",
         card_add_title: "Record Expense",
         category_label: "Category",
         cat_supermarket: "🛒 Groceries & Food",
@@ -521,11 +687,9 @@
         cat_home: "🏠 Home & Garden",
         cat_clothing: "👗 Clothing & Shoes",
         cat_other: "📦 Miscellaneous",
-        merchant_label: "Merchant / Place",
-        merchant_placeholder: "Merchant / Note (optional)",
+        merchant_label: "Place / Shop Type",
+        merchant_placeholder: "e.g. Supermarket, note or comment",
         btn_save: "Save Expense",
-        badge_local: "Local",
-        badge_sync_active: "⚡ Supabase Live",
         spent_label: "spent",
         target_budget_label: "Target Budget:",
         buffer_label: "Buffer",
@@ -533,18 +697,11 @@
         status_breeze: "Gentle Breeze",
         status_waves: "High Waves",
         status_storm: "Storm Warning",
-        status_wreck: "Shipwrecked!",
         status_over: "Over",
         split_label: "Split:",
         chart_title: "Where is our money going?",
         entries_count: "entries",
         receipts_title: "Recorded Receipts",
-        db_title: "⚡ Supabase Cloud Sync",
-        db_live_badge: "Live (Frankfurt)",
-        db_desc: "Hosted GDPR-compliant in Frankfurt, Germany. Receipts synchronize across all partner smartphones in real-time.",
-        btn_sync_now: "Sync Now",
-        link_settings: "Household Settings",
-        link_clear_month: "Clear Month",
         wizard_title: "Create Household",
         wizard_subtitle: "Set up your private logbook in 10 seconds.",
         wizard_name_label: "Household Name",
@@ -553,7 +710,7 @@
         wizard_users_label: "People in Household",
         wizard_add_user: "+ Add Person",
         wizard_owner_label: "Who owns this phone?",
-        wizard_start_btn: "Create Household & Start ⛵",
+        wizard_start_btn: "Create Household & Start 🚀",
         settings_title: "Household Settings",
         settings_lang_label: "Language / Sprache / Langue",
         settings_curr_label: "Currency / Währung / Devise",
@@ -563,26 +720,31 @@
         settings_add_user_btn: "+ Add Person",
         settings_owner_label: "Default user on this device",
         settings_cloud_sync_label: "Cloud Sync (Supabase)",
-        settings_cloud_sync_desc: "Shared household ID. All devices with this ID sync in real time.",
         settings_partner_link_btn: "🔗 Copy Setup Link for Partner",
         settings_partner_link_hint: "Send via WhatsApp / iMessage – sets up your partner's phone in 1 tap!",
-        settings_backup_btn: "Export Local Receipts as CSV",
         settings_save_btn: "Save Settings",
         toast_saved: "Saved",
+        toast_deleted: "✓ Expense deleted",
         toast_welcome: "Welcome to ",
         toast_partner_copied: "✓ Partner setup link copied!",
-        toast_sync_success: "✓ Supabase Cloud-Sync active",
-        toast_sync_offline: "Saved locally (Offline)",
-        toast_config_loaded: "✓ Setup loaded: ",
-        confirm_clear_month: "Do you really want to clear this month's receipts from this device?",
-        no_expenses: "No expenses recorded this month."
+        toast_sync_success: "✓ Cloud Sync active",
+        toast_config_loaded: "✓ Config loaded: ",
+        confirm_delete_expense: "Do you really want to permanently delete this expense from the logbook?",
+        no_expenses: "No expenses recorded yet.",
+        shop_supermarket: "Supermarket",
+        shop_discounter: "Discounter",
+        shop_drugstore: "Drugstore",
+        shop_bakery: "Bakery",
+        shop_restaurant: "Restaurant",
+        shop_diy: "DIY / Garden",
+        shop_gas: "Gas Station",
+        shop_online: "Online",
+        shop_other: "Specialty Shop"
       },
       de: {
         app_title: "Logbuch",
         household: "Haushalt",
         header_user_hint: "Tippen zum Wechseln",
-        sync_btn_title: "Supabase Cloud Sync",
-        settings_btn_title: "Einstellungen",
         card_add_title: "Ausgabe erfassen",
         category_label: "Kategorie",
         cat_supermarket: "🛒 Supermarkt & Essen",
@@ -593,11 +755,9 @@
         cat_home: "🏠 Haus & Garten",
         cat_clothing: "👗 Kleidung & Schuhe",
         cat_other: "📦 Sonstiges",
-        merchant_label: "Händler / Ort",
-        merchant_placeholder: "z. B. Rewe, DM, Tankstelle (optional)",
+        merchant_label: "Ort / Shop-Art",
+        merchant_placeholder: "z. B. Supermarkt, Notiz oder Kommentar",
         btn_save: "Ausgabe buchen",
-        badge_local: "Lokal",
-        badge_sync_active: "⚡ Supabase Live",
         spent_label: "ausgegeben",
         target_budget_label: "Soll-Budget:",
         buffer_label: "Puffer",
@@ -605,18 +765,11 @@
         status_breeze: "Frische Brise",
         status_waves: "Hohe Wellen",
         status_storm: "Sturmwarnung",
-        status_wreck: "Schiffbruch!",
         status_over: "Drüber",
         split_label: "Verteilung:",
         chart_title: "Wo bleibt das Geld?",
         entries_count: "Einträge",
         receipts_title: "Erfasste Belege",
-        db_title: "⚡ Supabase Cloud Sync",
-        db_live_badge: "Live (Frankfurt)",
-        db_desc: "DSGVO-konform in Frankfurt gehostet. Deine Ausgaben werden in Echtzeit zwischen allen Smartphones synchronisiert.",
-        btn_sync_now: "Jetzt synchronisieren",
-        link_settings: "Haushalts-Einstellungen",
-        link_clear_month: "Monat zurücksetzen",
         wizard_title: "Neuen Haushalt anlegen",
         wizard_subtitle: "Richte dein persönliches Haushaltsbuch in 10 Sekunden ein.",
         wizard_name_label: "Name des Haushalts",
@@ -625,7 +778,7 @@
         wizard_users_label: "Personen im Haushalt",
         wizard_add_user: "+ Person hinzufügen",
         wizard_owner_label: "Wem gehört dieses Smartphone?",
-        wizard_start_btn: "Haushalt anlegen & Starten ⛵",
+        wizard_start_btn: "Haushalt jetzt anlegen 🚀",
         settings_title: "Haushalts-Einstellungen",
         settings_lang_label: "Language / Sprache / Langue",
         settings_curr_label: "Currency / Währung / Devise",
@@ -635,26 +788,31 @@
         settings_add_user_btn: "+ Person hinzufügen",
         settings_owner_label: "Standard-Erfasser auf diesem Gerät",
         settings_cloud_sync_label: "Cloud-Sync (Supabase)",
-        settings_cloud_sync_desc: "Eure gemeinsame ID. Alle Geräte mit dieser ID synchronisieren Buchungen automatisch in Echtzeit.",
         settings_partner_link_btn: "🔗 Einrichtungs-Link für Partner kopieren",
         settings_partner_link_hint: "Per WhatsApp / iMessage senden – richtet das Handy des Partners sofort ein!",
-        settings_backup_btn: "Lokale Einträge als CSV exportieren",
         settings_save_btn: "Einstellungen speichern",
         toast_saved: "Gespeichert",
+        toast_deleted: "✓ Ausgabe gelöscht",
         toast_welcome: "Willkommen im ",
         toast_partner_copied: "✓ Setup-Link für Partner kopiert!",
-        toast_sync_success: "✓ Supabase Cloud-Sync aktiv",
-        toast_sync_offline: "Lokal gesichert (Offline)",
+        toast_sync_success: "✓ Cloud Sync aktiv",
         toast_config_loaded: "✓ Konfiguration geladen: ",
-        confirm_clear_month: "Möchtest du wirklich alle Belege dieses Monats auf diesem Gerät löschen?",
-        no_expenses: "Noch keine Ausgaben in diesem Monat."
+        confirm_delete_expense: "Möchtest du diese Ausgabe wirklich unwiderruflich aus dem Logbuch entfernen?",
+        no_expenses: "Noch keine Ausgaben erfasst.",
+        shop_supermarket: "Supermarkt",
+        shop_discounter: "Discounter",
+        shop_drugstore: "Drogerie / Apotheke",
+        shop_bakery: "Bäckerei / Café",
+        shop_restaurant: "Restaurant / Imbiss",
+        shop_diy: "Baumarkt / Garten",
+        shop_gas: "Tankstelle",
+        shop_online: "Online-Shop",
+        shop_other: "Fachgeschäft"
       },
       fr: {
         app_title: "Logbook",
         household: "Foyer",
         header_user_hint: "Appuyez pour changer",
-        sync_btn_title: "Supabase Cloud Sync",
-        settings_btn_title: "Paramètres",
         card_add_title: "Enregistrer une dépense",
         category_label: "Catégorie",
         cat_supermarket: "🛒 Supermarché & Repas",
@@ -665,11 +823,9 @@
         cat_home: "🏠 Maison & Jardin",
         cat_clothing: "👗 Vêtements & Mode",
         cat_other: "📦 Divers",
-        merchant_label: "Commerçant / Lieu",
-        merchant_placeholder: "ex. Carrefour, Total (optionnel)",
+        merchant_label: "Lieu / Type de magasin",
+        merchant_placeholder: "ex. Supermarché, note ou commentaire",
         btn_save: "Enregistrer la dépense",
-        badge_local: "Local",
-        badge_sync_active: "⚡ Supabase Live",
         spent_label: "dépensé",
         target_budget_label: "Budget cible :",
         buffer_label: "Marge",
@@ -677,18 +833,11 @@
         status_breeze: "Brise Légère",
         status_waves: "Vagues Hautes",
         status_storm: "Avis de Tempête",
-        status_wreck: "Naufrage !",
         status_over: "Dépassé",
         split_label: "Répartition :",
         chart_title: "Où va l'argent ?",
         entries_count: "dépenses",
         receipts_title: "Reçus enregistrés",
-        db_title: "⚡ Supabase Cloud Sync",
-        db_live_badge: "En direct (Francfort)",
-        db_desc: "Hébergé en conformité RGPD à Francfort. Les reçus se synchronisent en temps réel entre tous les smartphones.",
-        btn_sync_now: "Synchroniser",
-        link_settings: "Paramètres du foyer",
-        link_clear_month: "Réinitialiser le mois",
         wizard_title: "Créer un foyer",
         wizard_subtitle: "Configurez votre journal en 10 secondes.",
         wizard_name_label: "Nom du foyer",
@@ -697,7 +846,7 @@
         wizard_users_label: "Membres du foyer",
         wizard_add_user: "+ Ajouter un membre",
         wizard_owner_label: "À qui appartient ce smartphone ?",
-        wizard_start_btn: "Créer le foyer & Commencer ⛵",
+        wizard_start_btn: "Créer le foyer & Commencer 🚀",
         settings_title: "Paramètres du foyer",
         settings_lang_label: "Language / Sprache / Langue",
         settings_curr_label: "Currency / Währung / Devise",
@@ -707,19 +856,26 @@
         settings_add_user_btn: "+ Ajouter un membre",
         settings_owner_label: "Utilisateur par défaut sur cet appareil",
         settings_cloud_sync_label: "Synchro Cloud (Supabase)",
-        settings_cloud_sync_desc: "Votre ID de foyer partagé. Tous les appareils avec cet ID se synchronisent en temps réel.",
         settings_partner_link_btn: "🔗 Copier le lien pour le partenaire",
         settings_partner_link_hint: "Envoyez par WhatsApp / iMessage – configure le smartphone du partenaire en 1 clic !",
-        settings_backup_btn: "Exporter les dépenses en CSV",
         settings_save_btn: "Enregistrer les paramètres",
         toast_saved: "Enregistré",
+        toast_deleted: "✓ Dépense supprimée",
         toast_welcome: "Bienvenue dans ",
         toast_partner_copied: "✓ Lien partenaire copié !",
-        toast_sync_success: "✓ Supabase Cloud-Sync actif",
-        toast_sync_offline: "Enregistré localement (Hors ligne)",
+        toast_sync_success: "✓ Cloud Sync actif",
         toast_config_loaded: "✓ Configuration chargée : ",
-        confirm_clear_month: "Voulez-vous vraiment effacer les reçus de ce mois sur cet appareil ?",
-        no_expenses: "Aucune dépense ce mois-ci."
+        confirm_delete_expense: "Voulez-vous vraiment supprimer définitivement cette dépense du carnet ?",
+        no_expenses: "Aucune dépense enregistrée.",
+        shop_supermarket: "Supermarché",
+        shop_discounter: "Discounter",
+        shop_drugstore: "Pharmacie",
+        shop_bakery: "Boulangerie",
+        shop_restaurant: "Restaurant",
+        shop_diy: "Bricolage / Jardin",
+        shop_gas: "Station-Service",
+        shop_online: "En Ligne",
+        shop_other: "Magasin spécialisé"
       }
     };
 
@@ -755,7 +911,7 @@
       return formatted + ' ' + (config.currency || '€');
     }
 
-    // Kategorien Definition
+    // Kategorien
     const CATEGORIES = [
       { key: 'groceries', i18nKey: 'cat_supermarket' },
       { key: 'kids', i18nKey: 'cat_kids' },
@@ -765,6 +921,19 @@
       { key: 'home', i18nKey: 'cat_home' },
       { key: 'clothing', i18nKey: 'cat_clothing' },
       { key: 'other', i18nKey: 'cat_other' }
+    ];
+
+    // Generische Shop-Typen ohne Markennamen (Punkt d)
+    const GENERIC_SHOPS = [
+      { key: 'supermarket', icon: '🛒', i18nKey: 'shop_supermarket' },
+      { key: 'discounter', icon: '🏬', i18nKey: 'shop_discounter' },
+      { key: 'drugstore', icon: '💊', i18nKey: 'shop_drugstore' },
+      { key: 'bakery', icon: '🥖', i18nKey: 'shop_bakery' },
+      { key: 'restaurant', icon: '🍽️', i18nKey: 'shop_restaurant' },
+      { key: 'diy', icon: '🔨', i18nKey: 'shop_diy' },
+      { key: 'gas', icon: '⛽', i18nKey: 'shop_gas' },
+      { key: 'online', icon: '📦', i18nKey: 'shop_online' },
+      { key: 'other', icon: '🛍️', i18nKey: 'shop_other' }
     ];
 
     function getLocalizedCategory(catKey) {
@@ -826,6 +995,35 @@
       }).join('');
     }
 
+    function renderShopChips() {
+      const c = document.getElementById('shopChipsContainer');
+      if (!c) return;
+
+      c.innerHTML = GENERIC_SHOPS.map(s => {
+        const name = t(s.i18nKey);
+        return `
+          <button type="button" onclick="selectShop('${escapeHtml(name)}', this)"
+            class="shop-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition active:scale-95 flex items-center gap-1">
+            <span>${s.icon}</span> <span>${escapeHtml(name)}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function selectShop(name, btn) {
+      const input = document.getElementById('inputMerchant');
+      if (input) {
+        input.value = name;
+        input.focus();
+      }
+      document.querySelectorAll('.shop-chip').forEach(b => {
+        b.className = "shop-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition active:scale-95 flex items-center gap-1";
+      });
+      if (btn) {
+        btn.className = "shop-chip px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-400 text-[11px] text-sky-200 font-bold transition active:scale-95 flex items-center gap-1";
+      }
+    }
+
     function renderSettingsPills() {
       const currentLang = config.lang || getAutoLang();
       ['en', 'de', 'fr'].forEach(l => {
@@ -884,8 +1082,6 @@
       
       const headerOwnerBadge = document.getElementById('headerOwnerBadge');
       if (headerOwnerBadge) headerOwnerBadge.title = t('header_user_hint');
-      const btnCloudSync = document.getElementById('btnCloudSync');
-      if (btnCloudSync) btnCloudSync.title = t('sync_btn_title');
 
       const cardAddTitle = document.getElementById('cardAddTitle');
       if (cardAddTitle) {
@@ -901,6 +1097,7 @@
       if (btnSubmitExpenseText) btnSubmitExpenseText.innerText = t('btn_save');
 
       renderCategoryButtons();
+      renderShopChips();
 
       const spentSub = document.getElementById('spentSubtitle');
       if (spentSub) spentSub.innerText = t('spent_label');
@@ -914,21 +1111,6 @@
 
       const receiptsTitle = document.getElementById('receiptsCardTitle');
       if (receiptsTitle) receiptsTitle.innerText = t('receipts_title');
-
-      const dbTitle = document.getElementById('dbCardTitle');
-      if (dbTitle) {
-        dbTitle.innerHTML = `<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> ${t('db_title')}`;
-      }
-      const dbStatus = document.getElementById('dbCardStatusText');
-      if (dbStatus) dbStatus.innerText = t('db_live_badge');
-      const dbDesc = document.getElementById('dbCardDesc');
-      if (dbDesc) dbDesc.innerText = t('db_desc');
-      const btnSyncNowText = document.getElementById('btnSyncNowText');
-      if (btnSyncNowText) btnSyncNowText.innerText = t('btn_sync_now');
-      const linkSettingsBottom = document.getElementById('linkSettingsBottom');
-      if (linkSettingsBottom) linkSettingsBottom.innerText = t('link_settings');
-      const linkClearMonthBottom = document.getElementById('linkClearMonthBottom');
-      if (linkClearMonthBottom) linkClearMonthBottom.innerText = t('link_clear_month');
 
       // Setup Wizard Labels
       const wTitle = document.getElementById('wizardTitle');
@@ -963,14 +1145,10 @@
       if (sOwnerLbl) sOwnerLbl.innerText = t('settings_owner_label');
       const sCloudSyncLbl = document.getElementById('lblSettingsCloudSync');
       if (sCloudSyncLbl) sCloudSyncLbl.innerText = t('settings_cloud_sync_label');
-      const sCloudSyncDesc = document.getElementById('lblSettingsCloudSyncDesc');
-      if (sCloudSyncDesc) sCloudSyncDesc.innerText = t('settings_cloud_sync_desc');
       const sPartnerBtn = document.getElementById('btnSettingsPartnerLink');
       if (sPartnerBtn) sPartnerBtn.innerHTML = `<span>🔗</span> ${t('settings_partner_link_btn')}`;
       const sPartnerHint = document.getElementById('lblSettingsPartnerLinkHint');
       if (sPartnerHint) sPartnerHint.innerText = t('settings_partner_link_hint');
-      const sBackupBtn = document.getElementById('btnSettingsBackup');
-      if (sBackupBtn) sBackupBtn.innerHTML = `<svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> ${t('settings_backup_btn')}`;
       const sSaveBtn = document.getElementById('btnSettingsSave');
       if (sSaveBtn) sSaveBtn.innerText = t('settings_save_btn');
 
@@ -1017,18 +1195,6 @@
       }, 2400);
     }
 
-    function updateCloudSyncBadge(isLive) {
-      const badge = document.getElementById('dbCardBadge');
-      if (!badge) return;
-      if (isLive) {
-        badge.className = "text-[10px] text-emerald-400 flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full";
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> <span>Live (Frankfurt)</span>`;
-      } else {
-        badge.className = "text-[10px] text-amber-400 flex items-center gap-1 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full";
-        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span> <span>Offline</span>`;
-      }
-    }
-
     function loadOutbox() {
       try {
         const stored = safeStore.getItem(STORAGE_KEY_OUTBOX);
@@ -1046,7 +1212,7 @@
 
     // Default Konfiguration
     let config = {
-      householdId: generateHouseholdId(),
+      householdId: '',
       householdName: 'Household',
       monthlyBudget: 1500,
       currency: '€',
@@ -1055,7 +1221,11 @@
         { id: 'u_1', name: 'Person 1', colorIdx: 0 },
         { id: 'u_2', name: 'Person 2', colorIdx: 1 }
       ],
-      deviceOwner: 'Person 1'
+      deviceOwner: 'Person 1',
+      budgetPlan: {
+        incomes: [],
+        fixedCosts: []
+      }
     };
 
     let expenses = [];
@@ -1072,19 +1242,38 @@
       return 'hh_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).slice(-4);
     }
 
-    // URL Setup Hash prüfen
+    // URL Setup Hash & Search prüfen (Punkt a & b)
     function checkUrlSetup() {
       try {
-        const hash = window.location.hash;
-        if (hash && hash.includes('setup')) {
-          const qStr = hash.split('?')[1] || hash.replace('#setup', '').replace('#', '');
+        // Unterstützt sowohl #setup?hid=... als auch ?hid=... (falls Messenger Hash entfernen)
+        const hash = window.location.hash || '';
+        const search = window.location.search || '';
+        let qStr = '';
+
+        if (hash.includes('hid=') || hash.includes('setup') || hash.includes('h=')) {
+          qStr = hash.split('?')[1] || hash.replace('#setup', '').replace('#', '');
+        } else if (search.includes('hid=') || search.includes('setup') || search.includes('h=')) {
+          qStr = search.replace('?', '');
+        }
+
+        if (qStr) {
           const params = new URLSearchParams(qStr);
 
-          if (params.get('hid')) config.householdId = decodeURIComponent(params.get('hid')).trim();
-          if (params.get('h')) config.householdName = decodeURIComponent(params.get('h')).trim();
+          // 1. Haushalts-ID
+          if (params.get('hid')) {
+            config.householdId = decodeURIComponent(params.get('hid')).trim();
+          }
+
+          // 2. Haushaltsname
+          if (params.get('h')) {
+            config.householdName = decodeURIComponent(params.get('h')).trim();
+          }
+
+          // 3. Budget
           if (params.get('budget')) config.monthlyBudget = parseFloat(params.get('budget')) || 1500;
           if (params.get('b')) config.monthlyBudget = parseFloat(params.get('b')) || 1500;
 
+          // 4. User-Liste
           if (params.get('users')) {
             const rawUsers = decodeURIComponent(params.get('users')).split(',');
             config.users = rawUsers.map((uStr, i) => {
@@ -1101,13 +1290,22 @@
             }
           }
 
-          if (params.get('owner')) config.deviceOwner = decodeURIComponent(params.get('owner')).trim();
+          // 5. Geräte-Inhaber
+          if (params.get('owner')) {
+            config.deviceOwner = decodeURIComponent(params.get('owner')).trim();
+            activePerson = config.deviceOwner;
+          }
+
+          // 6. Sprache & Währung
           if (params.get('lang')) config.lang = decodeURIComponent(params.get('lang'));
           if (params.get('curr')) config.currency = decodeURIComponent(params.get('curr'));
 
+          // Dauerhaft als Default speichern
           saveConfig();
           safeStore.setItem('logbuch_device_owner_set', 'true');
           safeStore.setItem('logbuch_household_initialized', 'true');
+          
+          // URL bereinigen, damit Hash nicht stört
           window.history.replaceState(null, '', window.location.pathname);
           showToast(t('toast_config_loaded') + config.deviceOwner);
         }
@@ -1120,6 +1318,7 @@
       const dateEl = document.getElementById('inputDate');
       if (dateEl) dateEl.valueAsDate = new Date();
 
+      // Gespeicherte Config laden
       const storedConfig = safeStore.getItem(STORAGE_KEY_CONFIG);
       if (storedConfig) {
         try {
@@ -1134,6 +1333,7 @@
         } catch(e){}
       }
 
+      // URL Parameter prüfen (überschreibt bei Einladungslink)
       checkUrlSetup();
 
       if (!config.householdId) config.householdId = generateHouseholdId();
@@ -1147,6 +1347,7 @@
       if (!config.monthlyBudget) config.monthlyBudget = 1500;
       if (!config.lang) config.lang = getAutoLang();
       if (!config.currency) config.currency = '€';
+      if (!config.budgetPlan) config.budgetPlan = { incomes: [], fixedCosts: [] };
       saveConfig();
 
       activePerson = config.deviceOwner || (config.users[0] && config.users[0].name) || 'User';
@@ -1174,6 +1375,11 @@
       syncWithSupabase(false);
       subscribeToRealtime();
 
+      // Automatischer periodischer Sync alle 30 Sekunden
+      setInterval(() => {
+        syncWithSupabase(false);
+      }, 30000);
+
       window.addEventListener('online', () => {
         drainOutbox();
         syncWithSupabase(false);
@@ -1193,6 +1399,11 @@
     }
 
     function checkFirstLaunch() {
+      // Wenn der User bereits einen validen Haushalt hat (z. B. via Einladungslink oder gespeichert), kein Wizard!
+      if (config.householdId && config.householdName && config.householdName !== 'Household' && config.householdName !== 'Haushalt') {
+        safeStore.setItem('logbuch_household_initialized', 'true');
+        return;
+      }
       const isInitialized = safeStore.getItem('logbuch_household_initialized');
       if (!isInitialized) {
         openSetupWizard();
@@ -1295,15 +1506,11 @@
       const hName = document.getElementById('wizardHouseholdName').value.trim() || t('household');
       const bVal = parseFloat(document.getElementById('wizardMonthlyBudget').value);
 
-      if (!config.householdId) {
+      if (!config.householdId || config.householdId === 'hh_default') {
         config.householdId = generateHouseholdId();
       }
       config.householdName = hName;
       config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
-      const hIdInput = document.getElementById('settingsHouseholdId');
-      if (hIdInput && hIdInput.value.trim()) {
-        config.householdId = hIdInput.value.trim();
-      }
 
       config.users = wizardTempUsers.map((u, i) => ({
         id: `u_${i+1}`,
@@ -1325,13 +1532,63 @@
       render();
       showToast(`${t('toast_welcome')}${hName}!`);
 
-      // In Supabase sichern & synchronisieren
+      // In Supabase sichern
       await saveHouseholdToSupabase();
       subscribeToRealtime();
       syncWithSupabase(false);
+
+      // Nach Setup direkt das Einladungs-Modal für den Partner anzeigen (Punkt a)
+      openShareInviteModal();
     }
 
-    // Ausgabe erfassen
+    function openShareInviteModal() {
+      const modal = document.getElementById('shareInviteModal');
+      const linkText = document.getElementById('shareInviteLinkText');
+      if (!modal || !linkText) return;
+      const shareUrl = buildPartnerSetupUrl();
+      linkText.innerText = shareUrl;
+      modal.classList.remove('hidden');
+    }
+
+    function closeShareInviteModal() {
+      const modal = document.getElementById('shareInviteModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function buildPartnerSetupUrl() {
+      const baseUrl = window.location.origin + window.location.pathname;
+      if (!config.householdId) config.householdId = generateHouseholdId();
+      const hidParam = encodeURIComponent(config.householdId);
+      const hName = encodeURIComponent(config.householdName || 'Household');
+      const budget = config.monthlyBudget || 1500;
+      const userList = encodeURIComponent(config.users.map(u => u.name).join(','));
+      
+      let partnerOwner = config.users[0] ? config.users[0].name : '';
+      if (config.users.length > 1) {
+        const other = config.users.find(u => u.name !== config.deviceOwner);
+        if (other) partnerOwner = other.name;
+      }
+      const ownerParam = encodeURIComponent(partnerOwner);
+      const langParam = config.lang ? `&lang=${encodeURIComponent(config.lang)}` : '';
+      const currParam = config.currency ? `&curr=${encodeURIComponent(config.currency)}` : '';
+
+      return `${baseUrl}#setup?hid=${hidParam}&h=${hName}&b=${budget}&users=${userList}&owner=${ownerParam}${langParam}${currParam}`;
+    }
+
+    function copyPartnerSetupLink() {
+      const shareUrl = buildPartnerSetupUrl();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          showToast(t('toast_partner_copied'));
+        }).catch(() => {
+          prompt(t('settings_partner_link_btn') + ":", shareUrl);
+        });
+      } else {
+        prompt(t('settings_partner_link_btn') + ":", shareUrl);
+      }
+    }
+
+    // Ausgabe hinzufügen
     async function addExpense(e) {
       if (e) e.preventDefault();
       const amountEl = document.getElementById('inputAmount');
@@ -1350,7 +1607,7 @@
       const merchantVal = (merchantEl && merchantEl.value) ? merchantEl.value.trim() : '';
 
       const newEntry = {
-        id: 'exp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+        id: 'exp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7),
         date: dateVal,
         person: activePerson,
         purpose: purposeVal,
@@ -1372,22 +1629,28 @@
       // Hintergrund-Sync mit Supabase
       try {
         await pushExpenseToSupabase(newEntry);
-        updateCloudSyncBadge(true);
       } catch (err) {
         console.warn('Supabase offline, queuing in outbox', err);
         outbox.push({ action: 'add', entry: newEntry });
         saveOutbox();
-        updateCloudSyncBadge(false);
       }
     }
 
+    // Ausgabe löschen mit Bestätigung (Punkt e)
     async function deleteExpense(id) {
-      const idx = expenses.findIndex(e => e.id === id);
-      if (idx === -1) return;
+      const exp = expenses.find(e => e.id === id);
+      if (!exp) return;
 
-      expenses.splice(idx, 1);
+      const confirmMsg = t('confirm_delete_expense') || `Möchtest du diese Ausgabe wirklich unwiderruflich aus dem Logbuch entfernen?`;
+      if (!confirm(confirmMsg)) return;
+
+      expenses = expenses.filter(e => e.id !== id);
       saveData();
       render();
+      showToast(t('toast_deleted') || '✓ Ausgabe gelöscht');
+
+      // Auch im History-Modal aktualisieren falls geöffnet
+      renderFullHistoryList();
 
       try {
         await deleteExpenseFromSupabase(id);
@@ -1397,7 +1660,7 @@
       }
     }
 
-    // Supabase Operationen
+    // Supabase DB Operationen
     async function saveHouseholdToSupabase() {
       if (!config.householdId) config.householdId = generateHouseholdId();
       const client = getSupabaseClient();
@@ -1406,6 +1669,7 @@
         name: config.householdName || 'Household',
         monthly_budget: config.monthlyBudget || 1500,
         currency: config.currency || '€',
+        budget_plan: config.budgetPlan || {},
         updated_at: new Date().toISOString()
       };
 
@@ -1526,14 +1790,14 @@
       isDrainingOutbox = false;
     }
 
-    // Synchronisation mit Supabase
+    // Automatischer Sync (Punkt b)
     async function syncWithSupabase(showToastNotice = false) {
       if (isSyncing) return;
       if (!config.householdId) return;
 
       isSyncing = true;
-      const syncIcon = document.getElementById('iconSync');
-      if (syncIcon) syncIcon.classList.add('animate-spin');
+      const iconBottom = document.getElementById('iconSyncBottom');
+      if (iconBottom) iconBottom.classList.add('animate-spin');
 
       try {
         await drainOutbox();
@@ -1604,36 +1868,40 @@
           if (remoteHh.name) config.householdName = remoteHh.name;
           if (remoteHh.monthly_budget) config.monthlyBudget = parseFloat(remoteHh.monthly_budget);
           if (remoteHh.currency) config.currency = remoteHh.currency;
+          if (remoteHh.budget_plan && Object.keys(remoteHh.budget_plan).length > 0) {
+            config.budgetPlan = remoteHh.budget_plan;
+          }
           saveConfig();
           updateHouseholdUI();
           render();
         }
 
-        updateCloudSyncBadge(true);
         if (showToastNotice) {
           showToast(t('toast_sync_success'));
         }
       } catch(e) {
         console.warn('syncWithSupabase error:', e);
-        updateCloudSyncBadge(false);
-        if (showToastNotice) {
-          showToast(t('toast_sync_offline'), true);
-        }
       } finally {
         isSyncing = false;
-        if (syncIcon) syncIcon.classList.remove('animate-spin');
+        if (iconBottom) iconBottom.classList.remove('animate-spin');
       }
     }
 
     // Realtime-Abonnement
     function subscribeToRealtime() {
-      if (realtimeChannel) return;
       const client = getSupabaseClient();
       if (!client || !config.householdId) return;
 
+      const channelName = 'public:expenses:' + config.householdId;
+      if (realtimeChannel) {
+        if (realtimeChannel.topic === channelName) return;
+        try { client.removeChannel(realtimeChannel); } catch(e){}
+        realtimeChannel = null;
+      }
+
       try {
         realtimeChannel = client
-          .channel('public:expenses:' + config.householdId)
+          .channel(channelName)
           .on(
             'postgres_changes',
             { event: '*', schema: 'public', table: 'expenses', filter: `household_id=eq.${config.householdId}` },
@@ -1641,11 +1909,7 @@
               handleRemoteRealtimeChange(payload);
             }
           )
-          .subscribe((status) => {
-            if (status === 'SUBSCRIBED') {
-              updateCloudSyncBadge(true);
-            }
-          });
+          .subscribe();
       } catch(e) {
         console.warn('Realtime subscription error:', e);
       }
@@ -1676,6 +1940,7 @@
         }
         saveData();
         render();
+        renderFullHistoryList();
         if (navigator.vibrate) {
           try { navigator.vibrate(20); } catch(e){}
         }
@@ -1684,6 +1949,7 @@
           expenses = expenses.filter(e => e.id !== oldRec.id);
           saveData();
           render();
+          renderFullHistoryList();
         }
       }
     }
@@ -1694,10 +1960,20 @@
       const currentYear = now.getFullYear();
       const currentMonth = now.getMonth();
 
+      // Aktueller Monat
       const currentMonthExpenses = expenses.filter(exp => {
         if (!exp.date) return false;
-        const d = new Date(exp.date);
-        return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+        let y, m;
+        if (typeof exp.date === 'string' && exp.date.includes('-')) {
+          const parts = exp.date.split('-');
+          y = parseInt(parts[0], 10);
+          m = parseInt(parts[1], 10) - 1;
+        } else {
+          const d = new Date(exp.date);
+          y = d.getFullYear();
+          m = d.getMonth();
+        }
+        return y === currentYear && m === currentMonth;
       });
 
       let total = 0;
@@ -1767,15 +2043,13 @@
         } else if (pct < 95) {
           statusText.innerText = `⚠️ ${t('status_waves')} (${pct}%)`;
           statusText.className = 'text-xs font-bold text-amber-400';
-        } else if (pct <= 100) {
-          statusText.innerText = `🚨 ${t('status_storm')} (${pct}%)`;
-          statusText.className = 'text-xs font-bold text-rose-400';
         } else {
           statusText.innerText = `🚨 ${t('status_storm')} (+${formatMoneyCompact(total - budget)})`;
           statusText.className = 'text-xs font-bold text-rose-500 animate-pulse';
         }
       }
 
+      // Erfasste Belege Liste (Punkt e - mit Löschen)
       const countEl = document.getElementById('recentReceiptsCount');
       if (countEl) countEl.innerText = `${expenses.length} ${t('entries_count')}`;
 
@@ -1804,7 +2078,7 @@
               </div>
               <div class="flex items-center gap-2.5">
                 <span class="font-extrabold text-white text-sm">${formatMoney(exp.amount)}</span>
-                <button data-id="${escapeHtml(exp.id)}" onclick="deleteExpense(this.dataset.id)" class="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Delete">
+                <button type="button" onclick="deleteExpense('${escapeHtml(exp.id)}')" class="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Löschen">
                   <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                 </button>
               </div>
@@ -1829,9 +2103,68 @@
         }).join('');
       }
 
+      // Historische Monats-Bilanz rendern (Punkt g)
+      renderMonthlyHistory();
+
       if (window.lucide) {
         try { lucide.createIcons(); } catch(e){}
       }
+    }
+
+    // Historische Monats-Übersicht IST vs SOLL (Punkt g)
+    function renderMonthlyHistory() {
+      const container = document.getElementById('monthlyHistoryList');
+      if (!container) return;
+
+      const monthMap = {};
+      const budget = config.monthlyBudget || 1500;
+
+      expenses.forEach(exp => {
+        if (!exp.date) return;
+        const key = exp.date.slice(0, 7); // 'YYYY-MM'
+        monthMap[key] = (monthMap[key] || 0) + exp.amount;
+      });
+
+      // Sortiere Monate absteigend
+      const sortedKeys = Object.keys(monthMap).sort().reverse();
+
+      if (sortedKeys.length === 0) {
+        container.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs italic">Noch keine historischen Monate erfasst.</div>`;
+        return;
+      }
+
+      container.innerHTML = sortedKeys.slice(0, 12).map(key => {
+        const spent = monthMap[key];
+        const diff = budget - spent;
+        const isSurplus = diff >= 0;
+        const pct = Math.min(150, Math.round((spent / budget) * 100));
+
+        // Schöner Monatsname
+        const [y, m] = key.split('-');
+        const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, 1);
+        const monthName = dateObj.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' });
+
+        return `
+          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-white text-xs">${escapeHtml(monthName)}</span>
+              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${isSurplus ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'}">
+                ${isSurplus ? `+${formatMoney(diff)} Guthaben` : `−${formatMoney(Math.abs(diff))} Überzogen`}
+              </span>
+            </div>
+            
+            <div class="flex items-center justify-between text-[11px] text-slate-400">
+              <span>IST: <strong class="text-slate-200">${formatMoney(spent)}</strong></span>
+              <span>SOLL: <strong class="text-slate-200">${formatMoney(budget)}</strong></span>
+            </div>
+
+            <!-- Mini Progress Bar -->
+            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+              <div class="h-1.5 rounded-full ${spent > budget ? 'bg-rose-500' : (spent > budget * 0.85 ? 'bg-amber-400' : 'bg-sky-400')}" style="width: ${Math.min(100, pct)}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function renderCategoryChart(purposeMap) {
@@ -1865,34 +2198,88 @@
       });
     }
 
-    function buildCSV() {
-      let csv = "ID;Datum;Person;Zweck;Haendler;Betrag\n";
-      expenses.forEach(e => {
-        csv += `${e.id};${e.date};${e.person};"${e.purpose}";"${e.merchant || ''}";${e.amount.toFixed(2).replace('.', ',')}\n`;
-      });
-      return csv;
+    // GESAMTES LOGBUCH MODAL & EXCEL EXPORT (Punkt f)
+    function openHistoryModal() {
+      const modal = document.getElementById('historyModal');
+      if (!modal) return;
+      renderFullHistoryList();
+      modal.classList.remove('hidden');
     }
 
-    async function shareOrExport() {
+    function closeHistoryModal() {
+      const modal = document.getElementById('historyModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderFullHistoryList() {
+      const container = document.getElementById('fullHistoryContainer');
+      const searchInput = document.getElementById('historySearchInput');
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      const subtitle = document.getElementById('historyModalSubtitle');
+
+      if (!container) return;
+
+      let filtered = expenses;
+      if (query) {
+        filtered = expenses.filter(e => {
+          return (e.person && e.person.toLowerCase().includes(query)) ||
+                 (e.purpose && e.purpose.toLowerCase().includes(query)) ||
+                 (e.merchant && e.merchant.toLowerCase().includes(query)) ||
+                 (e.date && e.date.includes(query)) ||
+                 (String(e.amount).includes(query));
+        });
+      }
+
+      const totalAllTime = filtered.reduce((s, e) => s + e.amount, 0);
+      if (subtitle) {
+        subtitle.innerText = `${filtered.length} Einträge • ${formatMoney(totalAllTime)} Gesamt`;
+      }
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs italic">Keine Einträge gefunden.</div>`;
+        return;
+      }
+
+      container.innerHTML = filtered.map(exp => {
+        const color = getUserColor(exp.person);
+        const locPurpose = getLocalizedCategory(exp.purpose);
+        return `
+          <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs hover:border-slate-700 transition">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-8 rounded-full shrink-0" style="background-color: ${color.hex}"></span>
+              <div>
+                <div class="font-bold text-white flex items-center gap-1.5">
+                  <span>${escapeHtml(locPurpose)}</span>
+                  ${exp.merchant ? `<span class="text-[10px] font-normal text-slate-400">(${escapeHtml(exp.merchant)})</span>` : ''}
+                </div>
+                <div class="text-[10px] text-slate-400">${exp.date} • <span class="font-medium" style="color: ${color.hex}">${escapeHtml(exp.person)}</span></div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <span class="font-extrabold text-white text-sm">${formatMoney(exp.amount)}</span>
+              <button type="button" onclick="deleteExpense('${escapeHtml(exp.id)}')" class="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Löschen">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // CSV / Excel Export mit UTF-8 BOM für fehlerfreie Umlaute in Excel (Punkt f)
+    function exportAllExpensesCSV() {
       if (expenses.length === 0) {
         alert(t('no_expenses'));
         return;
       }
-      const csv = buildCSV();
-      const fileName = `Logbook_${config.householdName || 'Household'}_${new Date().toISOString().slice(0,10)}.csv`;
-      const file = new File([csv], fileName, { type: 'text/csv' });
+      
+      // UTF-8 BOM für Excel
+      let csv = "\uFEFFID;Datum;Person;Kategorie;Ort / Shop;Betrag\n";
+      expenses.forEach(e => {
+        csv += `${e.id};${e.date};${e.person};"${getLocalizedCategory(e.purpose)}";"${e.merchant || ''}";${e.amount.toFixed(2).replace('.', ',')}\n`;
+      });
 
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-          await navigator.share({
-            title: `${t('app_title')} - ${config.householdName}`,
-            text: `Receipts export:`,
-            files: [file]
-          });
-          return;
-        } catch (e) {}
-      }
-
+      const fileName = `Logbuch_${config.householdName || 'Haushalt'}_Gesamtexport_${new Date().toISOString().slice(0,10)}.csv`;
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
@@ -1900,6 +2287,209 @@
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      showToast('✓ CSV / Excel Datei heruntergeladen');
+    }
+
+    // FIXKOSTEN & BUDGET-PLANNER MODAL (Punkt h)
+    function openPlannerModal() {
+      const modal = document.getElementById('plannerModal');
+      if (!modal) return;
+      if (!config.budgetPlan) {
+        config.budgetPlan = { incomes: [], fixedCosts: [] };
+      }
+      // Wenn noch leer, sinnvolle Initialwerte vorbefüllen
+      if (config.budgetPlan.incomes.length === 0) {
+        config.budgetPlan.incomes = [
+          { id: 'inc_1', name: 'Gehalt Person 1', amount: 2600, interval: 'monthly' },
+          { id: 'inc_2', name: 'Gehalt Person 2', amount: 2200, interval: 'monthly' }
+        ];
+      }
+      if (config.budgetPlan.fixedCosts.length === 0) {
+        config.budgetPlan.fixedCosts = [
+          { id: 'fix_1', name: 'Miete / Kredit', amount: 1200, interval: 'monthly' },
+          { id: 'fix_2', name: 'Strom & Gas', amount: 180, interval: 'monthly' },
+          { id: 'fix_3', name: 'Internet & Handy', amount: 80, interval: 'monthly' },
+          { id: 'fix_4', name: 'KFZ-Versicherung', amount: 600, interval: 'yearly' },
+          { id: 'fix_5', name: 'Abos (Spotify, Streaming)', amount: 45, interval: 'monthly' }
+        ];
+      }
+
+      renderPlannerLists();
+      calculatePlannerSummary();
+      modal.classList.remove('hidden');
+    }
+
+    function closePlannerModal() {
+      const modal = document.getElementById('plannerModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderPlannerLists() {
+      // 1. Einnahmen
+      const incList = document.getElementById('plannerIncomesList');
+      if (incList && config.budgetPlan) {
+        incList.innerHTML = config.budgetPlan.incomes.map((inc, i) => `
+          <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 p-2 rounded-xl text-xs">
+            <input type="text" value="${escapeHtml(inc.name)}" oninput="updatePlannerIncome(${i}, 'name', this.value)" placeholder="z. B. Gehalt" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-white">
+            <input type="number" step="10" value="${inc.amount}" oninput="updatePlannerIncome(${i}, 'amount', this.value)" class="w-24 bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-emerald-400 font-bold text-right">
+            <select onchange="updatePlannerIncome(${i}, 'interval', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-lg px-1.5 py-1 text-[11px] text-slate-300">
+              <option value="monthly" ${inc.interval === 'monthly' ? 'selected' : ''}>Monatl.</option>
+              <option value="yearly" ${inc.interval === 'yearly' ? 'selected' : ''}>Jährl.</option>
+            </select>
+            <button type="button" onclick="removePlannerIncome(${i})" class="text-slate-500 hover:text-rose-400 p-1">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+        `).join('');
+      }
+
+      // 2. Fixkosten
+      const fixList = document.getElementById('plannerFixedCostsList');
+      if (fixList && config.budgetPlan) {
+        fixList.innerHTML = config.budgetPlan.fixedCosts.map((fix, i) => {
+          let monthlyAmount = fix.amount;
+          if (fix.interval === 'yearly') monthlyAmount = fix.amount / 12;
+          if (fix.interval === 'quarterly') monthlyAmount = fix.amount / 3;
+
+          return `
+          <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 p-2 rounded-xl text-xs">
+            <input type="text" value="${escapeHtml(fix.name)}" oninput="updatePlannerFixedCost(${i}, 'name', this.value)" placeholder="z. B. KFZ, Miete" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-white">
+            <input type="number" step="5" value="${fix.amount}" oninput="updatePlannerFixedCost(${i}, 'amount', this.value)" class="w-24 bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-rose-400 font-bold text-right">
+            <select onchange="updatePlannerFixedCost(${i}, 'interval', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-lg px-1.5 py-1 text-[11px] text-slate-300">
+              <option value="monthly" ${fix.interval === 'monthly' ? 'selected' : ''}>Monatl.</option>
+              <option value="yearly" ${fix.interval === 'yearly' ? 'selected' : ''}>Jährl. (/12)</option>
+              <option value="quarterly" ${fix.interval === 'quarterly' ? 'selected' : ''}>Quartal (/3)</option>
+            </select>
+            <button type="button" onclick="removePlannerFixedCost(${i})" class="text-slate-500 hover:text-rose-400 p-1">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function addPlannerIncome() {
+      if (!config.budgetPlan) config.budgetPlan = { incomes: [], fixedCosts: [] };
+      config.budgetPlan.incomes.push({
+        id: 'inc_' + Date.now(),
+        name: 'Neues Einkommen',
+        amount: 1000,
+        interval: 'monthly'
+      });
+      renderPlannerLists();
+      calculatePlannerSummary();
+    }
+
+    function removePlannerIncome(idx) {
+      config.budgetPlan.incomes.splice(idx, 1);
+      renderPlannerLists();
+      calculatePlannerSummary();
+    }
+
+    function updatePlannerIncome(idx, field, val) {
+      if (!config.budgetPlan.incomes[idx]) return;
+      if (field === 'amount') {
+        config.budgetPlan.incomes[idx].amount = parseFloat(val) || 0;
+      } else {
+        config.budgetPlan.incomes[idx][field] = val;
+      }
+      calculatePlannerSummary();
+    }
+
+    function addPlannerFixedCost() {
+      if (!config.budgetPlan) config.budgetPlan = { incomes: [], fixedCosts: [] };
+      config.budgetPlan.fixedCosts.push({
+        id: 'fix_' + Date.now(),
+        name: 'Neuer Vertrag / Abo',
+        amount: 50,
+        interval: 'monthly'
+      });
+      renderPlannerLists();
+      calculatePlannerSummary();
+    }
+
+    function removePlannerFixedCost(idx) {
+      config.budgetPlan.fixedCosts.splice(idx, 1);
+      renderPlannerLists();
+      calculatePlannerSummary();
+    }
+
+    function updatePlannerFixedCost(idx, field, val) {
+      if (!config.budgetPlan.fixedCosts[idx]) return;
+      if (field === 'amount') {
+        config.budgetPlan.fixedCosts[idx].amount = parseFloat(val) || 0;
+      } else {
+        config.budgetPlan.fixedCosts[idx][field] = val;
+      }
+      calculatePlannerSummary();
+    }
+
+    function calculatePlannerSummary() {
+      if (!config.budgetPlan) return;
+
+      let totalIncomeMonthly = 0;
+      config.budgetPlan.incomes.forEach(inc => {
+        let val = inc.amount || 0;
+        if (inc.interval === 'yearly') val = val / 12;
+        totalIncomeMonthly += val;
+      });
+
+      let totalFixedCostsMonthly = 0;
+      config.budgetPlan.fixedCosts.forEach(fix => {
+        let val = fix.amount || 0;
+        if (fix.interval === 'yearly') val = val / 12;
+        if (fix.interval === 'quarterly') val = val / 3;
+        totalFixedCostsMonthly += val;
+      });
+
+      const surplus = Math.max(0, totalIncomeMonthly - totalFixedCostsMonthly);
+
+      const incEl = document.getElementById('plannerIncomesTotal');
+      if (incEl) incEl.innerText = formatMoney(totalIncomeMonthly);
+
+      const fixEl = document.getElementById('plannerFixedCostsTotal');
+      if (fixEl) fixEl.innerText = formatMoney(totalFixedCostsMonthly);
+
+      const surplusEl = document.getElementById('plannerSurplusAmount');
+      if (surplusEl) surplusEl.innerText = formatMoney(surplus);
+
+      const recText = document.getElementById('plannerRecommendationText');
+      if (recText) recText.innerText = `${formatMoneyCompact(surplus)} / Monat`;
+
+      // Zwischenspeichern
+      saveConfig();
+    }
+
+    // Errechnetes Budget übernehmen
+    function applyPlannerBudget() {
+      calculatePlannerSummary();
+      let totalIncomeMonthly = 0;
+      config.budgetPlan.incomes.forEach(inc => {
+        let val = inc.amount || 0;
+        if (inc.interval === 'yearly') val = val / 12;
+        totalIncomeMonthly += val;
+      });
+
+      let totalFixedCostsMonthly = 0;
+      config.budgetPlan.fixedCosts.forEach(fix => {
+        let val = fix.amount || 0;
+        if (fix.interval === 'yearly') val = val / 12;
+        if (fix.interval === 'quarterly') val = val / 3;
+        totalFixedCostsMonthly += val;
+      });
+
+      const surplus = Math.max(0, Math.round(totalIncomeMonthly - totalFixedCostsMonthly));
+      config.monthlyBudget = surplus > 0 ? surplus : 1500;
+
+      saveConfig();
+      closePlannerModal();
+      updateHouseholdUI();
+      render();
+      showToast(`✓ Soll-Budget auf ${formatMoneyCompact(config.monthlyBudget)} gesetzt!`);
+
+      // In Supabase synchronisieren
+      saveHouseholdToSupabase();
     }
 
     function selectPurpose(key, fullName, btn) {
@@ -1936,7 +2526,7 @@
         ownerBadge.style.borderWidth = '1px';
       }
 
-      const pContainer = document.getElementById('personChipsContainer');
+      const pContainer = document.getElementById('formPersonSelectors');
       if (pContainer && config.users) {
         pContainer.innerHTML = config.users.map(u => {
           const isAct = (u.name === activePerson);
@@ -2059,6 +2649,7 @@
 
       config.householdName = hName;
       config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
+      
       const hIdInput = document.getElementById('settingsHouseholdId');
       if (hIdInput && hIdInput.value.trim()) {
         config.householdId = hIdInput.value.trim();
@@ -2084,53 +2675,8 @@
       showToast(t('toast_saved'));
 
       await saveHouseholdToSupabase();
+      subscribeToRealtime();
       syncWithSupabase(false);
-    }
-
-    function copyPartnerSetupLink() {
-      const baseUrl = window.location.origin + window.location.pathname;
-      const hidParam = encodeURIComponent(config.householdId || '');
-      const hName = encodeURIComponent(config.householdName || 'Household');
-      const budget = config.monthlyBudget || 1500;
-      const userList = encodeURIComponent(config.users.map(u => u.name).join(','));
-      
-      let partnerOwner = config.users[0] ? config.users[0].name : '';
-      if (config.users.length > 1) {
-        const other = config.users.find(u => u.name !== config.deviceOwner);
-        if (other) partnerOwner = other.name;
-      }
-      const ownerParam = encodeURIComponent(partnerOwner);
-      const langParam = config.lang ? `&lang=${encodeURIComponent(config.lang)}` : '';
-      const currParam = config.currency ? `&curr=${encodeURIComponent(config.currency)}` : '';
-
-      const shareUrl = `${baseUrl}#setup?hid=${hidParam}&h=${hName}&b=${budget}&users=${userList}&owner=${ownerParam}${langParam}${currParam}`;
-
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(shareUrl).then(() => {
-          showToast(t('toast_partner_copied'));
-        }).catch(() => {
-          prompt(t('settings_partner_link_btn') + ":", shareUrl);
-        });
-      } else {
-        prompt(t('settings_partner_link_btn') + ":", shareUrl);
-      }
-    }
-
-    function clearCurrentMonth() {
-      if (!confirm(t('confirm_clear_month'))) return;
-      const now = new Date();
-      const cy = now.getFullYear();
-      const cm = now.getMonth();
-
-      expenses = expenses.filter(exp => {
-        if (!exp.date) return true;
-        const d = new Date(exp.date);
-        return !(d.getFullYear() === cy && d.getMonth() === cm);
-      });
-
-      saveData();
-      render();
-      showToast("Cleared");
     }
 
     function escapeHtml(str) {
@@ -2160,6 +2706,6 @@
         syncWithSupabase(false);
       }
     });
-</script>
+  </script>
 </body>
 </html>

@@ -30,15 +30,31 @@
       -webkit-appearance: none;
       margin: 0;
     }
-    .waterline-container {
-      background: linear-gradient(to bottom, #0f172a, #020617);
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
+:root {
+      --sat: env(safe-area-inset-top, 0px);
+      --sab: env(safe-area-inset-bottom, 0px);
     }
-    .water-fill {
-      transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1), background 0.6s ease;
+    .header-safe {
+      padding-top: max(calc(env(safe-area-inset-top, 0px) + 0.75rem), 0.75rem);
+      padding-bottom: 0.75rem;
     }
-    .boat-indicator {
-      transition: bottom 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    .pb-safe {
+      padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) + 1rem), 1.5rem);
+    }
+    .modal-safe {
+      padding-top: max(calc(env(safe-area-inset-top, 0px) + 1.25rem), 1.25rem);
+      padding-bottom: max(calc(env(safe-area-inset-bottom, 0px) + 1.25rem), 1.25rem);
+    }
+    .bobbing-boat {
+      animation: boatBob 3s ease-in-out infinite;
+    }
+    @keyframes boatBob {
+      0%, 100% {
+        transform: translate(-50%, 0) rotate(0deg);
+      }
+      50% {
+        transform: translate(-50%, -3px) rotate(-3deg);
+      }
     }
     .glass-card {
       background: rgba(15, 23, 42, 0.75);
@@ -51,13 +67,13 @@
 <body class="h-full flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white pb-safe">
 
   <!-- Toast Benachrichtigung -->
-  <div id="toastNotification" class="fixed top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-slate-900/95 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-sky-400/30 backdrop-blur-xl transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-4">
+  <div id="toastNotification" class="fixed top-[calc(env(safe-area-inset-top,0px)+0.75rem)] left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-slate-900/95 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-sky-400/30 backdrop-blur-xl transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-4">
     <span class="text-sm text-sky-400" id="toastIcon">✓</span>
     <span id="toastMessage">Gespeichert</span>
   </div>
 
   <!-- Wizard Modal: Haushalt & Personen einrichten (Erster Start) -->
-  <div id="setupWizardModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden overflow-y-auto">
+  <div id="setupWizardModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden overflow-y-auto modal-safe">
     <div class="glass-card max-w-sm w-full rounded-3xl p-6 shadow-2xl border border-slate-700 space-y-4 my-auto">
       <div class="text-center space-y-2">
         <div class="w-14 h-14 mx-auto rounded-2xl bg-sky-500/15 text-sky-400 flex items-center justify-center border border-sky-400/20 text-2xl shadow">
@@ -130,7 +146,7 @@
   </div>
 
   <!-- Modal: Partner einladen (Nach Setup) -->
-  <div id="shareInviteModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+  <div id="shareInviteModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto modal-safe">
     <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl my-auto text-center">
       <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-2xl text-emerald-400">
         🔗
@@ -153,8 +169,8 @@
     </div>
   </div>
 
-  <!-- Header: Logbuch - Haushalt -->
-  <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-40 backdrop-blur-md px-4 py-3">
+  <!-- Header: Logbuch - Haushalt (mit Safe-Area Inset für iPhone Notch & Dynamic Island - Punkt A) -->
+  <header class="border-b border-slate-800 bg-slate-900/95 sticky top-0 z-40 backdrop-blur-md px-4 header-safe">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2.5">
         <img src="apple-touch-icon.png" alt="Logbuch" class="w-8 h-8 rounded-xl border border-sky-400/20 shadow-sm object-cover">
@@ -170,9 +186,9 @@
         </div>
       </div>
       
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-2">
         <!-- 1. Fixkosten & Budget-Rechner Button (Punkt h) -->
-        <button onclick="openPlannerModal()" id="btnOpenPlanner" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 flex items-center justify-center shrink-0" title="Fixkosten & Budget-Rechner">
+        <button onclick="openPlannerModal()" id="btnOpenPlanner" class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs transition active:scale-95 flex items-center justify-center shrink-0 shadow-sm" title="Fixkosten & Budget-Rechner">
           <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="4" width="20" height="16" rx="2"/>
             <line x1="6" y1="8" x2="6" y2="8"/>
@@ -185,7 +201,7 @@
         </button>
 
         <!-- 2. Gesamtes Logbuch aller Zeiten & Excel Export Button (Punkt f) -->
-        <button onclick="openHistoryModal()" id="btnOpenHistory" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 flex items-center justify-center shrink-0" title="Gesamtes Logbuch & Excel Export">
+        <button onclick="openHistoryModal()" id="btnOpenHistory" class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs transition active:scale-95 flex items-center justify-center shrink-0 shadow-sm" title="Gesamtes Logbuch & Excel Export">
           <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
@@ -193,7 +209,7 @@
         </button>
 
         <!-- 3. Settings Button -->
-        <button onclick="openSettingsModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-xs transition active:scale-95 flex items-center justify-center shrink-0" title="Einstellungen">
+        <button onclick="openSettingsModal()" class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs transition active:scale-95 flex items-center justify-center shrink-0 shadow-sm" title="Einstellungen">
           <svg class="w-4 h-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -228,26 +244,23 @@
           </div>
         </div>
 
-        <!-- Kategorie (Zweck) -->
+        <!-- Kategorie (Pflicht, Zweck / Lebensbereich - Punkt B) -->
         <div>
-          <div class="flex justify-between items-center mb-1">
+          <div class="flex justify-between items-center mb-1.5">
             <label id="lblCategory" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kategorie</label>
-            <span id="selectedCategoryLabel" class="text-[10px] text-sky-400 font-bold">🛒 Supermarkt & Essen</span>
+            <span id="selectedCategoryLabel" class="text-[10px] text-sky-400 font-bold">🍏 Essen & Trinken</span>
           </div>
-          <div class="grid grid-cols-2 gap-1.5" id="purposeButtonsGrid">
-            <!-- Dynamisch gerendert -->
+          <div class="grid grid-cols-3 gap-1.5" id="purposeButtonsGrid">
+            <!-- Dynamisch gerendert: 3x3 Raster der 9 Lebensbereiche -->
           </div>
-          <input type="hidden" id="inputPurpose" value="groceries">
+          <input type="hidden" id="inputPurpose" value="food">
         </div>
 
-        <!-- Ort / Shop (Generisch ohne Markennamen - Punkt d) -->
+        <!-- Optionale Notiz / Geschäft (Punkt B) -->
         <div>
-          <label id="lblMerchant" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ort / Shop-Art</label>
-          <div class="flex flex-wrap gap-1 mb-1.5" id="shopChipsContainer">
-            <!-- Dynamisch generische Chips gerendert -->
-          </div>
+          <label id="lblMerchant" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Notiz / Geschäft (optional)</label>
           <div>
-            <input type="text" id="inputMerchant" placeholder="z. B. Supermarkt, Notiz oder Kommentar" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+            <input type="text" id="inputMerchant" placeholder="z. B. Rewe, Zara, Tanken, Rossmann (optional)" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400">
           </div>
           <input type="date" id="inputDate" class="hidden">
         </div>
@@ -279,21 +292,17 @@
         </div>
       </div>
 
-      <!-- Wasserlinien-Leiste mit Segelboot -->
-      <div class="pt-1">
-        <div class="relative w-full h-11 rounded-xl overflow-hidden waterline-container border border-slate-800 flex items-end">
-          <div id="waterFill" class="water-fill w-full absolute bottom-0 left-0" style="height: 0%;"></div>
-          
-          <div class="absolute inset-0 flex items-center justify-between px-3 z-10 pointer-events-none">
-            <span id="seawayStatusText" class="text-xs font-bold text-sky-400 drop-shadow">⛵ Ruhige See</span>
-            <span id="freeboardLabel" class="text-xs font-semibold text-slate-200 drop-shadow"></span>
+      <!-- Schlanke Wasserlinien-Leiste mit Segelboot (Punkt C) -->
+      <div class="space-y-1.5 pt-2">
+        <div class="relative w-full h-3 bg-slate-900 rounded-full overflow-visible border border-slate-700/80 shadow-inner">
+          <div id="waterProgressBar" class="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-emerald-500 to-sky-500" style="width: 0%;"></div>
+          <div id="sailboatMarker" class="absolute -top-3.5 transition-all duration-500 transform -translate-x-1/2 text-lg select-none pointer-events-none drop-shadow bobbing-boat" style="left: 0%;">
+            ⛵
           </div>
-
-          <div id="sailboat" class="boat-indicator absolute left-3 z-20 pointer-events-none transition-all duration-500 transform -translate-y-1" style="bottom: 0px;">
-            <svg class="w-5 h-5 text-amber-300 drop-shadow-md" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2L4.5 15h15L12 2zm0 3.5l4.5 7.5h-9L12 5.5zM2 17l2 4h16l2-4H2z"/>
-            </svg>
-          </div>
+        </div>
+        <div class="flex justify-between items-center text-xs text-slate-400 pt-0.5">
+          <span id="nauticalStatusText" class="text-emerald-400 font-medium">⛵ Ruhige See (0%)</span>
+          <span id="waterFreeboardLabel" class="text-slate-300 font-bold">1.500 € Puffer</span>
         </div>
       </div>
 
@@ -386,7 +395,7 @@
   </main>
 
   <!-- MODAL: GESAMTES LOGBUCH ALLER ZEITEN & EXCEL EXPORT (Punkt f) -->
-  <div id="historyModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+  <div id="historyModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto modal-safe">
     <div class="glass-card rounded-2xl max-w-lg w-full p-4 sm:p-5 space-y-3.5 border border-slate-700 shadow-2xl my-auto max-h-[90vh] flex flex-col">
       <div class="flex items-center justify-between pb-2 border-b border-slate-800 shrink-0">
         <div>
@@ -423,7 +432,7 @@
   </div>
 
   <!-- MODAL: FIXKOSTEN & BUDGET-RECHNER (Punkt h) -->
-  <div id="plannerModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+  <div id="plannerModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto modal-safe">
     <div class="glass-card rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-4 border border-slate-700 shadow-2xl my-auto max-h-[92vh] flex flex-col">
       <div class="flex items-center justify-between pb-2 border-b border-slate-800 shrink-0">
         <div>
@@ -507,7 +516,7 @@
   </div>
 
   <!-- MODAL: EINSTELLUNGEN & HAUSHALT VERWALTEN -->
-  <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
+  <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto modal-safe">
     <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl my-auto">
       <div class="flex items-center justify-between pb-2 border-b border-slate-800">
         <h3 id="settingsTitle" class="text-sm font-bold text-white flex items-center gap-2">
@@ -679,16 +688,17 @@
         header_user_hint: "Tap to switch user",
         card_add_title: "Record Expense",
         category_label: "Category",
-        cat_supermarket: "🛒 Groceries & Food",
-        cat_kids: "👶 Kids & Family",
-        cat_auto: "⛽ Transport & Auto",
+        cat_food: "🍏 Food & Drinks",
+        cat_family: "👶 Kids & Family",
+        cat_mobility: "🚗 Car & Mobility",
+        cat_home: "🏡 Home & Garden",
         cat_drugstore: "💊 Drugstore & Health",
-        cat_leisure: "☕ Restaurant & Leisure",
-        cat_home: "🏠 Home & Garden",
-        cat_clothing: "👗 Clothing & Shoes",
-        cat_other: "📦 Miscellaneous",
-        merchant_label: "Place / Shop Type",
-        merchant_placeholder: "e.g. Supermarket, note or comment",
+        cat_fashion: "👕 Clothing & Fashion",
+        cat_restaurant: "🍽️ Dining & Takeaway",
+        cat_ecommerce: "📦 E-Commerce",
+        cat_other: "🛍️ Other",
+        note_label: "Note / Store (optional)",
+        note_placeholder: "e.g. Walmart, Zara, Gas, Pharmacy (optional)",
         btn_save: "Save Expense",
         spent_label: "spent",
         target_budget_label: "Target Budget:",
@@ -747,16 +757,17 @@
         header_user_hint: "Tippen zum Wechseln",
         card_add_title: "Ausgabe erfassen",
         category_label: "Kategorie",
-        cat_supermarket: "🛒 Supermarkt & Essen",
-        cat_kids: "👶 Kinder & Familie",
-        cat_auto: "⛽ Auto & Mobilität",
-        cat_drugstore: "💊 Drogerie & Pflege",
-        cat_leisure: "☕ Restaurant & Freizeit",
-        cat_home: "🏠 Haus & Garten",
-        cat_clothing: "👗 Kleidung & Schuhe",
-        cat_other: "📦 Sonstiges",
-        merchant_label: "Ort / Shop-Art",
-        merchant_placeholder: "z. B. Supermarkt, Notiz oder Kommentar",
+        cat_food: "🍏 Essen & Trinken",
+        cat_family: "👶 Kind & Familie",
+        cat_mobility: "🚗 Auto & Mobilität",
+        cat_home: "🏡 Haus & Garten",
+        cat_drugstore: "💊 Drogerie & Apotheke",
+        cat_fashion: "👕 Kleidung & Mode",
+        cat_restaurant: "🍽️ Restaurant & Unterwegs",
+        cat_ecommerce: "📦 E-Commerce",
+        cat_other: "🛍️ Sonstiges",
+        note_label: "Notiz / Geschäft (optional)",
+        note_placeholder: "z. B. Rewe, Zara, Tanken, Rossmann (optional)",
         btn_save: "Ausgabe buchen",
         spent_label: "ausgegeben",
         target_budget_label: "Soll-Budget:",
@@ -815,16 +826,17 @@
         header_user_hint: "Appuyez pour changer",
         card_add_title: "Enregistrer une dépense",
         category_label: "Catégorie",
-        cat_supermarket: "🛒 Supermarché & Repas",
-        cat_kids: "👶 Enfants & Famille",
-        cat_auto: "⛽ Transport & Voiture",
+        cat_food: "🍏 Nourriture & Boissons",
+        cat_family: "👶 Enfants & Famille",
+        cat_mobility: "🚗 Auto & Mobilité",
+        cat_home: "🏡 Maison & Jardin",
         cat_drugstore: "💊 Pharmacie & Soins",
-        cat_leisure: "☕ Restaurant & Loisirs",
-        cat_home: "🏠 Maison & Jardin",
-        cat_clothing: "👗 Vêtements & Mode",
-        cat_other: "📦 Divers",
-        merchant_label: "Lieu / Type de magasin",
-        merchant_placeholder: "ex. Supermarché, note ou commentaire",
+        cat_fashion: "👕 Vêtements & Mode",
+        cat_restaurant: "🍽️ Restaurant & Sorties",
+        cat_ecommerce: "📦 E-Commerce",
+        cat_other: "🛍️ Autre",
+        note_label: "Note / Magasin (optionnel)",
+        note_placeholder: "ex. Carrefour, Zara, Essence, Pharmacie (optionnel)",
         btn_save: "Enregistrer la dépense",
         spent_label: "dépensé",
         target_budget_label: "Budget cible :",
@@ -912,40 +924,30 @@
     }
 
     // Kategorien
+    // 9 Lebensbereiche nach Zweck (Punkt B)
     const CATEGORIES = [
-      { key: 'groceries', i18nKey: 'cat_supermarket' },
-      { key: 'kids', i18nKey: 'cat_kids' },
-      { key: 'auto', i18nKey: 'cat_auto' },
-      { key: 'drugstore', i18nKey: 'cat_drugstore' },
-      { key: 'leisure', i18nKey: 'cat_leisure' },
-      { key: 'home', i18nKey: 'cat_home' },
-      { key: 'clothing', i18nKey: 'cat_clothing' },
-      { key: 'other', i18nKey: 'cat_other' }
-    ];
-
-    // Generische Shop-Typen ohne Markennamen (Punkt d)
-    const GENERIC_SHOPS = [
-      { key: 'supermarket', icon: '🛒', i18nKey: 'shop_supermarket' },
-      { key: 'discounter', icon: '🏬', i18nKey: 'shop_discounter' },
-      { key: 'drugstore', icon: '💊', i18nKey: 'shop_drugstore' },
-      { key: 'bakery', icon: '🥖', i18nKey: 'shop_bakery' },
-      { key: 'restaurant', icon: '🍽️', i18nKey: 'shop_restaurant' },
-      { key: 'diy', icon: '🔨', i18nKey: 'shop_diy' },
-      { key: 'gas', icon: '⛽', i18nKey: 'shop_gas' },
-      { key: 'online', icon: '📦', i18nKey: 'shop_online' },
-      { key: 'other', icon: '🛍️', i18nKey: 'shop_other' }
+      { key: 'food', icon: '🍏', i18nKey: 'cat_food' },
+      { key: 'family', icon: '👶', i18nKey: 'cat_family' },
+      { key: 'mobility', icon: '🚗', i18nKey: 'cat_mobility' },
+      { key: 'home', icon: '🏡', i18nKey: 'cat_home' },
+      { key: 'drugstore', icon: '💊', i18nKey: 'cat_drugstore' },
+      { key: 'fashion', icon: '👕', i18nKey: 'cat_fashion' },
+      { key: 'restaurant', icon: '🍽️', i18nKey: 'cat_restaurant' },
+      { key: 'ecommerce', icon: '📦', i18nKey: 'cat_ecommerce' },
+      { key: 'other', icon: '🛍️', i18nKey: 'cat_other' }
     ];
 
     function getLocalizedCategory(catKey) {
       if (!catKey) return t('cat_other');
       const lk = String(catKey).toLowerCase();
-      if (lk.includes('supermarkt') || lk.includes('essen') || lk.includes('grocer') || lk.includes('food') || lk.includes('repas')) return t('cat_supermarket');
-      if (lk.includes('kinder') || lk.includes('baby') || lk.includes('kid') || lk.includes('enfant')) return t('cat_kids');
-      if (lk.includes('auto') || lk.includes('tanken') || lk.includes('mobil') || lk.includes('transport') || lk.includes('fuel') || lk.includes('carburant')) return t('cat_auto');
-      if (lk.includes('drogerie') || lk.includes('pflege') || lk.includes('drug') || lk.includes('health') || lk.includes('pharmacie') || lk.includes('soins')) return t('cat_drugstore');
-      if (lk.includes('freizeit') || lk.includes('restaurant') || lk.includes('leisure') || lk.includes('loisir') || lk.includes('cafe')) return t('cat_leisure');
-      if (lk.includes('haus') || lk.includes('garten') || lk.includes('home') || lk.includes('garden') || lk.includes('maison')) return t('cat_home');
-      if (lk.includes('kleidung') || lk.includes('schuhe') || lk.includes('cloth') || lk.includes('mode') || lk.includes('vetement')) return t('cat_clothing');
+      if (lk === 'food' || lk.includes('supermarkt') || lk.includes('essen') || lk.includes('grocer') || lk.includes('food') || lk.includes('repas')) return t('cat_food');
+      if (lk === 'family' || lk.includes('kinder') || lk.includes('kind') || lk.includes('baby') || lk.includes('kid') || lk.includes('enfant')) return t('cat_family');
+      if (lk === 'mobility' || lk.includes('auto') || lk.includes('tanken') || lk.includes('mobil') || lk.includes('transport') || lk.includes('fuel') || lk.includes('carburant')) return t('cat_mobility');
+      if (lk === 'drugstore' || lk.includes('drogerie') || lk.includes('apotheke') || lk.includes('pflege') || lk.includes('drug') || lk.includes('health') || lk.includes('pharmacie') || lk.includes('soins')) return t('cat_drugstore');
+      if (lk === 'restaurant' || lk.includes('freizeit') || lk.includes('restaurant') || lk.includes('leisure') || lk.includes('loisir') || lk.includes('cafe') || lk.includes('gastro')) return t('cat_restaurant');
+      if (lk === 'home' || lk.includes('haus') || lk.includes('garten') || lk.includes('home') || lk.includes('garden') || lk.includes('maison')) return t('cat_home');
+      if (lk === 'fashion' || lk.includes('kleidung') || lk.includes('mode') || lk.includes('schuhe') || lk.includes('cloth') || lk.includes('vetement')) return t('cat_fashion');
+      if (lk === 'ecommerce' || lk.includes('ecommerce') || lk.includes('online') || lk.includes('amazon') || lk.includes('e-commerce')) return t('cat_ecommerce');
       return t('cat_other');
     }
 
@@ -976,52 +978,31 @@
       const container = document.getElementById('purposeButtonsGrid');
       if (!container) return;
       const inputEl = document.getElementById('inputPurpose');
-      const currentKey = inputEl ? inputEl.value : 'groceries';
+      const currentKey = inputEl ? inputEl.value : 'food';
 
       container.innerHTML = CATEGORIES.map(c => {
         const fullLabel = t(c.i18nKey);
-        const isActive = (currentKey === c.key || currentKey === fullLabel);
+        const isActive = (currentKey === c.key);
         const textOnly = fullLabel.replace(/^[^\s]+\s*/, '');
         return `
           <button type="button" 
                   data-catkey="${escapeHtml(c.key)}" 
-                  data-fullname="${escapeHtml(fullLabel)}"
-                  onclick="selectPurpose('${escapeHtml(c.key)}', '${escapeHtml(fullLabel)}', this)" 
-                  class="purpose-btn py-2 px-1 rounded-xl text-[11px] font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5 ${isActive ? 'bg-sky-500/25 border-sky-400 text-sky-200' : 'bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600'}">
-            <span class="text-sm">${fullLabel.split(' ')[0]}</span>
-            <span class="truncate max-w-[85px] leading-tight text-center">${escapeHtml(textOnly)}</span>
+                  onclick="selectPurpose('${escapeHtml(c.key)}')" 
+                  class="purpose-btn py-2 px-1 rounded-xl text-[11px] font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5 ${isActive ? 'bg-sky-500/25 border-sky-400 text-sky-200 shadow-sm' : 'bg-slate-900 border-slate-700/80 text-slate-300 hover:border-slate-600'}">
+            <span class="text-base">${c.icon}</span>
+            <span class="truncate max-w-[95px] leading-tight text-center">${escapeHtml(textOnly)}</span>
           </button>
         `;
       }).join('');
     }
 
-    function renderShopChips() {
-      const c = document.getElementById('shopChipsContainer');
-      if (!c) return;
-
-      c.innerHTML = GENERIC_SHOPS.map(s => {
-        const name = t(s.i18nKey);
-        return `
-          <button type="button" onclick="selectShop('${escapeHtml(name)}', this)"
-            class="shop-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition active:scale-95 flex items-center gap-1">
-            <span>${s.icon}</span> <span>${escapeHtml(name)}</span>
-          </button>
-        `;
-      }).join('');
-    }
-
-    function selectShop(name, btn) {
-      const input = document.getElementById('inputMerchant');
-      if (input) {
-        input.value = name;
-        input.focus();
-      }
-      document.querySelectorAll('.shop-chip').forEach(b => {
-        b.className = "shop-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition active:scale-95 flex items-center gap-1";
-      });
-      if (btn) {
-        btn.className = "shop-chip px-2.5 py-1 rounded-lg bg-sky-500/20 border border-sky-400 text-[11px] text-sky-200 font-bold transition active:scale-95 flex items-center gap-1";
-      }
+    function selectPurpose(key) {
+      const input = document.getElementById('inputPurpose');
+      if (input) input.value = key;
+      const cat = CATEGORIES.find(c => c.key === key) || CATEGORIES[0];
+      const selectedCatLabel = document.getElementById('selectedCategoryLabel');
+      if (selectedCatLabel) selectedCatLabel.innerText = t(cat.i18nKey);
+      renderCategoryButtons();
     }
 
     function renderSettingsPills() {
@@ -1090,14 +1071,19 @@
       const lblCategory = document.getElementById('lblCategory');
       if (lblCategory) lblCategory.innerText = t('category_label');
       const lblMerchant = document.getElementById('lblMerchant');
-      if (lblMerchant) lblMerchant.innerText = t('merchant_label');
+      if (lblMerchant) lblMerchant.innerText = t('note_label') || t('merchant_label');
       const inputMerchant = document.getElementById('inputMerchant');
-      if (inputMerchant) inputMerchant.placeholder = t('merchant_placeholder');
+      if (inputMerchant) inputMerchant.placeholder = t('note_placeholder') || t('merchant_placeholder');
       const btnSubmitExpenseText = document.getElementById('btnSubmitExpenseText');
       if (btnSubmitExpenseText) btnSubmitExpenseText.innerText = t('btn_save');
 
+      const inputPurpose = document.getElementById('inputPurpose');
+      const curKey = inputPurpose ? inputPurpose.value : 'food';
+      const curCat = CATEGORIES.find(c => c.key === curKey) || CATEGORIES[0];
+      const selectedCatLabel = document.getElementById('selectedCategoryLabel');
+      if (selectedCatLabel) selectedCatLabel.innerText = t(curCat.i18nKey);
+
       renderCategoryButtons();
-      renderShopChips();
 
       const spentSub = document.getElementById('spentSubtitle');
       if (spentSub) spentSub.innerText = t('spent_label');
@@ -1602,7 +1588,7 @@
       const dateEl = document.getElementById('inputDate');
       const dateVal = (dateEl && dateEl.value) ? dateEl.value : new Date().toISOString().slice(0, 10);
       const purposeEl = document.getElementById('inputPurpose');
-      const purposeVal = (purposeEl && purposeEl.value) ? purposeEl.value : 'groceries';
+      const purposeVal = (purposeEl && purposeEl.value) ? purposeEl.value : 'food';
       const merchantEl = document.getElementById('inputMerchant');
       const merchantVal = (merchantEl && merchantEl.value) ? merchantEl.value.trim() : '';
 
@@ -2006,46 +1992,51 @@
       const budgetDisplay = document.getElementById('targetBudgetDisplay');
       if (budgetDisplay) budgetDisplay.innerText = formatMoneyCompact(budget);
 
-      const pct = Math.min(100, Math.round((total / budget) * 100));
-      const waterFill = document.getElementById('waterFill');
-      if (waterFill) {
-        waterFill.style.height = `${pct}%`;
-        if (pct < 60) {
-          waterFill.style.background = 'linear-gradient(to top, rgba(14, 165, 233, 0.45), rgba(56, 189, 248, 0.25))';
-        } else if (pct < 85) {
-          waterFill.style.background = 'linear-gradient(to top, rgba(234, 179, 8, 0.45), rgba(250, 204, 21, 0.25))';
+      const depthPct = Math.round((total / budget) * 100);
+      const freeboard = budget - total;
+
+      const barEl = document.getElementById('waterProgressBar');
+      const boatEl = document.getElementById('sailboatMarker');
+      const freeboardLabel = document.getElementById('waterFreeboardLabel');
+      const statusText = document.getElementById('nauticalStatusText');
+
+      if (barEl && boatEl) {
+        const visualWidth = Math.min(96, Math.max(4, depthPct));
+        barEl.style.width = visualWidth + '%';
+        boatEl.style.left = visualWidth + '%';
+
+        if (depthPct <= 50) {
+          barEl.className = 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-emerald-500 to-sky-500';
+        } else if (depthPct <= 80) {
+          barEl.className = 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-sky-500 to-blue-500';
+        } else if (depthPct <= 100) {
+          barEl.className = 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-amber-500 to-orange-500';
         } else {
-          waterFill.style.background = 'linear-gradient(to top, rgba(244, 63, 94, 0.55), rgba(251, 113, 133, 0.35))';
+          barEl.className = 'h-full rounded-full transition-all duration-500 bg-gradient-to-r from-rose-500 to-red-600';
         }
       }
 
-      const boat = document.getElementById('sailboat');
-      if (boat) boat.style.bottom = `calc(${pct}% - 8px)`;
-
-      const freeboard = budget - total;
-      const freeboardLabel = document.getElementById('freeboardLabel');
       if (freeboardLabel) {
         if (freeboard >= 0) {
-          freeboardLabel.innerHTML = `${formatMoneyCompact(freeboard)} <span class="text-slate-300 font-bold">${t('buffer_label')}</span>`;
+          freeboardLabel.innerHTML = `Noch <span class="text-emerald-400 font-bold">${formatMoneyCompact(freeboard)}</span> Puffer`;
         } else {
-          freeboardLabel.innerHTML = `<span class="text-rose-400 font-bold">${formatMoneyCompact(Math.abs(freeboard))} ${t('status_over')}</span>`;
+          freeboardLabel.innerHTML = `<span class="text-rose-400 font-bold">${formatMoneyCompact(Math.abs(freeboard))} über Budget!</span>`;
         }
       }
 
-      const statusText = document.getElementById('seawayStatusText');
       if (statusText) {
-        if (pct < 45) {
-          statusText.innerText = `⛵ ${t('status_calm')} (${pct}%)`;
-          statusText.className = 'text-xs font-bold text-sky-400';
-        } else if (pct < 75) {
-          statusText.innerText = `🌊 ${t('status_breeze')} (${pct}%)`;
-          statusText.className = 'text-xs font-bold text-emerald-400';
-        } else if (pct < 95) {
-          statusText.innerText = `⚠️ ${t('status_waves')} (${pct}%)`;
-          statusText.className = 'text-xs font-bold text-amber-400';
+        if (depthPct <= 50) {
+          statusText.className = 'text-emerald-400 font-medium text-xs';
+          statusText.innerText = `⛵ ${t('status_calm')} (${depthPct}%)`;
+        } else if (depthPct <= 80) {
+          statusText.className = 'text-sky-400 font-medium text-xs';
+          statusText.innerText = `🌊 ${t('status_breeze')} (${depthPct}%)`;
+        } else if (depthPct <= 100) {
+          statusText.className = 'text-amber-400 font-medium text-xs';
+          statusText.innerText = `⚠️ ${t('status_waves')} (${depthPct}%)`;
         } else {
-          statusText.innerText = `🚨 ${t('status_storm')} (+${formatMoneyCompact(total - budget)})`;
-          statusText.className = 'text-xs font-bold text-rose-500 animate-pulse';
+          statusText.className = 'text-rose-400 font-bold animate-pulse text-xs';
+          statusText.innerText = `🚨 ${t('status_storm')} (${depthPct}%)`;
         }
       }
 
@@ -2179,7 +2170,7 @@
         data.push(1);
       }
 
-      const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16', '#64748b'];
+      const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16', '#6366f1', '#64748b'];
 
       if (chartInstance) chartInstance.destroy();
 

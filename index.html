@@ -145,25 +145,29 @@
     </div>
   </div>
 
-  <!-- Modal: Partner einladen (Nach Setup) -->
+  <!-- Modal: Haushalts-Mitglieder einladen (Nach Setup - Punkt e) -->
   <div id="shareInviteModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto modal-safe">
     <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl my-auto text-center">
-      <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-2xl text-emerald-400">
-        🔗
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center text-sky-400">
+        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       </div>
       <div>
-        <h3 class="text-base font-bold text-white">Partner einladen</h3>
-        <p class="text-xs text-slate-400 mt-1">Sende diesen Link an deinen Partner. Er öffnet direkt euren gemeinsamen Haushalt!</p>
+        <h3 class="text-base font-bold text-white">Haushalts-Mitglieder einladen</h3>
+        <p class="text-xs text-slate-400 mt-1">Lade deinen Partner oder weitere Mitglieder ein. Der Link richtet das Smartphone sofort ein!</p>
       </div>
       <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-400 font-mono break-all text-left" id="shareInviteLinkText">
         -
       </div>
       <div class="space-y-2">
-        <button onclick="copyPartnerSetupLink()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white text-xs font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-sky-500/20 active:scale-95 transition">
-          <span>📋</span> Link kopieren & per WhatsApp teilen
+        <button onclick="shareHouseholdInvite()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 active:scale-95 transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          Einladung teilen (WhatsApp, Mail...)
         </button>
-        <button onclick="closeShareInviteModal()" class="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 text-xs">
-          Fertig / Später teilen
+        <button onclick="copyPartnerSetupLink()" class="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700/80 active:scale-95 transition">
+          Link kopieren
+        </button>
+        <button onclick="closeShareInviteModal()" class="w-full py-1.5 text-slate-500 hover:text-slate-300 text-xs transition">
+          Schließen
         </button>
       </div>
     </div>
@@ -278,7 +282,7 @@
       <div class="flex items-center justify-between text-xs text-slate-400">
         <span class="font-medium text-slate-300" id="currentMonthLabel">Aktueller Monat</span>
         <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium flex items-center gap-1" id="syncStatusBadge">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Supabase Live
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Live
         </span>
       </div>
 
@@ -374,11 +378,12 @@
           </svg>
         </div>
         <div>
-          <div class="font-bold text-white flex items-center gap-1.5">
-            Cloud-Synchronisation aktiv
+          <div class="font-bold text-white flex items-center gap-1.5 text-xs">
+            <span>Cloud-Sync:</span>
+            <span id="cloudSyncStatusText" class="text-emerald-400 font-semibold">active</span>
           </div>
           <div class="text-[10px] text-slate-400 flex items-center gap-1">
-            <span>🇩🇪</span> Hosted in Germany • 100% GDPR compliant
+            <span>🇩🇪</span> Hosting in Deutschland
           </div>
         </div>
       </div>
@@ -602,13 +607,16 @@
           </div>
         </div>
 
-        <!-- Supabase Cloud Sync Info & Haushalts-ID -->
+        <!-- Cloud-Sync & Haushalts-ID (Punkt c & d) -->
         <div class="pt-2 border-t border-slate-800 space-y-1.5">
           <div class="flex items-center justify-between">
-            <label id="lblSettingsCloudSync" class="text-[11px] font-semibold text-slate-300">Cloud-Sync (Supabase)</label>
-            <span class="text-[10px] text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Frankfurt (DSGVO)
+            <label id="lblSettingsCloudSync" class="text-[11px] font-semibold text-slate-300">Cloud-Sync</label>
+            <span id="settingsSyncBadge" class="text-[10px] text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> active
             </span>
+          </div>
+          <div class="text-[10px] text-slate-400 flex items-center gap-1">
+            <span>🇩🇪</span> Hosting in Deutschland
           </div>
           <div>
             <label class="text-[10px] text-slate-400 block mb-0.5">Gemeinsame Haushalts-ID</label>
@@ -616,12 +624,13 @@
           </div>
         </div>
 
-        <!-- Magischer Setup-Link für Partner kopieren -->
+        <!-- Haushalts-Mitglieder einladen (Punkt e) -->
         <div class="pt-2 border-t border-slate-800">
-          <button type="button" id="btnSettingsPartnerLink" onclick="copyPartnerSetupLink()" class="w-full py-2 px-3 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-300 text-xs font-bold flex items-center justify-center gap-1.5 transition">
-            <span>🔗</span> Einrichtungs-Link für Partner kopieren
+          <button type="button" id="btnSettingsPartnerLink" onclick="shareHouseholdInvite()" class="w-full py-2.5 px-3 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-300 text-xs font-bold flex items-center justify-center gap-2 transition active:scale-95 shadow-sm">
+            <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span id="btnSettingsPartnerLinkText">Haushalts-Mitglieder einladen</span>
           </button>
-          <p id="lblSettingsPartnerLinkHint" class="text-[9px] text-slate-400 text-center mt-1">Per WhatsApp / iMessage senden – richtet das Handy des Partners sofort ein!</p>
+          <p id="lblSettingsPartnerLinkHint" class="text-[9px] text-slate-400 text-center mt-1">Per WhatsApp, Mail oder Teilen-Menü senden</p>
         </div>
       </div>
 
@@ -729,9 +738,9 @@
         settings_users_label: "People in Household",
         settings_add_user_btn: "+ Add Person",
         settings_owner_label: "Default user on this device",
-        settings_cloud_sync_label: "Cloud Sync (Supabase)",
-        settings_partner_link_btn: "🔗 Copy Setup Link for Partner",
-        settings_partner_link_hint: "Send via WhatsApp / iMessage – sets up your partner's phone in 1 tap!",
+        settings_cloud_sync_label: "Cloud-Sync",
+        settings_partner_link_btn: "Haushalts-Mitglieder einladen",
+        settings_partner_link_hint: "Per WhatsApp, Mail oder Teilen-Menü senden",
         settings_save_btn: "Save Settings",
         toast_saved: "Saved",
         toast_deleted: "✓ Expense deleted",
@@ -798,9 +807,9 @@
         settings_users_label: "Personen im Haushalt",
         settings_add_user_btn: "+ Person hinzufügen",
         settings_owner_label: "Standard-Erfasser auf diesem Gerät",
-        settings_cloud_sync_label: "Cloud-Sync (Supabase)",
-        settings_partner_link_btn: "🔗 Einrichtungs-Link für Partner kopieren",
-        settings_partner_link_hint: "Per WhatsApp / iMessage senden – richtet das Handy des Partners sofort ein!",
+        settings_cloud_sync_label: "Cloud-Sync",
+        settings_partner_link_btn: "Haushalts-Mitglieder einladen",
+        settings_partner_link_hint: "Per WhatsApp, Mail oder Teilen-Menü senden",
         settings_save_btn: "Einstellungen speichern",
         toast_saved: "Gespeichert",
         toast_deleted: "✓ Ausgabe gelöscht",
@@ -867,9 +876,9 @@
         settings_users_label: "Membres du foyer",
         settings_add_user_btn: "+ Ajouter un membre",
         settings_owner_label: "Utilisateur par défaut sur cet appareil",
-        settings_cloud_sync_label: "Synchro Cloud (Supabase)",
-        settings_partner_link_btn: "🔗 Copier le lien pour le partenaire",
-        settings_partner_link_hint: "Envoyez par WhatsApp / iMessage – configure le smartphone du partenaire en 1 clic !",
+        settings_cloud_sync_label: "Cloud-Sync",
+        settings_partner_link_btn: "Inviter des membres du foyer",
+        settings_partner_link_hint: "Envoyez par WhatsApp, e-mail ou menu de partage",
         settings_save_btn: "Enregistrer les paramètres",
         toast_saved: "Enregistré",
         toast_deleted: "✓ Dépense supprimée",
@@ -979,29 +988,48 @@
       if (!container) return;
       const inputEl = document.getElementById('inputPurpose');
       const currentKey = inputEl ? inputEl.value : 'food';
+      const userColor = getUserColor(activePerson);
 
       container.innerHTML = CATEGORIES.map(c => {
         const fullLabel = t(c.i18nKey);
         const isActive = (currentKey === c.key);
         const textOnly = fullLabel.replace(/^[^\s]+\s*/, '');
+
+        const activeStyles = `
+          border: 2px solid ${userColor.hex};
+          background-color: ${userColor.bg || (userColor.hex + '22')};
+          color: #ffffff;
+          box-shadow: 0 0 12px ${userColor.hex}44;
+        `;
+        const inactiveStyles = `
+          border: 1px solid rgba(51, 65, 85, 0.7);
+          background-color: rgba(15, 23, 42, 0.75);
+          color: #94a3b8;
+        `;
+
         return `
           <button type="button" 
                   data-catkey="${escapeHtml(c.key)}" 
                   onclick="selectPurpose('${escapeHtml(c.key)}')" 
-                  class="purpose-btn py-2 px-1 rounded-xl text-[11px] font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5 ${isActive ? 'bg-sky-500/25 border-sky-400 text-sky-200 shadow-sm' : 'bg-slate-900 border-slate-700/80 text-slate-300 hover:border-slate-600'}">
-            <span class="text-base">${c.icon}</span>
+                  class="purpose-btn py-2.5 px-1 rounded-xl text-[11px] font-bold transition-all duration-150 active:scale-95 flex flex-col items-center justify-center gap-1"
+                  style="${isActive ? activeStyles : inactiveStyles}">
+            <span class="text-base drop-shadow-sm">${c.icon}</span>
             <span class="truncate max-w-[95px] leading-tight text-center">${escapeHtml(textOnly)}</span>
           </button>
         `;
       }).join('');
+
+      const labelEl = document.getElementById('selectedCategoryLabel');
+      if (labelEl) {
+        const cat = CATEGORIES.find(c => c.key === currentKey) || CATEGORIES[0];
+        labelEl.innerText = t(cat.i18nKey);
+        labelEl.style.color = userColor.hex;
+      }
     }
 
     function selectPurpose(key) {
       const input = document.getElementById('inputPurpose');
       if (input) input.value = key;
-      const cat = CATEGORIES.find(c => c.key === key) || CATEGORIES[0];
-      const selectedCatLabel = document.getElementById('selectedCategoryLabel');
-      if (selectedCatLabel) selectedCatLabel.innerText = t(cat.i18nKey);
       renderCategoryButtons();
     }
 
@@ -1131,8 +1159,8 @@
       if (sOwnerLbl) sOwnerLbl.innerText = t('settings_owner_label');
       const sCloudSyncLbl = document.getElementById('lblSettingsCloudSync');
       if (sCloudSyncLbl) sCloudSyncLbl.innerText = t('settings_cloud_sync_label');
-      const sPartnerBtn = document.getElementById('btnSettingsPartnerLink');
-      if (sPartnerBtn) sPartnerBtn.innerHTML = `<span>🔗</span> ${t('settings_partner_link_btn')}`;
+      const sPartnerBtnText = document.getElementById('btnSettingsPartnerLinkText');
+      if (sPartnerBtnText) sPartnerBtnText.innerText = t('settings_partner_link_btn');
       const sPartnerHint = document.getElementById('lblSettingsPartnerLinkHint');
       if (sPartnerHint) sPartnerHint.innerText = t('settings_partner_link_hint');
       const sSaveBtn = document.getElementById('btnSettingsSave');
@@ -1561,6 +1589,28 @@
       return `${baseUrl}#setup?hid=${hidParam}&h=${hName}&b=${budget}&users=${userList}&owner=${ownerParam}${langParam}${currParam}`;
     }
 
+    async function shareHouseholdInvite() {
+      const shareUrl = buildPartnerSetupUrl();
+      const shareData = {
+        title: `${t('app_title')} - ${config.householdName || t('household')}`,
+        text: `Komm in unseren Haushalt auf Logbuch:
+`,
+        url: shareUrl
+      };
+
+      if (navigator.share) {
+        try {
+          await navigator.share(shareData);
+          return;
+        } catch (err) {
+          if (err.name === 'AbortError') return;
+          console.warn('Native share error, falling back to copy', err);
+        }
+      }
+
+      copyPartnerSetupLink();
+    }
+
     function copyPartnerSetupLink() {
       const shareUrl = buildPartnerSetupUrl();
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1862,11 +1912,32 @@
           render();
         }
 
+        const syncStatusText = document.getElementById('cloudSyncStatusText');
+        if (syncStatusText) {
+          syncStatusText.innerText = 'active';
+          syncStatusText.className = 'text-emerald-400 font-semibold';
+        }
+        const sBadge = document.getElementById('settingsSyncBadge');
+        if (sBadge) {
+          sBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> active';
+          sBadge.className = 'text-[10px] text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full';
+        }
+
         if (showToastNotice) {
           showToast(t('toast_sync_success'));
         }
       } catch(e) {
         console.warn('syncWithSupabase error:', e);
+        const syncStatusText = document.getElementById('cloudSyncStatusText');
+        if (syncStatusText) {
+          syncStatusText.innerText = 'inactive';
+          syncStatusText.className = 'text-slate-400 font-semibold';
+        }
+        const sBadge = document.getElementById('settingsSyncBadge');
+        if (sBadge) {
+          sBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> inactive';
+          sBadge.className = 'text-[10px] text-slate-400 font-bold flex items-center gap-1 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full';
+        }
       } finally {
         isSyncing = false;
         if (iconBottom) iconBottom.classList.remove('animate-spin');
@@ -2315,6 +2386,13 @@
       if (modal) modal.classList.add('hidden');
     }
 
+    function getIntervalDivisor(interval) {
+      if (interval === 'yearly') return 12;
+      if (interval === 'half_yearly' || interval === 'halfyearly') return 2;
+      if (interval === 'quarterly') return 4;
+      return 1; // monthly
+    }
+
     function renderPlannerLists() {
       // 1. Einnahmen
       const incList = document.getElementById('plannerIncomesList');
@@ -2325,7 +2403,9 @@
             <input type="number" step="10" value="${inc.amount}" oninput="updatePlannerIncome(${i}, 'amount', this.value)" class="w-24 bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-emerald-400 font-bold text-right">
             <select onchange="updatePlannerIncome(${i}, 'interval', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-lg px-1.5 py-1 text-[11px] text-slate-300">
               <option value="monthly" ${inc.interval === 'monthly' ? 'selected' : ''}>Monatl.</option>
-              <option value="yearly" ${inc.interval === 'yearly' ? 'selected' : ''}>Jährl.</option>
+              <option value="quarterly" ${inc.interval === 'quarterly' ? 'selected' : ''}>Quartal (/4)</option>
+              <option value="half_yearly" ${inc.interval === 'half_yearly' ? 'selected' : ''}>Halbjährl. (/2)</option>
+              <option value="yearly" ${inc.interval === 'yearly' ? 'selected' : ''}>Jährl. (/12)</option>
             </select>
             <button type="button" onclick="removePlannerIncome(${i})" class="text-slate-500 hover:text-rose-400 p-1">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2338,18 +2418,15 @@
       const fixList = document.getElementById('plannerFixedCostsList');
       if (fixList && config.budgetPlan) {
         fixList.innerHTML = config.budgetPlan.fixedCosts.map((fix, i) => {
-          let monthlyAmount = fix.amount;
-          if (fix.interval === 'yearly') monthlyAmount = fix.amount / 12;
-          if (fix.interval === 'quarterly') monthlyAmount = fix.amount / 3;
-
           return `
           <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 p-2 rounded-xl text-xs">
             <input type="text" value="${escapeHtml(fix.name)}" oninput="updatePlannerFixedCost(${i}, 'name', this.value)" placeholder="z. B. KFZ, Miete" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-white">
             <input type="number" step="5" value="${fix.amount}" oninput="updatePlannerFixedCost(${i}, 'amount', this.value)" class="w-24 bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-rose-400 font-bold text-right">
             <select onchange="updatePlannerFixedCost(${i}, 'interval', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-lg px-1.5 py-1 text-[11px] text-slate-300">
               <option value="monthly" ${fix.interval === 'monthly' ? 'selected' : ''}>Monatl.</option>
+              <option value="quarterly" ${fix.interval === 'quarterly' ? 'selected' : ''}>Quartal (/4)</option>
+              <option value="half_yearly" ${fix.interval === 'half_yearly' ? 'selected' : ''}>Halbjährl. (/2)</option>
               <option value="yearly" ${fix.interval === 'yearly' ? 'selected' : ''}>Jährl. (/12)</option>
-              <option value="quarterly" ${fix.interval === 'quarterly' ? 'selected' : ''}>Quartal (/3)</option>
             </select>
             <button type="button" onclick="removePlannerFixedCost(${i})" class="text-slate-500 hover:text-rose-400 p-1">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2421,16 +2498,13 @@
 
       let totalIncomeMonthly = 0;
       config.budgetPlan.incomes.forEach(inc => {
-        let val = inc.amount || 0;
-        if (inc.interval === 'yearly') val = val / 12;
+        const val = (inc.amount || 0) / getIntervalDivisor(inc.interval);
         totalIncomeMonthly += val;
       });
 
       let totalFixedCostsMonthly = 0;
       config.budgetPlan.fixedCosts.forEach(fix => {
-        let val = fix.amount || 0;
-        if (fix.interval === 'yearly') val = val / 12;
-        if (fix.interval === 'quarterly') val = val / 3;
+        const val = (fix.amount || 0) / getIntervalDivisor(fix.interval);
         totalFixedCostsMonthly += val;
       });
 
@@ -2457,16 +2531,13 @@
       calculatePlannerSummary();
       let totalIncomeMonthly = 0;
       config.budgetPlan.incomes.forEach(inc => {
-        let val = inc.amount || 0;
-        if (inc.interval === 'yearly') val = val / 12;
+        const val = (inc.amount || 0) / getIntervalDivisor(inc.interval);
         totalIncomeMonthly += val;
       });
 
       let totalFixedCostsMonthly = 0;
       config.budgetPlan.fixedCosts.forEach(fix => {
-        let val = fix.amount || 0;
-        if (fix.interval === 'yearly') val = val / 12;
-        if (fix.interval === 'quarterly') val = val / 3;
+        const val = (fix.amount || 0) / getIntervalDivisor(fix.interval);
         totalFixedCostsMonthly += val;
       });
 
@@ -2483,13 +2554,7 @@
       saveHouseholdToSupabase();
     }
 
-    function selectPurpose(key, fullName, btn) {
-      document.getElementById('inputPurpose').value = key;
-      document.querySelectorAll('.purpose-btn').forEach(b => {
-        b.className = "purpose-btn py-2 px-1 rounded-xl text-[11px] font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5 bg-slate-900 border-slate-700 text-slate-300 hover:border-slate-600";
-      });
-      btn.className = "purpose-btn py-2 px-1 rounded-xl text-[11px] font-semibold border transition active:scale-95 flex flex-col items-center justify-center gap-0.5 bg-sky-500/25 border-sky-400 text-sky-200";
-    }
+
 
     function toggleDeviceOwner() {
       if (!config.users || config.users.length === 0) return;
@@ -2539,11 +2604,14 @@
 
       const hidInput = document.getElementById('settingsHouseholdId');
       if (hidInput) hidInput.value = config.householdId || '';
+
+      renderCategoryButtons();
     }
 
     function setActivePerson(name) {
       activePerson = name;
       updateHouseholdUI();
+      renderCategoryButtons();
     }
 
     function openSettingsModal() {
@@ -2695,6 +2763,26 @@
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         syncWithSupabase(false);
+      }
+    });
+    window.addEventListener('online', () => {
+      const syncStatusText = document.getElementById('cloudSyncStatusText');
+      if (syncStatusText) {
+        syncStatusText.innerText = 'active';
+        syncStatusText.className = 'text-emerald-400 font-semibold';
+      }
+      syncWithSupabase(false);
+    });
+    window.addEventListener('offline', () => {
+      const syncStatusText = document.getElementById('cloudSyncStatusText');
+      if (syncStatusText) {
+        syncStatusText.innerText = 'inactive';
+        syncStatusText.className = 'text-slate-400 font-semibold';
+      }
+      const sBadge = document.getElementById('settingsSyncBadge');
+      if (sBadge) {
+        sBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> inactive';
+        sBadge.className = 'text-[10px] text-slate-400 font-bold flex items-center gap-1 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full';
       }
     });
   </script>

@@ -132,6 +132,7 @@
       </button>
     </div>
   </div>
+</div>
 
   <!-- Header: Logbuch - Haushalt -->
   <header class="border-b border-slate-800 bg-slate-900/90 sticky top-0 z-40 backdrop-blur-md px-4 py-3">
@@ -320,22 +321,15 @@
       <p id="dbCardDesc" class="text-slate-400 text-[11px] leading-relaxed">
         DSGVO-konform in Frankfurt gehostet. Deine Ausgaben werden in Echtzeit zwischen allen Smartphones synchronisiert.
       </p>
-      <div class="grid grid-cols-2 gap-2">
-        <button onclick="syncWithSupabase(true)" id="btnManualSyncNow" class="py-2.5 px-3 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-400/30 font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div>
+        <button onclick="syncWithSupabase(true)" id="btnManualSyncNow" class="w-full py-2.5 px-3 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-400/30 font-semibold flex items-center justify-center gap-2 active:scale-95 transition">
+          <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
             <path d="M3 3v5h5"/>
             <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
             <path d="M16 21h5v-5"/>
           </svg>
           <span id="btnSyncNowText">Jetzt synchronisieren</span>
-        </button>
-        <button onclick="shareOrExport()" class="py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 font-semibold flex items-center justify-center gap-1.5 active:scale-95 transition">
-          <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-          </svg>
-          <span id="btnExportCsvText">CSV Export</span>
         </button>
       </div>
       <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-400">
@@ -436,7 +430,7 @@
           </div>
           <div>
             <label class="text-[10px] text-slate-400 block mb-0.5">Haushalts-ID (Cloud-Schlüssel)</label>
-            <input type="text" id="settingsHouseholdId" readonly onclick="this.select()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-300 font-mono select-all">
+            <input type="text" id="settingsHouseholdId" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-sky-400 font-mono focus:border-sky-400 focus:outline-none" placeholder="z. B. hh_home123">
           </div>
           <p id="lblSettingsCloudSyncDesc" class="text-[10px] text-slate-500 leading-tight">
             Eure gemeinsame ID. Alle Geräte mit dieser ID synchronisieren Buchungen automatisch in Echtzeit.
@@ -451,13 +445,7 @@
           <p id="lblSettingsPartnerLinkHint" class="text-[9px] text-slate-400 text-center mt-1">Per WhatsApp / iMessage senden – richtet das Handy des Partners sofort ein!</p>
         </div>
 
-        <!-- Lokales CSV Backup -->
-        <div class="pt-2 border-t border-slate-800">
-          <button type="button" id="btnSettingsBackup" onclick="shareOrExport()" class="w-full py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
-            <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-            Lokale Einträge als CSV exportieren
-          </button>
-        </div>
+
       </div>
 
       <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
@@ -1312,6 +1300,10 @@
       }
       config.householdName = hName;
       config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
+      const hIdInput = document.getElementById('settingsHouseholdId');
+      if (hIdInput && hIdInput.value.trim()) {
+        config.householdId = hIdInput.value.trim();
+      }
 
       config.users = wizardTempUsers.map((u, i) => ({
         id: `u_${i+1}`,
@@ -1785,15 +1777,15 @@
       }
 
       const countEl = document.getElementById('recentReceiptsCount');
-      if (countEl) countEl.innerText = `${currentMonthExpenses.length} ${t('entries_count')}`;
+      if (countEl) countEl.innerText = `${expenses.length} ${t('entries_count')}`;
 
       const outboxIds = new Set(outbox.map(item => (item.entry ? item.entry.id : item.id)));
       const listEl = document.getElementById('recentReceiptsList');
       if (listEl) {
-        if (currentMonthExpenses.length === 0) {
+        if (expenses.length === 0) {
           listEl.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs italic">${t('no_expenses')}</div>`;
         } else {
-          listEl.innerHTML = currentMonthExpenses.slice(0, 20).map(exp => {
+          listEl.innerHTML = expenses.slice(0, 30).map(exp => {
             const isPending = outboxIds.has(exp.id);
             const color = getUserColor(exp.person);
             const locPurpose = getLocalizedCategory(exp.purpose);
@@ -2067,6 +2059,10 @@
 
       config.householdName = hName;
       config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
+      const hIdInput = document.getElementById('settingsHouseholdId');
+      if (hIdInput && hIdInput.value.trim()) {
+        config.householdId = hIdInput.value.trim();
+      }
 
       config.users = config.users.map((u, i) => ({
         id: u.id || `u_${i+1}`,
@@ -2148,9 +2144,21 @@
       })[m]);
     }
 
-    // App Start
+    // App Start & Lifecycle Sync
     document.addEventListener('DOMContentLoaded', () => {
       init();
+    });
+    window.addEventListener('load', () => {
+      syncWithSupabase(false);
+      subscribeToRealtime();
+    });
+    window.addEventListener('pageshow', () => {
+      syncWithSupabase(false);
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        syncWithSupabase(false);
+      }
     });
 </script>
 </body>

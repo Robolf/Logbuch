@@ -1023,7 +1023,7 @@
         while (outbox.length > 0) {
           const item = outbox[0];
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 3500);
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
 
           try {
             await fetch(config.googleWebhook, {
@@ -1072,9 +1072,9 @@
       // 1. Erst eventuell wartende Offline-Einträge hochladen
       drainOutbox();
 
-      // 2. Striktes 2,5-Sekunden-Timeout! Kein endloses Drehen des Zahnrads!
+      // 2. Ausreichender Timeout für Google Apps Script Kaltstart (12s)
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2500);
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
       try {
         let reqUrl = config.googleWebhook;

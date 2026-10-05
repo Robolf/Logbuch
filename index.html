@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="de" class="h-full bg-slate-950 text-slate-100">
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title id="pageTitle">Logbuch - Haushalt</title>
+  <title id="pageTitle">Logbook - Household</title>
   
   <!-- PWA Meta Tags & Icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Logbuch">
+  <meta name="apple-mobile-web-app-title" content="Logbook">
   <meta name="theme-color" content="#020617">
   
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -30,7 +30,7 @@
       -webkit-appearance: none;
       margin: 0;
     }
-:root {
+    :root {
       --sat: env(safe-area-inset-top, 0px);
       --sab: env(safe-area-inset-bottom, 0px);
     }
@@ -66,21 +66,21 @@
 </head>
 <body class="h-full flex flex-col justify-between font-sans antialiased selection:bg-sky-500 selection:text-white pb-safe">
 
-  <!-- Toast Benachrichtigung -->
-  <div id="toastNotification" class="fixed top-[calc(env(safe-area-inset-top,0px)+0.75rem)] left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-2xl bg-slate-900/95 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-sky-400/30 backdrop-blur-xl transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-4">
+  <!-- Toast Benachrichtigung (immer im Vordergrund z-[9999]) -->
+  <div id="toastNotification" class="fixed top-[calc(env(safe-area-inset-top,0px)+0.75rem)] left-1/2 -translate-x-1/2 z-[9999] px-4 py-2 rounded-2xl bg-slate-900/95 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-sky-400/30 backdrop-blur-xl transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-4">
     <span class="text-sm text-sky-400" id="toastIcon">✓</span>
-    <span id="toastMessage">Gespeichert</span>
+    <span id="toastMessage">Saved</span>
   </div>
 
-  <!-- Wizard Modal: Haushalt & Personen einrichten (Erster Start) -->
+  <!-- Wizard Modal: Setup Household & People (Initial Start) -->
   <div id="setupWizardModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 hidden overflow-y-auto modal-safe">
     <div class="glass-card max-w-sm w-full rounded-3xl p-6 shadow-2xl border border-slate-700 space-y-4 my-auto">
       <div class="text-center space-y-2">
         <div class="w-14 h-14 mx-auto rounded-2xl bg-sky-500/15 text-sky-400 flex items-center justify-center border border-sky-400/20 text-2xl shadow">
           ⛵
         </div>
-        <h3 id="wizardTitle" class="text-base font-extrabold text-white tracking-tight">Neuen Haushalt anlegen</h3>
-        <p id="wizardSubtitle" class="text-xs text-slate-400">Richte dein persönliches Haushaltsbuch in 10 Sekunden ein.</p>
+        <h3 id="wizardTitle" class="text-base font-extrabold text-white tracking-tight">Create Household or Project</h3>
+        <p id="wizardSubtitle" class="text-xs text-slate-400">Set up your shared logbook in 10 seconds.</p>
       </div>
 
       <div class="space-y-3 pt-1">
@@ -105,94 +105,123 @@
           </div>
         </div>
 
-        <!-- 1. Haushaltsname -->
+        <!-- 1. Household Name -->
         <div>
-          <label id="lblWizardHouseholdName" class="text-[11px] font-bold text-slate-300 block mb-1">Name des Haushalts</label>
-          <input type="text" id="wizardHouseholdName" placeholder="z. B. Unser Haushalt" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+          <label id="lblWizardHouseholdName" class="text-[11px] font-bold text-slate-300 block mb-1">Household or Project Name</label>
+          <input type="text" id="wizardHouseholdName" placeholder="e.g. Our Home, Bachelor Party, Vacation" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
         </div>
 
-        <!-- 2. Monatliches Budget -->
+        <!-- 2. Monthly Available Budget (Optional) -->
         <div>
-          <label id="lblWizardMonthlyBudget" class="text-[11px] font-bold text-slate-300 block mb-1">Monatliches Soll-Budget</label>
-          <input type="number" step="10" id="wizardMonthlyBudget" placeholder="1500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+          <label id="lblWizardMonthlyBudget" class="text-[11px] font-bold text-slate-300 block mb-1">Monthly Available Budget (optional)</label>
+          <input type="number" step="10" id="wizardMonthlyBudget" placeholder="e.g. 1500 (optional)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
         </div>
 
-        <!-- 3. Personen anlegen -->
+        <!-- 3. People in Household -->
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <label id="lblWizardUsers" class="text-[11px] font-bold text-slate-300">Personen im Haushalt</label>
+            <label id="lblWizardUsers" class="text-[11px] font-bold text-slate-300">People in Household / Group</label>
             <button type="button" id="btnWizardAddUser" onclick="addWizardUser()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold flex items-center gap-1">
-              + Person hinzufügen
+              + Add Person
             </button>
           </div>
           <div id="wizardUsersContainer" class="space-y-2 max-h-40 overflow-y-auto pr-1">
-            <!-- Dynamisch gefüllt mit Farbpunkten -->
+            <!-- Dynamically populated -->
           </div>
         </div>
 
-        <!-- 4. Wer bedient dieses Smartphone? -->
+        <!-- 4. Who owns this phone? -->
         <div class="pt-2 border-t border-slate-800">
-          <label id="lblWizardOwner" class="text-[11px] font-bold text-slate-300 block mb-1">Wem gehört dieses Smartphone?</label>
+          <label id="lblWizardOwner" class="text-[11px] font-bold text-slate-300 block mb-1">Who owns this smartphone?</label>
           <div id="wizardOwnerOptions" class="grid grid-cols-2 gap-1.5">
-            <!-- Dynamisch gefüllt -->
+            <!-- Dynamically populated -->
           </div>
         </div>
 
         <button id="btnWizardStart" onclick="finishSetupWizard()" class="w-full mt-2 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 text-white font-extrabold rounded-xl text-xs transition shadow-lg shadow-sky-500/20 active:scale-[0.98]">
-          Haushalt jetzt anlegen 🚀
+          Create & Start 🚀
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Haushalts-Mitglieder einladen (Nach Setup - Punkt e) -->
+  <!-- Modal: Invite Members (Generic, gender-neutral, all group types) -->
   <div id="shareInviteModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto modal-safe">
     <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl my-auto text-center">
       <div class="w-12 h-12 mx-auto rounded-2xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center text-sky-400">
         <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       </div>
       <div>
-        <h3 class="text-base font-bold text-white">Haushalts-Mitglieder einladen</h3>
-        <p class="text-xs text-slate-400 mt-1">Lade deinen Partner oder weitere Mitglieder ein. Der Link richtet das Smartphone sofort ein!</p>
+        <h3 class="text-base font-bold text-white" id="shareInviteTitle">Invite Members</h3>
+        <p class="text-xs text-slate-400 mt-1" id="shareInviteSubtitle">Invite members to your household: Share expenses and track your budget together.</p>
       </div>
       <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-[11px] text-slate-400 font-mono break-all text-left" id="shareInviteLinkText">
         -
       </div>
       <div class="space-y-2">
-        <button onclick="shareHouseholdInvite()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 active:scale-95 transition">
+        <button onclick="shareHouseholdInvite()" id="btnShareInviteNative" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-sky-500/20 active:scale-95 transition">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-          Einladung teilen (WhatsApp, Mail...)
+          <span id="btnShareInviteNativeText">Share Invite (WhatsApp, Mail...)</span>
         </button>
-        <button onclick="copyPartnerSetupLink()" class="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700/80 active:scale-95 transition">
-          Link kopieren
+        <button onclick="copyPartnerSetupLink()" id="btnShareInviteCopy" class="w-full py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-semibold border border-slate-700/80 active:scale-95 transition">
+          <span id="btnShareInviteCopyText">Copy Link</span>
         </button>
-        <button onclick="closeShareInviteModal()" class="w-full py-1.5 text-slate-500 hover:text-slate-300 text-xs transition">
-          Schließen
+        <button onclick="closeShareInviteModal()" id="btnShareInviteClose" class="w-full py-1.5 text-slate-500 hover:text-slate-300 text-xs transition">
+          <span id="btnShareInviteCloseText">Close</span>
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Header: Logbuch - Haushalt (mit Safe-Area Inset für iPhone Notch & Dynamic Island - Punkt A) -->
+  <!-- Modal: Invited Member Onboarding (Wer bist du auf diesem Gerät?) -->
+  <div id="inviteOnboardingModal" class="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md hidden flex items-center justify-center p-4 overflow-y-auto modal-safe">
+    <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl my-auto text-center">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-sky-500/15 border border-sky-400/30 flex items-center justify-center text-sky-400 text-2xl">
+        👋
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-white" id="onboardingTitle">Welcome to the Household!</h3>
+        <p class="text-xs text-slate-400 mt-1" id="onboardingSubtitle">You were invited! Who are you on this smartphone?</p>
+      </div>
+      
+      <!-- Existing member options -->
+      <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1" id="onboardingUserOptions">
+        <!-- Dynamically filled with member chips -->
+      </div>
+
+      <!-- Option: Neuer Name -->
+      <div class="pt-2.5 border-t border-slate-800 text-left space-y-1.5">
+        <label class="text-[10px] text-slate-400 block font-semibold" id="lblOnboardingNewPerson">Or enter your own name:</label>
+        <div class="flex items-center gap-1.5">
+          <input type="text" id="inputOnboardingNewName" placeholder="e.g. Maria" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+          <button type="button" onclick="submitOnboardingNewUser()" class="px-3.5 py-2 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-xl text-xs font-bold shrink-0 transition active:scale-95 shadow-sm" id="btnOnboardingAdd">
+            Join
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header: Logbook - Household -->
   <header class="border-b border-slate-800 bg-slate-900/95 sticky top-0 z-40 backdrop-blur-md px-4 header-safe">
     <div class="max-w-md mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2.5">
-        <img src="apple-touch-icon.png" alt="Logbuch" class="w-8 h-8 rounded-xl border border-sky-400/20 shadow-sm object-cover">
+        <img src="apple-touch-icon.png" alt="Logbook" class="w-8 h-8 rounded-xl border border-sky-400/20 shadow-sm object-cover">
         <div>
           <div class="flex items-center gap-1.5">
             <h1 class="text-sm font-bold text-white tracking-tight leading-tight" id="headerTitleText">Logbook</h1>
-            <!-- Klickbarer Switcher direkt im Header mit Benutzer-Farbe -->
-            <button onclick="toggleDeviceOwner()" id="headerOwnerBadge" class="text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 transition active:scale-95" title="Tippen zum Wechseln">
+            <!-- Clickable owner badge in header -->
+            <button onclick="toggleDeviceOwner()" id="headerOwnerBadge" class="text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 transition active:scale-95" title="Tap to switch user">
               User
             </button>
           </div>
-          <p class="text-[10px] text-slate-400" id="headerHouseholdSubtitle">Haushalt</p>
+          <p class="text-[10px] text-slate-400" id="headerHouseholdSubtitle">Household</p>
         </div>
       </div>
       
       <div class="flex items-center gap-2">
-        <!-- 1. Fixkosten & Budget-Rechner Button (Punkt h) -->
-        <button onclick="openPlannerModal()" id="btnOpenPlanner" class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs transition active:scale-95 flex items-center justify-center shrink-0 shadow-sm" title="Fixkosten & Budget-Rechner">
+        <!-- 1. Fixkosten & Budget-Rechner Button -->
+        <button onclick="openPlannerModal()" id="btnOpenPlanner" class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs transition active:scale-95 flex items-center justify-center shrink-0 shadow-sm" title="Budget & Fixed Costs Calculator">
           <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="2" y="4" width="20" height="16" rx="2"/>
             <line x1="6" y1="8" x2="6" y2="8"/>
@@ -204,8 +233,8 @@
           </svg>
         </button>
 
-        <!-- 2. Gesamtes Logbuch aller Zeiten & Excel Export Button (Punkt f) -->
-        <button onclick="openHistoryModal()" id="btnOpenHistory" class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs transition active:scale-95 flex items-center justify-center shrink-0 shadow-sm" title="Gesamtes Logbuch & Excel Export">
+        <!-- 2. Download Historical Logbook (CSV / Excel) -->
+        <button onclick="openHistoryModal()" id="btnOpenHistory" class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs transition active:scale-95 flex items-center justify-center shrink-0 shadow-sm" title="Download Historical Logbook">
           <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
@@ -213,7 +242,7 @@
         </button>
 
         <!-- 3. Settings Button -->
-        <button onclick="openSettingsModal()" class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs transition active:scale-95 flex items-center justify-center shrink-0 shadow-sm" title="Einstellungen">
+        <button onclick="openSettingsModal()" class="w-10 h-10 min-w-[40px] min-h-[40px] rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 border border-slate-700/80 text-xs transition active:scale-95 flex items-center justify-center shrink-0 shadow-sm" title="Settings">
           <svg class="w-4 h-4 text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -226,12 +255,12 @@
   <!-- Main Container -->
   <main class="max-w-md mx-auto px-4 py-3.5 w-full flex-1 space-y-3.5">
 
-    <!-- 1. CARD: AUSGABE ERFASSEN (HAUPTFOKUS BEIM APP-START) -->
+    <!-- 1. CARD: LOG EXPENSE -->
     <div class="glass-card rounded-2xl p-4 shadow-xl border border-slate-800 space-y-3">
       <div class="flex items-center justify-between">
         <h2 id="cardAddTitle" class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
           <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-          Ausgabe erfassen
+          Log Expense
         </h2>
         <!-- Dynamischer Personen-Wähler -->
         <div id="formPersonSelectors" class="flex flex-wrap gap-1">
@@ -240,63 +269,64 @@
       </div>
 
       <form id="expenseForm" onsubmit="addExpense(event)" class="space-y-3">
-        <!-- Betrag -->
+        <!-- Amount -->
         <div>
           <div class="relative">
-            <input type="number" step="0.01" inputmode="decimal" id="inputAmount" placeholder="0,00" required class="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl px-4 py-3 text-3xl font-extrabold text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 text-right pr-11 tracking-tight">
+            <input type="number" step="0.01" inputmode="decimal" id="inputAmount" placeholder="0.00" required class="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl px-4 py-3 text-3xl font-extrabold text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 text-right pr-11 tracking-tight">
             <span id="currencySymbolDisplay" class="absolute right-4 top-3.5 text-2xl font-bold text-slate-400">€</span>
           </div>
         </div>
 
-        <!-- Kategorie (Pflicht, Zweck / Lebensbereich - Punkt B) -->
+        <!-- Category -->
         <div>
           <div class="flex justify-between items-center mb-1.5">
-            <label id="lblCategory" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kategorie</label>
-            <span id="selectedCategoryLabel" class="text-[10px] text-sky-400 font-bold">🍏 Essen & Trinken</span>
+            <label id="lblCategory" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
+            <span id="selectedCategoryLabel" class="text-[10px] text-sky-400 font-bold">🍏 Food & Drinks</span>
           </div>
           <div class="grid grid-cols-3 gap-1.5" id="purposeButtonsGrid">
-            <!-- Dynamisch gerendert: 3x3 Raster der 9 Lebensbereiche -->
+            <!-- 9 purpose buttons -->
           </div>
           <input type="hidden" id="inputPurpose" value="food">
         </div>
 
-        <!-- Optionale Notiz / Geschäft (Punkt B) -->
+        <!-- Optional Note / Store -->
         <div>
-          <label id="lblMerchant" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Notiz / Geschäft (optional)</label>
+          <label id="lblMerchant" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Note / Store (optional)</label>
           <div>
-            <input type="text" id="inputMerchant" placeholder="z. B. Rewe, Zara, Tanken, Rossmann (optional)" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400">
+            <input type="text" id="inputMerchant" placeholder="e.g. Walmart, Zara, Gas, Pharmacy (optional)" class="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400">
           </div>
           <input type="date" id="inputDate" class="hidden">
         </div>
 
-        <!-- Speichern Button -->
+        <!-- Save Button -->
         <button type="submit" id="btnSubmitExpense" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-extrabold rounded-xl text-sm transition shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2 active:scale-[0.98]">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          <span id="btnSubmitExpenseText">Ausgabe buchen</span>
+          <span id="btnSubmitExpenseText">Log Expense</span>
         </button>
       </form>
     </div>
 
-    <!-- 2. CARD: STATUS & WASSERLINIEN-BUDGET -->
+    <!-- 2. CARD: STATUS & WATERLINE BUDGET -->
     <div class="glass-card rounded-2xl p-3.5 shadow-xl border border-slate-800 space-y-2">
       <div class="flex items-center justify-between text-xs text-slate-400">
-        <span class="font-medium text-slate-300" id="currentMonthLabel">Aktueller Monat</span>
+        <span class="font-medium text-slate-300" id="currentMonthLabel">Current Month</span>
         <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-medium flex items-center gap-1" id="syncStatusBadge">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Cloud Live
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="syncStatusBadgeText">Cloud-Sync: active</span>
         </span>
       </div>
 
       <div class="flex items-baseline justify-between">
         <div>
-          <span class="text-2xl font-extrabold text-white" id="totalExpensesMonth">0,00 €</span>
-          <span id="spentSubtitle" class="text-xs text-slate-400 ml-1">ausgegeben</span>
+          <span class="text-2xl font-extrabold text-white" id="totalExpensesMonth">0.00 €</span>
+          <span id="spentSubtitle" class="text-xs text-slate-400 ml-1">spent</span>
         </div>
         <div class="text-right text-xs text-slate-400">
-          <span id="targetBudgetLabel">Soll-Budget:</span> <span class="font-bold text-slate-200" id="targetBudgetDisplay">1.500 €</span>
+          <span id="targetBudgetLabel">Available Budget:</span> <span class="font-bold text-slate-200" id="targetBudgetDisplay">1,500 €</span>
         </div>
       </div>
 
-      <!-- Schlanke Wasserlinien-Leiste mit Segelboot (Punkt C) -->
+      <!-- Waterline Progress Bar with Sailboat -->
       <div class="space-y-1.5 pt-2">
         <div class="relative w-full h-3 bg-slate-900 rounded-full overflow-visible border border-slate-700/80 shadow-inner">
           <div id="waterProgressBar" class="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-emerald-500 to-sky-500" style="width: 0%;"></div>
@@ -305,26 +335,28 @@
           </div>
         </div>
         <div class="flex justify-between items-center text-xs text-slate-400 pt-0.5">
-          <span id="nauticalStatusText" class="text-emerald-400 font-medium">⛵ Ruhige See (0%)</span>
-          <span id="waterFreeboardLabel" class="text-slate-300 font-bold">1.500 € Puffer</span>
+          <span id="nauticalStatusText" class="text-emerald-400 font-medium">⛵ Calm Seas (0%)</span>
+          <span id="waterFreeboardLabel" class="text-slate-300 font-bold">1,500 € buffer left</span>
         </div>
       </div>
 
-      <!-- Personen-Aufteilung -->
-      <div class="pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
-        <span class="text-slate-400" id="lblSplit">Verteilung:</span>
-        <div id="userSplitDisplay" class="flex items-center gap-2 font-medium">
-          <!-- Dynamisch -->
+      <!-- Person Distribution (Responsive flex-wrap for 2 to 15+ participants) -->
+      <div class="pt-2.5 border-t border-slate-800/80 space-y-1.5 text-xs">
+        <div class="flex items-center justify-between text-slate-400">
+          <span class="font-bold text-[10px] text-slate-400 uppercase tracking-wider" id="lblSplit">Distribution:</span>
+        </div>
+        <div id="userSplitDisplay" class="flex flex-wrap items-center gap-1.5 font-medium">
+          <!-- Dynamically populated chips -->
         </div>
       </div>
     </div>
 
-    <!-- 3. CARD: KATEGORIEN-CHART -->
+    <!-- 3. CARD: CATEGORY BREAKDOWN -->
     <div class="glass-card rounded-2xl p-4 shadow-xl border border-slate-800 space-y-3">
       <div class="flex items-center justify-between">
         <h3 id="chartCardTitle" class="text-xs font-bold text-slate-200 flex items-center gap-1.5 uppercase tracking-wider">
           <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-          Wo bleibt das Geld?
+          Where is our money going?
         </h3>
       </div>
       
@@ -333,43 +365,43 @@
       </div>
 
       <div id="categoryBreakdownList" class="space-y-1.5 text-xs pt-1 border-t border-slate-800/60 max-h-36 overflow-y-auto">
-        <!-- Dynamisch -->
+        <!-- Dynamically populated -->
       </div>
     </div>
 
-    <!-- 4. CARD: ERFASSTE BELEGE (MIT LÖSCHEN & BESTÄTIGUNG - Punkt e) -->
+    <!-- 4. CARD: RECORDED RECEIPTS (WITH CONFIRMATION DELETE) -->
     <div class="glass-card rounded-2xl p-4 shadow-xl border border-slate-800 space-y-3">
       <div class="flex items-center justify-between">
         <h3 id="receiptsCardTitle" class="text-xs font-bold text-slate-200 uppercase tracking-wider">
-          Erfasste Belege
+          Recorded Receipts
         </h3>
-        <span id="recentReceiptsCount" class="text-[10px] text-slate-400">0 Einträge</span>
+        <span id="recentReceiptsCount" class="text-[10px] text-slate-400">0 entries</span>
       </div>
 
       <div id="recentReceiptsList" class="space-y-2 max-h-64 overflow-y-auto pr-1">
-        <!-- Dynamisch gerendert -->
+        <!-- Dynamically populated -->
       </div>
     </div>
 
-    <!-- 5. CARD: HISTORISCHE MONATS-BILANZ (IST VS. SOLL - Punkt g) -->
+    <!-- 5. CARD: HISTORICAL MONTHLY BALANCE (ACTUAL VS. BUDGET) -->
     <div class="glass-card rounded-2xl p-4 shadow-xl border border-slate-800 space-y-3">
       <div class="flex items-center justify-between">
-        <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+        <h3 id="monthlyHistoryTitle" class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
           <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="20" x2="18" y2="10"/>
             <line x1="12" y1="20" x2="12" y2="4"/>
             <line x1="6" y1="20" x2="6" y2="14"/>
           </svg>
-          Monats-Bilanz (IST / SOLL)
+          Monthly Balance (Actual vs. Budget)
         </h3>
-        <span class="text-[10px] text-slate-400">Historie</span>
+        <span id="monthlyHistorySubtitle" class="text-[10px] text-slate-400">History</span>
       </div>
       <div id="monthlyHistoryList" class="space-y-2">
-        <!-- Dynamisch mit IST / SOLL / Saldo gerendert -->
+        <!-- Dynamically populated -->
       </div>
     </div>
 
-    <!-- 6. MINIMALES CLOUD-SYNC MODUL (Punkt c) -->
+    <!-- 6. MINIMAL CLOUD-SYNC WIDGET -->
     <div class="glass-card rounded-2xl py-3 px-4 flex items-center justify-between text-xs">
       <div class="flex items-center gap-2.5">
         <div class="w-7 h-7 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
@@ -383,11 +415,11 @@
             <span id="cloudSyncStatusText" class="text-emerald-400 font-semibold">active</span>
           </div>
           <div class="text-[10px] text-slate-400 flex items-center gap-1">
-            <span>🇩🇪</span> Hosting in Deutschland
+            <span>🇩🇪</span> <span id="lblHostedInGermany">Hosted in Germany</span>
           </div>
         </div>
       </div>
-      <button onclick="syncWithSupabase(true)" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 active:scale-95 transition" title="Jetzt synchronisieren">
+      <button onclick="syncWithSupabase(true)" class="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 active:scale-95 transition" title="Sync now">
         <svg id="iconSyncBottom" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
           <path d="M3 3v5h5"/>
@@ -399,19 +431,19 @@
 
   </main>
 
-  <!-- MODAL: GESAMTES LOGBUCH ALLER ZEITEN & EXCEL EXPORT (Punkt f) -->
+  <!-- MODAL: DOWNLOAD HISTORICAL LOGBOOK & EXCEL EXPORT -->
   <div id="historyModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto modal-safe">
     <div class="glass-card rounded-2xl max-w-lg w-full p-4 sm:p-5 space-y-3.5 border border-slate-700 shadow-2xl my-auto max-h-[90vh] flex flex-col">
       <div class="flex items-center justify-between pb-2 border-b border-slate-800 shrink-0">
         <div>
-          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <h3 id="historyModalTitle" class="text-sm font-bold text-white flex items-center gap-2">
             <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
             </svg>
-            Gesamtes Logbuch aller Zeiten
+            Download Historical Logbook
           </h3>
-          <p class="text-[10px] text-slate-400" id="historyModalSubtitle">0 Einträge insgesamt</p>
+          <p class="text-[10px] text-slate-400" id="historyModalSubtitle">0 entries total</p>
         </div>
         <button onclick="closeHistoryModal()" class="text-slate-400 hover:text-white p-1">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -421,27 +453,27 @@
       <!-- Filter & Search + Excel Download Button -->
       <div class="space-y-2 shrink-0">
         <div class="flex items-center gap-2">
-          <input type="text" id="historySearchInput" oninput="renderFullHistoryList()" placeholder="Suchen nach Händler, Kategorie, Person..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+          <input type="text" id="historySearchInput" oninput="renderFullHistoryList()" placeholder="Search by store, category, person..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
           <button onclick="exportAllExpensesCSV()" class="py-1.5 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 text-xs font-bold flex items-center gap-1.5 shrink-0 transition active:scale-95">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Excel / CSV
+            <span id="btnHistoryExportText">Excel / CSV</span>
           </button>
         </div>
       </div>
 
-      <!-- Scrollbare Gesamt-Liste -->
+      <!-- Scrollable History List -->
       <div class="overflow-y-auto flex-1 space-y-1.5 pr-1 min-h-[220px]" id="fullHistoryContainer">
-        <!-- Dynamisch gefüllt -->
+        <!-- Dynamically populated -->
       </div>
     </div>
   </div>
 
-  <!-- MODAL: FIXKOSTEN & BUDGET-RECHNER (Punkt h) -->
+  <!-- MODAL: FIXED COSTS & BUDGET CALCULATOR -->
   <div id="plannerModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto modal-safe">
     <div class="glass-card rounded-2xl max-w-md w-full p-4 sm:p-5 space-y-4 border border-slate-700 shadow-2xl my-auto max-h-[92vh] flex flex-col">
       <div class="flex items-center justify-between pb-2 border-b border-slate-800 shrink-0">
         <div>
-          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <h3 id="plannerTitle" class="text-sm font-bold text-white flex items-center gap-2">
             <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="2" y="4" width="20" height="16" rx="2"/>
               <line x1="6" y1="8" x2="6" y2="8"/>
@@ -451,9 +483,9 @@
               <line x1="6" y1="12" x2="18" y2="12"/>
               <line x1="6" y1="16" x2="18" y2="16"/>
             </svg>
-            Fixkosten & Budget-Rechner
+            Fixed Costs & Budget Calculator
           </h3>
-          <p class="text-[10px] text-slate-400">Errechne dein optimales monatliches Haushalts-Budget</p>
+          <p class="text-[10px] text-slate-400" id="plannerSubtitle">Calculate your optimal monthly household budget</p>
         </div>
         <button onclick="closePlannerModal()" class="text-slate-400 hover:text-white p-1">
           <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -461,80 +493,105 @@
       </div>
 
       <div class="overflow-y-auto flex-1 space-y-4 pr-1">
-        <!-- 1. Einnahmen (Netto) -->
+        <!-- 1. Income (Net) -->
         <div class="space-y-2">
           <div class="flex items-center justify-between">
-            <label class="text-xs font-bold text-emerald-400 flex items-center gap-1">
-              <span>+</span> Monatliche Einnahmen (Gehälter)
+            <label id="plannerIncomesHeader" class="text-xs font-bold text-emerald-400 flex items-center gap-1">
+              <span>+</span> Monthly Income (Net Salaries)
             </label>
-            <button type="button" onclick="addPlannerIncome()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
-              + Einnahme hinzufügen
+            <button type="button" id="plannerAddIncomeBtn" onclick="addPlannerIncome()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
+              + Add Income
             </button>
           </div>
           <div id="plannerIncomesList" class="space-y-1.5">
-            <!-- Dynamisch gerendert -->
+            <!-- Dynamically populated -->
           </div>
           <div class="flex justify-between text-xs text-slate-400 px-1 font-medium">
-            <span>Einnahmen Gesamt:</span>
-            <span class="text-emerald-400 font-bold" id="plannerIncomesTotal">0,00 €</span>
+            <span id="plannerIncomesTotalLabel">Total Monthly Income:</span>
+            <span class="text-emerald-400 font-bold" id="plannerIncomesTotal">0.00 €</span>
           </div>
         </div>
 
-        <!-- 2. Fixkosten, Abos & Verträge -->
+        <!-- 2. Fixed Costs & Subscriptions -->
         <div class="space-y-2 pt-2 border-t border-slate-800">
           <div class="flex items-center justify-between">
-            <label class="text-xs font-bold text-rose-400 flex items-center gap-1">
-              <span>−</span> Feste Ausgaben & Abos
+            <label id="plannerFixedHeader" class="text-xs font-bold text-rose-400 flex items-center gap-1">
+              <span>−</span> Fixed Costs & Subscriptions
             </label>
-            <button type="button" onclick="addPlannerFixedCost()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
-              + Posten hinzufügen
+            <button type="button" id="plannerAddFixedBtn" onclick="addPlannerFixedCost()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
+              + Add Item
             </button>
           </div>
           <div id="plannerFixedCostsList" class="space-y-1.5">
-            <!-- Dynamisch gerendert mit Intervall (monatlich / jährlich) -->
+            <!-- Dynamically populated -->
           </div>
           <div class="flex justify-between text-xs text-slate-400 px-1 font-medium">
-            <span>Fixkosten Monatlich:</span>
-            <span class="text-rose-400 font-bold" id="plannerFixedCostsTotal">0,00 €</span>
+            <span id="plannerFixedCostsTotalLabel">Total Fixed Costs:</span>
+            <span class="text-rose-400 font-bold" id="plannerFixedCostsTotal">0.00 €</span>
           </div>
         </div>
 
-        <!-- 3. Zusammenfassung & Übernahme -->
+        <!-- 3. Summary & Apply -->
         <div class="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
           <div class="flex items-center justify-between">
             <div>
-              <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Verfügbarer Überschuss</div>
-              <div class="text-lg font-extrabold text-emerald-400" id="plannerSurplusAmount">0,00 €</div>
+              <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider" id="plannerSurplusLabel">Available Monthly Surplus</div>
+              <div class="text-lg font-extrabold text-emerald-400" id="plannerSurplusAmount">0.00 €</div>
             </div>
             <div class="text-right">
-              <div class="text-[10px] text-slate-400">Empfohlenes Budget</div>
-              <div class="text-xs font-bold text-white" id="plannerRecommendationText">0,00 € / Monat</div>
+              <div class="text-[10px] text-slate-400" id="plannerRecLabel">Recommended Budget</div>
+              <div class="text-xs font-bold text-white" id="plannerRecommendationText">0 € / Month</div>
             </div>
           </div>
           
-          <button type="button" onclick="applyPlannerBudget()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 active:scale-95 transition flex items-center justify-center gap-1.5">
-            <span>⛵</span> Diesen Betrag als Soll-Budget übernehmen
+          <button type="button" id="plannerApplyBtn" onclick="applyPlannerBudget()" class="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 text-white font-bold text-xs shadow-lg shadow-emerald-500/20 active:scale-95 transition flex items-center justify-center gap-1.5">
+            <span>⛵</span> <span id="plannerApplyBtnText">Apply this as Available Budget</span>
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: EINSTELLUNGEN & HAUSHALT VERWALTEN -->
+  <!-- MODAL: SETTINGS & HOUSEHOLDS MANAGEMENT -->
   <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto modal-safe">
     <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl my-auto">
       <div class="flex items-center justify-between pb-2 border-b border-slate-800">
         <h3 id="settingsTitle" class="text-sm font-bold text-white flex items-center gap-2">
           <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-          Haushalts-Einstellungen
+          Household & Settings
         </h3>
         <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white">
-          <svg class="w-5 h-5 text-slate-400 hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
 
       <div class="space-y-3">
-        <!-- Sprache & Währung -->
+        <!-- Section: Switch Household / Projects (Neu) -->
+        <div class="pb-3 border-b border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <label class="text-[11px] font-bold text-slate-300" id="lblSettingsHouseholdsSection">My Households & Projects</label>
+            <button type="button" onclick="startNewHouseholdFlow()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold flex items-center gap-1" id="btnSettingsNewHousehold">
+              + New Budget / Project
+            </button>
+          </div>
+          
+          <!-- Liste der gespeicherten Haushalte auf diesem Gerät -->
+          <div id="settingsHouseholdsList" class="space-y-1.5 max-h-32 overflow-y-auto pr-1">
+            <!-- Dynamisch gerendert -->
+          </div>
+
+          <!-- Haushalt per ID beitreten -->
+          <div class="pt-1.5">
+            <div class="flex items-center gap-1.5">
+              <input type="text" id="inputJoinHouseholdId" placeholder="Join with Household ID or Link..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400 font-mono">
+              <button type="button" onclick="joinHouseholdById()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 rounded-xl text-xs font-bold shrink-0 transition active:scale-95" id="btnJoinHousehold">
+                Join
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Language & Currency -->
         <div class="space-y-2 pb-2 border-b border-slate-800">
           <div>
             <label id="lblSettingsLang" class="text-[11px] font-semibold text-slate-300 block mb-1.5">Language / Sprache / Langue</label>
@@ -569,45 +626,45 @@
           </div>
         </div>
 
-        <!-- Haushaltsname -->
+        <!-- Household Name -->
         <div>
-          <label id="lblSettingsHouseholdName" class="text-[11px] font-semibold text-slate-300 block mb-1">Name des Haushalts</label>
-          <input type="text" id="settingsHouseholdName" placeholder="z. B. Unser Haushalt" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
+          <label id="lblSettingsHouseholdName" class="text-[11px] font-semibold text-slate-300 block mb-1">Household Name</label>
+          <input type="text" id="settingsHouseholdName" placeholder="e.g. Our Household" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
         </div>
 
-        <!-- Monatliches Soll-Budget -->
+        <!-- Monthly Available Budget (Optional) -->
         <div>
           <div class="flex items-center justify-between mb-1">
-            <label id="lblSettingsMonthlyBudget" class="text-[11px] font-semibold text-slate-300">Monatliches Soll-Budget</label>
-            <button type="button" onclick="closeSettingsModal(); openPlannerModal();" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
-              Fixkosten-Rechner 💼
+            <label id="lblSettingsMonthlyBudget" class="text-[11px] font-semibold text-slate-300">Monthly Available Budget (optional)</label>
+            <button type="button" onclick="closeSettingsModal(); openPlannerModal();" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold" id="btnSettingsOpenPlanner">
+              Budget Calculator 💼
             </button>
           </div>
-          <input type="number" step="10" id="settingsMonthlyBudget" placeholder="1500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
+          <input type="number" step="10" id="settingsMonthlyBudget" placeholder="e.g. 1500 (optional)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
         </div>
 
-        <!-- Personen verwalten -->
+        <!-- Manage People -->
         <div class="pt-2 border-t border-slate-800">
           <div class="flex items-center justify-between mb-1.5">
-            <label id="lblSettingsUsers" class="text-[11px] font-semibold text-slate-300">Personen im Haushalt</label>
+            <label id="lblSettingsUsers" class="text-[11px] font-semibold text-slate-300">People in Household</label>
             <button type="button" id="btnSettingsAddUser" onclick="addSettingsUser()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
-              + Person hinzufügen
+              + Add Person
             </button>
           </div>
           <div id="settingsUsersList" class="space-y-1.5 max-h-36 overflow-y-auto pr-1">
-            <!-- Dynamisch gerendert -->
+            <!-- Dynamically populated -->
           </div>
         </div>
 
-        <!-- Standard-Erfasser auf diesem Handy -->
+        <!-- Default user on this phone -->
         <div class="pt-2 border-t border-slate-800">
-          <label id="lblSettingsDeviceOwner" class="text-[11px] font-semibold text-slate-300 block mb-1.5">Standard-Erfasser auf diesem Gerät</label>
+          <label id="lblSettingsDeviceOwner" class="text-[11px] font-semibold text-slate-300 block mb-1.5">Default user on this device</label>
           <div id="settingsDeviceOwnerOptions" class="grid grid-cols-2 gap-1.5">
-            <!-- Dynamisch gerendert -->
+            <!-- Dynamically populated -->
           </div>
         </div>
 
-        <!-- Cloud-Sync & Haushalts-ID (Punkt c & d) -->
+        <!-- Cloud-Sync & Household ID -->
         <div class="pt-2 border-t border-slate-800 space-y-1.5">
           <div class="flex items-center justify-between">
             <label id="lblSettingsCloudSync" class="text-[11px] font-semibold text-slate-300">Cloud-Sync</label>
@@ -616,34 +673,34 @@
             </span>
           </div>
           <div class="text-[10px] text-slate-400 flex items-center gap-1">
-            <span>🇩🇪</span> Hosting in Deutschland
+            <span>🇩🇪</span> <span id="lblSettingsHosting">Hosted in Germany</span>
           </div>
           <div>
-            <label class="text-[10px] text-slate-400 block mb-0.5">Gemeinsame Haushalts-ID</label>
-            <input type="text" id="settingsHouseholdId" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-sky-400 font-mono focus:border-sky-400 focus:outline-none" placeholder="z. B. hh_home123">
+            <label class="text-[10px] text-slate-400 block mb-0.5" id="lblSettingsHouseholdId">Shared Household ID</label>
+            <input type="text" id="settingsHouseholdId" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-sky-400 font-mono focus:border-sky-400 focus:outline-none" placeholder="e.g. hh_home123">
           </div>
         </div>
 
-        <!-- Haushalts-Mitglieder einladen (Punkt e) -->
+        <!-- Invite Members Button -->
         <div class="pt-2 border-t border-slate-800">
           <button type="button" id="btnSettingsPartnerLink" onclick="shareHouseholdInvite()" class="w-full py-2.5 px-3 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-300 text-xs font-bold flex items-center justify-center gap-2 transition active:scale-95 shadow-sm">
             <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span id="btnSettingsPartnerLinkText">Haushalts-Mitglieder einladen</span>
+            <span id="btnSettingsPartnerLinkText">Invite Members</span>
           </button>
-          <p id="lblSettingsPartnerLinkHint" class="text-[9px] text-slate-400 text-center mt-1">Per WhatsApp, Mail oder Teilen-Menü senden</p>
+          <p id="lblSettingsPartnerLinkHint" class="text-[9px] text-slate-400 text-center mt-1">Send via WhatsApp, Mail, or native share sheet</p>
         </div>
       </div>
 
       <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
         <button id="btnSettingsSave" onclick="saveSettings()" class="w-full py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-sky-500/20">
-          Einstellungen speichern
+          Save Settings
         </button>
       </div>
     </div>
   </div>
 
   <script>
-    // Farb-Palette für Personen
+    // Color Palette for People
     const PALETTE = [
       { name: 'Sky', hex: '#38bdf8', bg: 'rgba(14, 165, 233, 0.22)', border: '#38bdf8', text: '#7dd3fc' },
       { name: 'Purple', hex: '#c084fc', bg: 'rgba(168, 85, 247, 0.22)', border: '#c084fc', text: '#e9d5ff' },
@@ -658,44 +715,57 @@
     // Safe LocalStorage Wrapper
     const memStore = {};
     const safeStore = {
-      getItem: (k) => {
-        try { return localStorage.getItem(k); } catch(e) { return memStore[k] || null; }
+      getItem(key) {
+        try {
+          return localStorage.getItem(key);
+        } catch(e) {
+          return memStore[key] || null;
+        }
       },
-      setItem: (k, v) => {
-        try { localStorage.setItem(k, v); } catch(e) { memStore[k] = String(v); }
+      setItem(key, val) {
+        try {
+          localStorage.setItem(key, val);
+        } catch(e) {
+          memStore[key] = String(val);
+        }
+      },
+      removeItem(key) {
+        try {
+          localStorage.removeItem(key);
+        } catch(e) {
+          delete memStore[key];
+        }
       }
     };
 
-    // Storage Keys
-    const STORAGE_KEY_DATA = 'logbuch_haushalt_entries_v3';
-    const STORAGE_KEY_CONFIG = 'logbuch_haushalt_config_v2';
-    const STORAGE_KEY_OUTBOX = 'logbuch_haushalt_outbox_v1';
+    const STORAGE_KEY_CONFIG = 'logbuch_household_config';
+    const STORAGE_KEY_DATA = 'logbuch_household_expenses';
+    const STORAGE_KEY_OUTBOX = 'logbuch_offline_outbox';
+    const STORAGE_KEY_SAVED_HOUSEHOLDS = 'logbuch_saved_households';
 
-    // Supabase Konfiguration (Frankfurt eu-central-1, DSGVO-konform)
-    const SUPABASE_URL = "https://krdunxtbpgpdmutlicdt.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZHVueHRicGdwZG11dGxpY2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzgzODQsImV4cCI6MjA5ODMxNDM4NH0.yd_LcTldUl9uHGCQ-bX-QI154TA80M7Dvav5lWFtXCM";
+    // Supabase Credentials
+    const SUPABASE_URL = 'https://krdunxtbpgpdmutlicdt.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZHVueHRicGdwZG11dGxpY2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNDc1NzEsImV4cCI6MjA5MDkyMzU3MX0.y7Lh9i-uK61F4f_YQyB9_RjL0C2Tqj-7B1u_yHw_3vY';
 
     let supabaseClient = null;
     function getSupabaseClient() {
-      if (supabaseClient) return supabaseClient;
-      if (window.supabase && typeof window.supabase.createClient === 'function') {
+      if (!supabaseClient && window.supabase) {
         try {
           supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          return supabaseClient;
         } catch(e) {
-          console.warn("Supabase SDK init:", e);
+          console.warn('Supabase initialization failed:', e);
         }
       }
-      return null;
+      return supabaseClient;
     }
 
-    // Mehrsprachiges Wörterbuch
+    // Comprehensive Multi-Language Dictionaries
     const I18N = {
       en: {
         app_title: "Logbook",
         household: "Household",
         header_user_hint: "Tap to switch user",
-        card_add_title: "Record Expense",
+        card_add_title: "Log Expense",
         category_label: "Category",
         cat_food: "🍏 Food & Drinks",
         cat_family: "👶 Kids & Family",
@@ -708,57 +778,90 @@
         cat_other: "🛍️ Other",
         note_label: "Note / Store (optional)",
         note_placeholder: "e.g. Walmart, Zara, Gas, Pharmacy (optional)",
-        btn_save: "Save Expense",
+        btn_save: "Log Expense",
+        current_month: "Current Month",
         spent_label: "spent",
-        target_budget_label: "Target Budget:",
-        buffer_label: "Buffer",
+        target_budget_label: "Available Budget:",
+        buffer_label: "buffer left",
+        over_budget_label: "over budget!",
         status_calm: "Calm Seas",
         status_breeze: "Gentle Breeze",
         status_waves: "High Waves",
         status_storm: "Storm Warning",
-        status_over: "Over",
-        split_label: "Split:",
+        status_over: "Over Budget",
+        split_label: "Distribution:",
         chart_title: "Where is our money going?",
         entries_count: "entries",
         receipts_title: "Recorded Receipts",
-        wizard_title: "Create Household",
-        wizard_subtitle: "Set up your private logbook in 10 seconds.",
-        wizard_name_label: "Household Name",
-        wizard_name_placeholder: "e.g. Our Household",
-        wizard_budget_label: "Monthly Target Budget",
-        wizard_users_label: "People in Household",
+        monthly_history_title: "Monthly Balance (Actual vs. Budget)",
+        monthly_history_subtitle: "History",
+        no_history: "No historical months recorded yet.",
+        download_history_title: "Download Historical Logbook",
+        history_search_placeholder: "Search by store, category, person...",
+        btn_export_csv: "Excel / CSV",
+        hosted_in_germany: "Hosted in Germany",
+        cloud_sync_active: "Cloud-Sync: active",
+        cloud_sync_inactive: "Cloud-Sync: inactive",
+        planner_title: "Fixed Costs & Budget Calculator",
+        planner_subtitle: "Calculate your optimal monthly household budget",
+        planner_incomes_header: "Monthly Income (Net Salaries)",
+        planner_add_income: "+ Add Income",
+        planner_incomes_total: "Total Monthly Income:",
+        planner_fixed_header: "Fixed Costs & Subscriptions",
+        planner_add_fixed: "+ Add Item",
+        planner_fixed_total: "Total Fixed Costs:",
+        planner_surplus_label: "Available Monthly Surplus",
+        planner_rec_label: "Recommended Budget",
+        planner_apply_btn: "Apply this as Available Budget",
+        month_suffix: "Month",
+        wizard_title: "Create Household or Project",
+        wizard_subtitle: "Set up your shared logbook in 10 seconds.",
+        wizard_name_label: "Household or Project Name",
+        wizard_name_placeholder: "e.g. Our Home, Bachelor Party, Vacation",
+        wizard_budget_label: "Monthly Available Budget (optional)",
+        wizard_budget_placeholder: "e.g. 1500 (optional)",
+        wizard_users_label: "People in Household / Group",
         wizard_add_user: "+ Add Person",
-        wizard_owner_label: "Who owns this phone?",
-        wizard_start_btn: "Create Household & Start 🚀",
-        settings_title: "Household Settings",
+        wizard_owner_label: "Who owns this smartphone?",
+        wizard_start_btn: "Create & Start 🚀",
+        invite_title: "Invite Members",
+        invite_subtitle: "Invite members to your household: Share expenses and track your budget together.",
+        btn_share_native: "Share Invite (WhatsApp, Mail...)",
+        btn_copy_link: "Copy Link",
+        btn_close: "Close",
+        onboarding_title: "Welcome to ",
+        onboarding_subtitle: "You were invited! Who are you on this smartphone?",
+        onboarding_new_person: "Or enter your own name:",
+        onboarding_join_btn: "Join",
+        settings_title: "Household & Settings",
+        settings_households_section: "My Households & Projects",
+        settings_new_household_btn: "+ New Budget / Project",
+        settings_join_placeholder: "Join with Household ID or Link...",
+        settings_join_btn: "Join",
         settings_lang_label: "Language / Sprache / Langue",
         settings_curr_label: "Currency / Währung / Devise",
         settings_name_label: "Household Name",
-        settings_budget_label: "Monthly Target Budget",
+        settings_budget_label: "Monthly Available Budget (optional)",
+        settings_planner_btn: "Budget Calculator 💼",
         settings_users_label: "People in Household",
         settings_add_user_btn: "+ Add Person",
         settings_owner_label: "Default user on this device",
         settings_cloud_sync_label: "Cloud-Sync",
-        settings_partner_link_btn: "Haushalts-Mitglieder einladen",
-        settings_partner_link_hint: "Per WhatsApp, Mail oder Teilen-Menü senden",
+        settings_household_id_label: "Shared Household ID",
+        settings_partner_link_btn: "Invite Members",
+        settings_partner_link_hint: "Send via WhatsApp, Mail, or native share sheet",
         settings_save_btn: "Save Settings",
         toast_saved: "Saved",
         toast_deleted: "✓ Expense deleted",
         toast_welcome: "Welcome to ",
-        toast_partner_copied: "✓ Partner setup link copied!",
-        toast_sync_success: "✓ Cloud Sync active",
-        toast_config_loaded: "✓ Config loaded: ",
+        toast_partner_copied: "✓ Invite link copied!",
+        toast_sync_success: "✓ Cloud-Sync active",
+        toast_config_loaded: "✓ Loaded profile: ",
+        toast_budget_applied: "✓ Available Budget updated to ",
+        toast_switched_household: "✓ Switched to ",
         confirm_delete_expense: "Do you really want to permanently delete this expense from the logbook?",
-        no_expenses: "No expenses recorded yet.",
-        shop_supermarket: "Supermarket",
-        shop_discounter: "Discounter",
-        shop_drugstore: "Drugstore",
-        shop_bakery: "Bakery",
-        shop_restaurant: "Restaurant",
-        shop_diy: "DIY / Garden",
-        shop_gas: "Gas Station",
-        shop_online: "Online",
-        shop_other: "Specialty Shop"
+        confirm_leave_household: "Do you really want to leave this household on this device?",
+        no_expenses: "No expenses recorded yet."
       },
       de: {
         app_title: "Logbuch",
@@ -778,56 +881,89 @@
         note_label: "Notiz / Geschäft (optional)",
         note_placeholder: "z. B. Rewe, Zara, Tanken, Rossmann (optional)",
         btn_save: "Ausgabe buchen",
+        current_month: "Aktueller Monat",
         spent_label: "ausgegeben",
-        target_budget_label: "Soll-Budget:",
+        target_budget_label: "Verfügbares Budget:",
         buffer_label: "Puffer",
+        over_budget_label: "über Budget!",
         status_calm: "Ruhige See",
         status_breeze: "Frische Brise",
         status_waves: "Hohe Wellen",
         status_storm: "Sturmwarnung",
-        status_over: "Drüber",
+        status_over: "Über Budget",
         split_label: "Verteilung:",
         chart_title: "Wo bleibt das Geld?",
         entries_count: "Einträge",
         receipts_title: "Erfasste Belege",
-        wizard_title: "Neuen Haushalt anlegen",
+        monthly_history_title: "Monats-Bilanz (IST / SOLL)",
+        monthly_history_subtitle: "Historie",
+        no_history: "Noch keine historischen Monate erfasst.",
+        download_history_title: "Historisches Logbuch Downloaden",
+        history_search_placeholder: "Suchen nach Händler, Kategorie, Person...",
+        btn_export_csv: "Excel / CSV",
+        hosted_in_germany: "Hosting in Deutschland",
+        cloud_sync_active: "Cloud-Sync: active",
+        cloud_sync_inactive: "Cloud-Sync: inactive",
+        planner_title: "Fixkosten & Budget-Rechner",
+        planner_subtitle: "Errechne dein optimales monatliches Haushalts-Budget",
+        planner_incomes_header: "Monatliche Einnahmen (Gehälter)",
+        planner_add_income: "+ Einnahme hinzufügen",
+        planner_incomes_total: "Einnahmen Gesamt:",
+        planner_fixed_header: "Feste Ausgaben & Abos",
+        planner_add_fixed: "+ Posten hinzufügen",
+        planner_fixed_total: "Fixkosten Monatlich:",
+        planner_surplus_label: "Verfügbarer Überschuss",
+        planner_rec_label: "Empfohlenes Budget",
+        planner_apply_btn: "Diesen Betrag als Soll-Budget übernehmen",
+        month_suffix: "Monat",
+        wizard_title: "Neuen Haushalt oder Projekt anlegen",
         wizard_subtitle: "Richte dein persönliches Haushaltsbuch in 10 Sekunden ein.",
-        wizard_name_label: "Name des Haushalts",
-        wizard_name_placeholder: "z. B. Unser Haushalt",
-        wizard_budget_label: "Monatliches Soll-Budget",
-        wizard_users_label: "Personen im Haushalt",
+        wizard_name_label: "Name des Haushalts oder Projekts",
+        wizard_name_placeholder: "z. B. Unser Haushalt, JGA Mallorca, WG",
+        wizard_budget_label: "Monatlich verfügbares Budget (optional)",
+        wizard_budget_placeholder: "z. B. 1500 (optional)",
+        wizard_users_label: "Personen im Haushalt / Gruppe",
         wizard_add_user: "+ Person hinzufügen",
         wizard_owner_label: "Wem gehört dieses Smartphone?",
         wizard_start_btn: "Haushalt jetzt anlegen 🚀",
+        invite_title: "Personen einladen",
+        invite_subtitle: "Lade Personen zu deinem Haushalt ein: Teilt eure Kosten und dokumentiert euer Budget.",
+        btn_share_native: "Einladung teilen (WhatsApp, Mail...)",
+        btn_copy_link: "Link kopieren",
+        btn_close: "Schließen",
+        onboarding_title: "Willkommen bei ",
+        onboarding_subtitle: "Du wurdest eingeladen! Wer bist du auf diesem Gerät?",
+        onboarding_new_person: "Oder trage deinen eigenen Namen ein:",
+        onboarding_join_btn: "Beitreten",
         settings_title: "Haushalts-Einstellungen",
+        settings_households_section: "Meine Haushalte & Projekte",
+        settings_new_household_btn: "+ Neues Budget / Projekt",
+        settings_join_placeholder: "Haushalt per ID oder Link beitreten...",
+        settings_join_btn: "Beitreten",
         settings_lang_label: "Language / Sprache / Langue",
         settings_curr_label: "Currency / Währung / Devise",
         settings_name_label: "Name des Haushalts",
-        settings_budget_label: "Monatliches Soll-Budget",
+        settings_budget_label: "Monatlich verfügbares Budget (optional)",
+        settings_planner_btn: "Fixkosten-Rechner 💼",
         settings_users_label: "Personen im Haushalt",
         settings_add_user_btn: "+ Person hinzufügen",
         settings_owner_label: "Standard-Erfasser auf diesem Gerät",
         settings_cloud_sync_label: "Cloud-Sync",
+        settings_household_id_label: "Gemeinsame Haushalts-ID",
         settings_partner_link_btn: "Haushalts-Mitglieder einladen",
         settings_partner_link_hint: "Per WhatsApp, Mail oder Teilen-Menü senden",
         settings_save_btn: "Einstellungen speichern",
         toast_saved: "Gespeichert",
         toast_deleted: "✓ Ausgabe gelöscht",
         toast_welcome: "Willkommen im ",
-        toast_partner_copied: "✓ Setup-Link für Partner kopiert!",
-        toast_sync_success: "✓ Cloud Sync aktiv",
-        toast_config_loaded: "✓ Konfiguration geladen: ",
+        toast_partner_copied: "✓ Einladungs-Link kopiert!",
+        toast_sync_success: "✓ Cloud-Sync aktiv",
+        toast_config_loaded: "✓ Profil geladen: ",
+        toast_budget_applied: "✓ Verfügbares Budget gesetzt auf ",
+        toast_switched_household: "✓ Gewechselt zu ",
         confirm_delete_expense: "Möchtest du diese Ausgabe wirklich unwiderruflich aus dem Logbuch entfernen?",
-        no_expenses: "Noch keine Ausgaben erfasst.",
-        shop_supermarket: "Supermarkt",
-        shop_discounter: "Discounter",
-        shop_drugstore: "Drogerie / Apotheke",
-        shop_bakery: "Bäckerei / Café",
-        shop_restaurant: "Restaurant / Imbiss",
-        shop_diy: "Baumarkt / Garten",
-        shop_gas: "Tankstelle",
-        shop_online: "Online-Shop",
-        shop_other: "Fachgeschäft"
+        confirm_leave_household: "Möchtest du diesen Haushalt auf diesem Gerät wirklich verlassen?",
+        no_expenses: "Noch keine Ausgaben erfasst."
       },
       fr: {
         app_title: "Logbook",
@@ -847,9 +983,11 @@
         note_label: "Note / Magasin (optionnel)",
         note_placeholder: "ex. Carrefour, Zara, Essence, Pharmacie (optionnel)",
         btn_save: "Enregistrer la dépense",
+        current_month: "Mois en cours",
         spent_label: "dépensé",
-        target_budget_label: "Budget cible :",
+        target_budget_label: "Budget disponible :",
         buffer_label: "Marge",
+        over_budget_label: "dépassé !",
         status_calm: "Mer Calme",
         status_breeze: "Brise Légère",
         status_waves: "Vagues Hautes",
@@ -859,62 +997,91 @@
         chart_title: "Où va l'argent ?",
         entries_count: "dépenses",
         receipts_title: "Reçus enregistrés",
-        wizard_title: "Créer un foyer",
+        monthly_history_title: "Bilan Mensuel (Réel vs Budget)",
+        monthly_history_subtitle: "Historique",
+        no_history: "Aucun historique enregistré.",
+        download_history_title: "Télécharger le journal historique",
+        history_search_placeholder: "Rechercher par magasin, catégorie, personne...",
+        btn_export_csv: "Excel / CSV",
+        hosted_in_germany: "Hébergé en Allemagne",
+        cloud_sync_active: "Cloud-Sync: active",
+        cloud_sync_inactive: "Cloud-Sync: inactive",
+        planner_title: "Calculateur de Frais Fixes & Budget",
+        planner_subtitle: "Calculez votre budget mensuel optimal",
+        planner_incomes_header: "Revenus mensuels (Salaires nets)",
+        planner_add_income: "+ Ajouter un revenu",
+        planner_incomes_total: "Total revenus mensuels :",
+        planner_fixed_header: "Dépenses fixes & Abonnements",
+        planner_add_fixed: "+ Ajouter un poste",
+        planner_fixed_total: "Total charges fixes :",
+        planner_surplus_label: "Excédent mensuel disponible",
+        planner_rec_label: "Budget recommandé",
+        planner_apply_btn: "Appliquer comme budget disponible",
+        month_suffix: "Mois",
+        wizard_title: "Créer un foyer ou projet",
         wizard_subtitle: "Configurez votre journal en 10 secondes.",
-        wizard_name_label: "Nom du foyer",
-        wizard_name_placeholder: "ex. Notre Foyer",
-        wizard_budget_label: "Budget mensuel cible",
-        wizard_users_label: "Membres du foyer",
+        wizard_name_label: "Nom du foyer ou projet",
+        wizard_name_placeholder: "ex. Notre Foyer, Voyage, Colocation",
+        wizard_budget_label: "Budget mensuel disponible (optionnel)",
+        wizard_budget_placeholder: "ex. 1500 (optionnel)",
+        wizard_users_label: "Membres du foyer / groupe",
         wizard_add_user: "+ Ajouter un membre",
         wizard_owner_label: "À qui appartient ce smartphone ?",
         wizard_start_btn: "Créer le foyer & Commencer 🚀",
+        invite_title: "Inviter des membres",
+        invite_subtitle: "Invitez des membres à votre foyer : partagez vos dépenses et suivez votre budget ensemble.",
+        btn_share_native: "Partager l'invitation (WhatsApp, Email...)",
+        btn_copy_link: "Copier le lien",
+        btn_close: "Fermer",
+        onboarding_title: "Bienvenue dans ",
+        onboarding_subtitle: "Vous avez été invité ! Qui êtes-vous sur cet appareil ?",
+        onboarding_new_person: "Ou entrez votre propre nom :",
+        onboarding_join_btn: "Rejoindre",
         settings_title: "Paramètres du foyer",
+        settings_households_section: "Mes foyers & projets",
+        settings_new_household_btn: "+ Nouveau budget / projet",
+        settings_join_placeholder: "Rejoindre avec identifiant ou lien...",
+        settings_join_btn: "Rejoindre",
         settings_lang_label: "Language / Sprache / Langue",
         settings_curr_label: "Currency / Währung / Devise",
         settings_name_label: "Nom du foyer",
-        settings_budget_label: "Budget mensuel cible",
+        settings_budget_label: "Budget mensuel disponible (optionnel)",
+        settings_planner_btn: "Calculateur de budget 💼",
         settings_users_label: "Membres du foyer",
         settings_add_user_btn: "+ Ajouter un membre",
         settings_owner_label: "Utilisateur par défaut sur cet appareil",
         settings_cloud_sync_label: "Cloud-Sync",
+        settings_household_id_label: "Identifiant commun du foyer",
         settings_partner_link_btn: "Inviter des membres du foyer",
         settings_partner_link_hint: "Envoyez par WhatsApp, e-mail ou menu de partage",
         settings_save_btn: "Enregistrer les paramètres",
         toast_saved: "Enregistré",
         toast_deleted: "✓ Dépense supprimée",
         toast_welcome: "Bienvenue dans ",
-        toast_partner_copied: "✓ Lien partenaire copié !",
-        toast_sync_success: "✓ Cloud Sync actif",
-        toast_config_loaded: "✓ Configuration chargée : ",
+        toast_partner_copied: "✓ Lien d'invitation copié !",
+        toast_sync_success: "✓ Cloud-Sync actif",
+        toast_config_loaded: "✓ Profil chargé : ",
+        toast_budget_applied: "✓ Budget disponible défini à ",
+        toast_switched_household: "✓ Changé pour ",
         confirm_delete_expense: "Voulez-vous vraiment supprimer définitivement cette dépense du carnet ?",
-        no_expenses: "Aucune dépense enregistrée.",
-        shop_supermarket: "Supermarché",
-        shop_discounter: "Discounter",
-        shop_drugstore: "Pharmacie",
-        shop_bakery: "Boulangerie",
-        shop_restaurant: "Restaurant",
-        shop_diy: "Bricolage / Jardin",
-        shop_gas: "Station-Service",
-        shop_online: "En Ligne",
-        shop_other: "Magasin spécialisé"
+        confirm_leave_household: "Voulez-vous vraiment quitter ce foyer sur cet appareil ?",
+        no_expenses: "Aucune dépense enregistrée."
       }
     };
 
+    // Default language is ALWAYS English unless explicitly set
     function getAutoLang() {
-      const navLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-      if (navLang.startsWith('de')) return 'de';
-      if (navLang.startsWith('fr')) return 'fr';
       return 'en';
     }
 
     function t(key) {
-      const lang = config.lang || getAutoLang();
+      const lang = config.lang || 'en';
       const dict = I18N[lang] || I18N['en'];
       return dict[key] || I18N['en'][key] || key;
     }
 
     function getLocale() {
-      const lang = config.lang || getAutoLang();
+      const lang = config.lang || 'en';
       if (lang === 'de') return 'de-DE';
       if (lang === 'fr') return 'fr-FR';
       return 'en-US';
@@ -932,8 +1099,7 @@
       return formatted + ' ' + (config.currency || '€');
     }
 
-    // Kategorien
-    // 9 Lebensbereiche nach Zweck (Punkt B)
+    // 9 Purpose Categories
     const CATEGORIES = [
       { key: 'food', icon: '🍏', i18nKey: 'cat_food' },
       { key: 'family', icon: '👶', i18nKey: 'cat_family' },
@@ -948,8 +1114,8 @@
 
     function getLocalizedCategory(catKey) {
       if (!catKey) return t('cat_other');
-      const lk = String(catKey).toLowerCase();
-      if (lk === 'food' || lk.includes('supermarkt') || lk.includes('essen') || lk.includes('grocer') || lk.includes('food') || lk.includes('repas')) return t('cat_food');
+      const lk = catKey.toLowerCase();
+      if (lk === 'food' || lk.includes('essen') || lk.includes('lebensmittel') || lk.includes('nourriture')) return t('cat_food');
       if (lk === 'family' || lk.includes('kinder') || lk.includes('kind') || lk.includes('baby') || lk.includes('kid') || lk.includes('enfant')) return t('cat_family');
       if (lk === 'mobility' || lk.includes('auto') || lk.includes('tanken') || lk.includes('mobil') || lk.includes('transport') || lk.includes('fuel') || lk.includes('carburant')) return t('cat_mobility');
       if (lk === 'drugstore' || lk.includes('drogerie') || lk.includes('apotheke') || lk.includes('pflege') || lk.includes('drug') || lk.includes('health') || lk.includes('pharmacie') || lk.includes('soins')) return t('cat_drugstore');
@@ -973,12 +1139,11 @@
       saveConfig();
       updateCurrencyUI();
       render();
-      saveHouseholdToSupabase();
     }
 
     function updateCurrencyUI() {
-      const curDisplay = document.getElementById('currencySymbolDisplay');
-      if (curDisplay) curDisplay.innerText = config.currency || '€';
+      const display = document.getElementById('currencySymbolDisplay');
+      if (display) display.innerText = config.currency || '€';
       renderSettingsPills();
       renderWizardPills();
     }
@@ -986,14 +1151,15 @@
     function renderCategoryButtons() {
       const container = document.getElementById('purposeButtonsGrid');
       if (!container) return;
-      const inputEl = document.getElementById('inputPurpose');
-      const currentKey = inputEl ? inputEl.value : 'food';
+
+      const input = document.getElementById('inputPurpose');
+      const currentKey = input ? input.value : 'food';
       const userColor = getUserColor(activePerson);
 
       container.innerHTML = CATEGORIES.map(c => {
-        const fullLabel = t(c.i18nKey);
-        const isActive = (currentKey === c.key);
-        const textOnly = fullLabel.replace(/^[^\s]+\s*/, '');
+        const isActive = (c.key === currentKey);
+        const localizedName = t(c.i18nKey);
+        const textOnly = localizedName.replace(/^[^\s]+\s*/, '');
 
         const activeStyles = `
           border: 2px solid ${userColor.hex};
@@ -1034,7 +1200,7 @@
     }
 
     function renderSettingsPills() {
-      const currentLang = config.lang || getAutoLang();
+      const currentLang = config.lang || 'en';
       ['en', 'de', 'fr'].forEach(l => {
         const btn = document.getElementById('btnLang' + l.charAt(0).toUpperCase() + l.slice(1));
         if (!btn) return;
@@ -1059,7 +1225,7 @@
     }
 
     function renderWizardPills() {
-      const currentLang = config.lang || getAutoLang();
+      const currentLang = config.lang || 'en';
       ['en', 'de', 'fr'].forEach(l => {
         const btn = document.getElementById('wBtnLang' + l.charAt(0).toUpperCase() + l.slice(1));
         if (!btn) return;
@@ -1083,6 +1249,7 @@
       });
     }
 
+    // Comprehensive UI Internationalization
     function updateI18nUI() {
       const pageTitle = document.getElementById('pageTitle');
       if (pageTitle) pageTitle.innerText = `${t('app_title')} - ${config.householdName || t('household')}`;
@@ -1099,9 +1266,9 @@
       const lblCategory = document.getElementById('lblCategory');
       if (lblCategory) lblCategory.innerText = t('category_label');
       const lblMerchant = document.getElementById('lblMerchant');
-      if (lblMerchant) lblMerchant.innerText = t('note_label') || t('merchant_label');
+      if (lblMerchant) lblMerchant.innerText = t('note_label');
       const inputMerchant = document.getElementById('inputMerchant');
-      if (inputMerchant) inputMerchant.placeholder = t('note_placeholder') || t('merchant_placeholder');
+      if (inputMerchant) inputMerchant.placeholder = t('note_placeholder');
       const btnSubmitExpenseText = document.getElementById('btnSubmitExpenseText');
       if (btnSubmitExpenseText) btnSubmitExpenseText.innerText = t('btn_save');
 
@@ -1113,10 +1280,14 @@
 
       renderCategoryButtons();
 
+      const curMonthLbl = document.getElementById('currentMonthLabel');
+      if (curMonthLbl) curMonthLbl.innerText = t('current_month');
       const spentSub = document.getElementById('spentSubtitle');
       if (spentSub) spentSub.innerText = t('spent_label');
       const targetLbl = document.getElementById('targetBudgetLabel');
       if (targetLbl) targetLbl.innerText = t('target_budget_label');
+      const lblSplit = document.getElementById('lblSplit');
+      if (lblSplit) lblSplit.innerText = t('split_label');
 
       const chartTitle = document.getElementById('chartCardTitle');
       if (chartTitle) {
@@ -1126,6 +1297,26 @@
       const receiptsTitle = document.getElementById('receiptsCardTitle');
       if (receiptsTitle) receiptsTitle.innerText = t('receipts_title');
 
+      const mHistTitle = document.getElementById('monthlyHistoryTitle');
+      if (mHistTitle) {
+        mHistTitle.innerHTML = `<svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> ${t('monthly_history_title')}`;
+      }
+      const mHistSub = document.getElementById('monthlyHistorySubtitle');
+      if (mHistSub) mHistSub.innerText = t('monthly_history_subtitle');
+
+      const lblHostedGermany = document.getElementById('lblHostedInGermany');
+      if (lblHostedGermany) lblHostedGermany.innerText = t('hosted_in_germany');
+
+      // History Modal
+      const hModalTitle = document.getElementById('historyModalTitle');
+      if (hModalTitle) {
+        hModalTitle.innerHTML = `<svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> ${t('download_history_title')}`;
+      }
+      const hSearch = document.getElementById('historySearchInput');
+      if (hSearch) hSearch.placeholder = t('history_search_placeholder');
+      const hExportBtn = document.getElementById('btnHistoryExportText');
+      if (hExportBtn) hExportBtn.innerText = t('btn_export_csv');
+
       // Setup Wizard Labels
       const wTitle = document.getElementById('wizardTitle');
       if (wTitle) wTitle.innerText = t('wizard_title');
@@ -1133,8 +1324,12 @@
       if (wSub) wSub.innerText = t('wizard_subtitle');
       const wHNameLbl = document.getElementById('lblWizardHouseholdName');
       if (wHNameLbl) wHNameLbl.innerText = t('wizard_name_label');
+      const wHNameInput = document.getElementById('wizardHouseholdName');
+      if (wHNameInput) wHNameInput.placeholder = t('wizard_name_placeholder');
       const wMBudgetLbl = document.getElementById('lblWizardMonthlyBudget');
       if (wMBudgetLbl) wMBudgetLbl.innerText = `${t('wizard_budget_label')} (${config.currency || '€'})`;
+      const wMBudgetInput = document.getElementById('wizardMonthlyBudget');
+      if (wMBudgetInput) wMBudgetInput.placeholder = t('wizard_budget_placeholder');
       const wUsersLbl = document.getElementById('lblWizardUsers');
       if (wUsersLbl) wUsersLbl.innerText = t('wizard_users_label');
       const wAddUserBtn = document.getElementById('btnWizardAddUser');
@@ -1144,13 +1339,70 @@
       const wStartBtn = document.getElementById('btnWizardStart');
       if (wStartBtn) wStartBtn.innerText = t('wizard_start_btn');
 
+      // Invite Modal Labels
+      const sInviteTitle = document.getElementById('shareInviteTitle');
+      if (sInviteTitle) sInviteTitle.innerText = t('invite_title');
+      const sInviteSubtitle = document.getElementById('shareInviteSubtitle');
+      if (sInviteSubtitle) sInviteSubtitle.innerText = t('invite_subtitle');
+      const btnShareNativeText = document.getElementById('btnShareInviteNativeText');
+      if (btnShareNativeText) btnShareNativeText.innerText = t('btn_share_native');
+      const btnShareCopyText = document.getElementById('btnShareInviteCopyText');
+      if (btnShareCopyText) btnShareCopyText.innerText = t('btn_copy_link');
+      const btnShareCloseText = document.getElementById('btnShareInviteCloseText');
+      if (btnShareCloseText) btnShareCloseText.innerText = t('btn_close');
+
+      // Onboarding Modal Labels
+      const onbTitle = document.getElementById('onboardingTitle');
+      if (onbTitle) onbTitle.innerText = `${t('onboarding_title')}${config.householdName || t('household')}!`;
+      const onbSub = document.getElementById('onboardingSubtitle');
+      if (onbSub) onbSub.innerText = t('onboarding_subtitle');
+      const onbNewPersonLbl = document.getElementById('lblOnboardingNewPerson');
+      if (onbNewPersonLbl) onbNewPersonLbl.innerText = t('onboarding_new_person');
+      const onbJoinBtn = document.getElementById('btnOnboardingAdd');
+      if (onbJoinBtn) onbJoinBtn.innerText = t('onboarding_join_btn');
+
+      // Planner Modal Labels
+      const plTitle = document.getElementById('plannerTitle');
+      if (plTitle) plTitle.innerHTML = `<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="8"/><line x1="10" y1="8" x2="10" y2="8"/><line x1="14" y1="8" x2="14" y2="8"/><line x1="18" y1="8" x2="18" y2="8"/><line x1="6" y1="12" x2="18" y2="12"/><line x1="6" y1="16" x2="18" y2="16"/></svg> ${t('planner_title')}`;
+      const plSub = document.getElementById('plannerSubtitle');
+      if (plSub) plSub.innerText = t('planner_subtitle');
+      const plIncHeader = document.getElementById('plannerIncomesHeader');
+      if (plIncHeader) plIncHeader.innerHTML = `<span>+</span> ${t('planner_incomes_header')}`;
+      const plAddIncBtn = document.getElementById('plannerAddIncomeBtn');
+      if (plAddIncBtn) plAddIncBtn.innerText = t('planner_add_income');
+      const plIncTotalLbl = document.getElementById('plannerIncomesTotalLabel');
+      if (plIncTotalLbl) plIncTotalLbl.innerText = t('planner_incomes_total');
+      const plFixHeader = document.getElementById('plannerFixedHeader');
+      if (plFixHeader) plFixHeader.innerHTML = `<span>−</span> ${t('planner_fixed_header')}`;
+      const plAddFixBtn = document.getElementById('plannerAddFixedBtn');
+      if (plAddFixBtn) plAddFixBtn.innerText = t('planner_add_fixed');
+      const plFixTotalLbl = document.getElementById('plannerFixedCostsTotalLabel');
+      if (plFixTotalLbl) plFixTotalLbl.innerText = t('planner_fixed_total');
+      const plSurplusLbl = document.getElementById('plannerSurplusLabel');
+      if (plSurplusLbl) plSurplusLbl.innerText = t('planner_surplus_label');
+      const plRecLbl = document.getElementById('plannerRecLabel');
+      if (plRecLbl) plRecLbl.innerText = t('planner_rec_label');
+      const plApplyBtnText = document.getElementById('plannerApplyBtnText');
+      if (plApplyBtnText) plApplyBtnText.innerText = t('planner_apply_btn');
+
       // Settings Modal Labels
       const sTitle = document.getElementById('settingsTitle');
       if (sTitle) sTitle.innerHTML = `<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg> ${t('settings_title')}`;
+      const sHSectionLbl = document.getElementById('lblSettingsHouseholdsSection');
+      if (sHSectionLbl) sHSectionLbl.innerText = t('settings_households_section');
+      const sNewHBtn = document.getElementById('btnSettingsNewHousehold');
+      if (sNewHBtn) sNewHBtn.innerText = t('settings_new_household_btn');
+      const sJoinInput = document.getElementById('inputJoinHouseholdId');
+      if (sJoinInput) sJoinInput.placeholder = t('settings_join_placeholder');
+      const sJoinBtn = document.getElementById('btnJoinHousehold');
+      if (sJoinBtn) sJoinBtn.innerText = t('settings_join_btn');
+
       const sHNameLbl = document.getElementById('lblSettingsHouseholdName');
       if (sHNameLbl) sHNameLbl.innerText = t('settings_name_label');
       const sMBudgetLbl = document.getElementById('lblSettingsMonthlyBudget');
       if (sMBudgetLbl) sMBudgetLbl.innerText = `${t('settings_budget_label')} (${config.currency || '€'})`;
+      const sPlannerBtn = document.getElementById('btnSettingsOpenPlanner');
+      if (sPlannerBtn) sPlannerBtn.innerText = t('settings_planner_btn');
       const sUsersLbl = document.getElementById('lblSettingsUsers');
       if (sUsersLbl) sUsersLbl.innerText = t('settings_users_label');
       const sAddUserBtn = document.getElementById('btnSettingsAddUser');
@@ -1159,6 +1411,10 @@
       if (sOwnerLbl) sOwnerLbl.innerText = t('settings_owner_label');
       const sCloudSyncLbl = document.getElementById('lblSettingsCloudSync');
       if (sCloudSyncLbl) sCloudSyncLbl.innerText = t('settings_cloud_sync_label');
+      const sHostingLbl = document.getElementById('lblSettingsHosting');
+      if (sHostingLbl) sHostingLbl.innerText = t('hosted_in_germany');
+      const sHidLbl = document.getElementById('lblSettingsHouseholdId');
+      if (sHidLbl) sHidLbl.innerText = t('settings_household_id_label');
       const sPartnerBtnText = document.getElementById('btnSettingsPartnerLinkText');
       if (sPartnerBtnText) sPartnerBtnText.innerText = t('settings_partner_link_btn');
       const sPartnerHint = document.getElementById('lblSettingsPartnerLinkHint');
@@ -1190,6 +1446,7 @@
       return hash;
     }
 
+    // Always in foreground with z-[9999]
     function showToast(message, isWarning = false) {
       const toast = document.getElementById('toastNotification');
       const msg = document.getElementById('toastMessage');
@@ -1197,16 +1454,16 @@
       msg.innerText = message;
       
       toast.className = isWarning 
-        ? "fixed top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-amber-600 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-amber-400/50 transition-all duration-300 opacity-100 pointer-events-auto transform translate-y-0"
-        : "fixed top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-emerald-400/50 transition-all duration-300 opacity-100 pointer-events-auto transform translate-y-0";
+        ? "fixed top-3 left-1/2 -translate-x-1/2 z-[9999] px-4 py-2.5 rounded-xl bg-amber-600 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-amber-400/50 transition-all duration-300 opacity-100 pointer-events-auto transform translate-y-0"
+        : "fixed top-3 left-1/2 -translate-x-1/2 z-[9999] px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-emerald-400/50 transition-all duration-300 opacity-100 pointer-events-auto transform translate-y-0";
       
       if (navigator.vibrate) {
         try { navigator.vibrate(25); } catch(e){}
       }
       
       setTimeout(() => {
-        toast.className = "fixed top-3 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-emerald-400/50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-4";
-      }, 2400);
+        toast.className = "fixed top-3 left-1/2 -translate-x-1/2 z-[9999] px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-emerald-400/50 transition-all duration-300 opacity-0 pointer-events-none transform -translate-y-4";
+      }, 2600);
     }
 
     function loadOutbox() {
@@ -1224,7 +1481,7 @@
       } catch(e) {}
     }
 
-    // Default Konfiguration
+    // Default configuration (Clean English defaults)
     let config = {
       householdId: '',
       householdName: 'Household',
@@ -1256,10 +1513,155 @@
       return 'hh_' + Math.random().toString(36).substring(2, 9) + Date.now().toString(36).slice(-4);
     }
 
-    // URL Setup Hash & Search prüfen (Punkt a & b)
+    // Households & Projects Management (Switching & Storing)
+    function getSavedHouseholds() {
+      try {
+        const raw = safeStore.getItem(STORAGE_KEY_SAVED_HOUSEHOLDS);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e) {
+        return [];
+      }
+    }
+
+    function saveHouseholdToList(hh) {
+      if (!hh || !hh.id) return;
+      let list = getSavedHouseholds();
+      const existingIdx = list.findIndex(h => h.id === hh.id);
+      const entry = {
+        id: hh.id,
+        name: hh.name || 'Household',
+        currency: hh.currency || '€',
+        monthlyBudget: hh.monthlyBudget || 0,
+        deviceOwner: hh.deviceOwner || '',
+        lastUsed: Date.now()
+      };
+      if (existingIdx !== -1) {
+        list[existingIdx] = Object.assign(list[existingIdx], entry);
+      } else {
+        list.unshift(entry);
+      }
+      list = list.slice(0, 15);
+      try { safeStore.setItem(STORAGE_KEY_SAVED_HOUSEHOLDS, JSON.stringify(list)); } catch(e){}
+    }
+
+    function renderSettingsHouseholdsList() {
+      const container = document.getElementById('settingsHouseholdsList');
+      if (!container) return;
+      const list = getSavedHouseholds();
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="p-2 rounded-xl bg-slate-900/60 border border-slate-800 text-[11px] text-slate-400 flex items-center justify-between">
+            <span class="font-bold text-white">${escapeHtml(config.householdName || 'Household')}</span>
+            <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-[10px]">● Active</span>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(h => {
+        const isActive = (h.id === config.householdId);
+        return `
+          <div class="p-2 rounded-xl bg-slate-900 border ${isActive ? 'border-sky-500/50 bg-sky-950/20' : 'border-slate-800'} text-xs flex items-center justify-between gap-2">
+            <div class="truncate flex-1">
+              <div class="font-bold text-white truncate">${escapeHtml(h.name)}</div>
+              <div class="text-[9px] text-slate-500 font-mono">${escapeHtml(h.id)}</div>
+            </div>
+            ${isActive ? `
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-[10px] shrink-0">● Active</span>
+            ` : `
+              <button type="button" onclick="switchToHousehold('${escapeHtml(h.id)}')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-sky-400 text-xs font-bold transition active:scale-95 shrink-0">
+                Switch
+              </button>
+            `}
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function switchToHousehold(targetId) {
+      if (!targetId) return;
+      if (targetId === config.householdId) {
+        closeSettingsModal();
+        return;
+      }
+
+      // Save current household first
+      saveHouseholdToList({
+        id: config.householdId,
+        name: config.householdName,
+        currency: config.currency,
+        monthlyBudget: config.monthlyBudget,
+        deviceOwner: config.deviceOwner
+      });
+
+      const list = getSavedHouseholds();
+      const found = list.find(h => h.id === targetId);
+
+      config.householdId = targetId;
+      if (found) {
+        config.householdName = found.name;
+        if (found.currency) config.currency = found.currency;
+        if (found.deviceOwner) {
+          config.deviceOwner = found.deviceOwner;
+          activePerson = found.deviceOwner;
+        }
+      }
+
+      saveConfig();
+      expenses = [];
+      saveData();
+
+      closeSettingsModal();
+      updateHouseholdUI();
+      render();
+      showToast(`${t('toast_switched_household')}${config.householdName || targetId}`);
+
+      subscribeToRealtime();
+      await syncWithSupabase(false);
+    }
+
+    function startNewHouseholdFlow() {
+      // Save current household
+      saveHouseholdToList({
+        id: config.householdId,
+        name: config.householdName,
+        currency: config.currency,
+        monthlyBudget: config.monthlyBudget,
+        deviceOwner: config.deviceOwner
+      });
+
+      closeSettingsModal();
+
+      // Reset for new household
+      config.householdId = generateHouseholdId();
+      config.householdName = '';
+      config.monthlyBudget = 1500;
+      config.budgetPlan = { incomes: [], fixedCosts: [] };
+      expenses = [];
+      saveData();
+
+      openSetupWizard();
+    }
+
+    async function joinHouseholdById() {
+      const input = document.getElementById('inputJoinHouseholdId');
+      if (!input) return;
+      let rawVal = input.value.trim();
+      if (!rawVal) return;
+
+      if (rawVal.includes('hid=')) {
+        const match = rawVal.match(/hid=([^&]+)/);
+        if (match && match[1]) rawVal = decodeURIComponent(match[1]);
+      }
+
+      await switchToHousehold(rawVal);
+      input.value = '';
+    }
+
+    // URL Setup Hash & Search prüfen (Invite Link Handler)
     function checkUrlSetup() {
       try {
-        // Unterstützt sowohl #setup?hid=... als auch ?hid=... (falls Messenger Hash entfernen)
         const hash = window.location.hash || '';
         const search = window.location.search || '';
         let qStr = '';
@@ -1273,81 +1675,129 @@
         if (qStr) {
           const params = new URLSearchParams(qStr);
 
-          // 1. Haushalts-ID
           if (params.get('hid')) {
             config.householdId = decodeURIComponent(params.get('hid')).trim();
           }
 
-          // 2. Haushaltsname
           if (params.get('h')) {
             config.householdName = decodeURIComponent(params.get('h')).trim();
           }
 
-          // 3. Budget
-          if (params.get('budget')) config.monthlyBudget = parseFloat(params.get('budget')) || 1500;
-          if (params.get('b')) config.monthlyBudget = parseFloat(params.get('b')) || 1500;
+          if (params.get('budget')) config.monthlyBudget = parseFloat(params.get('budget')) || 0;
+          if (params.get('b')) config.monthlyBudget = parseFloat(params.get('b')) || 0;
 
-          // 4. User-Liste
           if (params.get('users')) {
             const rawUsers = decodeURIComponent(params.get('users')).split(',');
             config.users = rawUsers.map((uStr, i) => {
               const parts = uStr.trim().split(':');
               return { id: 'u_' + (i + 1), name: parts[0].trim(), colorIdx: i % PALETTE.length };
             }).filter(u => u.name.length > 0);
-          } else {
-            const p1 = params.get('p1');
-            const p2 = params.get('p2');
-            if (p1 || p2) {
-              config.users = [];
-              if (p1) config.users.push({ id: 'u_1', name: p1.trim(), colorIdx: 0 });
-              if (p2) config.users.push({ id: 'u_2', name: p2.trim(), colorIdx: 1 });
-            }
           }
 
-          // 5. Geräte-Inhaber
-          if (params.get('owner')) {
-            config.deviceOwner = decodeURIComponent(params.get('owner')).trim();
-            activePerson = config.deviceOwner;
-          }
-
-          // 6. Sprache & Währung
           if (params.get('lang')) config.lang = decodeURIComponent(params.get('lang'));
           if (params.get('curr')) config.currency = decodeURIComponent(params.get('curr'));
 
-          // Dauerhaft als Default speichern
           saveConfig();
-          safeStore.setItem('logbuch_device_owner_set', 'true');
-          safeStore.setItem('logbuch_household_initialized', 'true');
-          
-          // URL bereinigen, damit Hash nicht stört
+          saveHouseholdToList({
+            id: config.householdId,
+            name: config.householdName,
+            currency: config.currency,
+            monthlyBudget: config.monthlyBudget,
+            deviceOwner: config.deviceOwner
+          });
+
+          // Clean URL from address bar
           window.history.replaceState(null, '', window.location.pathname);
-          showToast(t('toast_config_loaded') + config.deviceOwner);
+
+          // Prompt invited user: "Who are you on this smartphone?"
+          setTimeout(() => {
+            openInviteOnboardingModal();
+          }, 300);
         }
       } catch(e) {
         console.error('Setup hash parse error', e);
       }
     }
 
+    function openInviteOnboardingModal() {
+      const modal = document.getElementById('inviteOnboardingModal');
+      const title = document.getElementById('onboardingTitle');
+      const usersContainer = document.getElementById('onboardingUserOptions');
+      if (!modal || !usersContainer) return;
+
+      if (title) title.innerText = `${t('onboarding_title')}${config.householdName || t('household')}!`;
+
+      usersContainer.innerHTML = (config.users || []).map((u, i) => {
+        const color = PALETTE[u.colorIdx % PALETTE.length];
+        return `
+          <button type="button" onclick="selectOnboardingUser('${escapeHtml(u.name)}')" class="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-white font-bold text-xs flex items-center justify-between transition active:scale-95 shadow-sm">
+            <span class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full inline-block" style="background-color: ${color.hex}"></span>
+              <span>${escapeHtml(u.name)}</span>
+            </span>
+            <span class="text-[10px] text-sky-400 font-semibold">Select →</span>
+          </button>
+        `;
+      }).join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function selectOnboardingUser(name) {
+      config.deviceOwner = name;
+      activePerson = name;
+      saveConfig();
+      saveHouseholdToList({
+        id: config.householdId,
+        name: config.householdName,
+        currency: config.currency,
+        monthlyBudget: config.monthlyBudget,
+        deviceOwner: config.deviceOwner
+      });
+
+      const modal = document.getElementById('inviteOnboardingModal');
+      if (modal) modal.classList.add('hidden');
+
+      safeStore.setItem('logbuch_household_initialized', 'true');
+      updateHouseholdUI();
+      render();
+      showToast(`${t('toast_welcome')}${name}!`);
+
+      subscribeToRealtime();
+      syncWithSupabase(false);
+    }
+
+    function submitOnboardingNewUser() {
+      const input = document.getElementById('inputOnboardingNewName');
+      if (!input) return;
+      const val = input.value.trim();
+      if (!val) return;
+
+      const newIdx = config.users.length;
+      config.users.push({
+        id: `u_${newIdx + 1}`,
+        name: val,
+        colorIdx: newIdx % PALETTE.length
+      });
+
+      selectOnboardingUser(val);
+      saveHouseholdToSupabase();
+    }
+
     function init() {
       const dateEl = document.getElementById('inputDate');
       if (dateEl) dateEl.valueAsDate = new Date();
 
-      // Gespeicherte Config laden
+      // Load stored config
       const storedConfig = safeStore.getItem(STORAGE_KEY_CONFIG);
       if (storedConfig) {
         try {
           const parsed = JSON.parse(storedConfig);
-          if (!parsed.users && (parsed.person1 || parsed.person2)) {
-            parsed.users = [
-              { id: 'u_1', name: parsed.person1 || 'Person 1', colorIdx: 0 },
-              { id: 'u_2', name: parsed.person2 || 'Person 2', colorIdx: 1 }
-            ];
-          }
           config = Object.assign(config, parsed);
         } catch(e){}
       }
 
-      // URL Parameter prüfen (überschreibt bei Einladungslink)
+      // Check URL parameters (invite links)
       checkUrlSetup();
 
       if (!config.householdId) config.householdId = generateHouseholdId();
@@ -1358,8 +1808,8 @@
         ];
       }
 
-      if (!config.monthlyBudget) config.monthlyBudget = 1500;
-      if (!config.lang) config.lang = getAutoLang();
+      if (config.monthlyBudget === undefined || config.monthlyBudget === null) config.monthlyBudget = 1500;
+      if (!config.lang) config.lang = 'en';
       if (!config.currency) config.currency = '€';
       if (!config.budgetPlan) config.budgetPlan = { incomes: [], fixedCosts: [] };
       saveConfig();
@@ -1385,11 +1835,10 @@
         try { lucide.createIcons(); } catch(e){}
       }
 
-      // Initialer Sync mit Supabase & Realtime-Abonnement
+      // Initial Sync with Supabase & Realtime
       syncWithSupabase(false);
       subscribeToRealtime();
 
-      // Automatischer periodischer Sync alle 30 Sekunden
       setInterval(() => {
         syncWithSupabase(false);
       }, 30000);
@@ -1410,10 +1859,16 @@
       try {
         safeStore.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config));
       } catch(e){}
+      saveHouseholdToList({
+        id: config.householdId,
+        name: config.householdName,
+        currency: config.currency,
+        monthlyBudget: config.monthlyBudget,
+        deviceOwner: config.deviceOwner
+      });
     }
 
     function checkFirstLaunch() {
-      // Wenn der User bereits einen validen Haushalt hat (z. B. via Einladungslink oder gespeichert), kein Wizard!
       if (config.householdId && config.householdName && config.householdName !== 'Household' && config.householdName !== 'Haushalt') {
         safeStore.setItem('logbuch_household_initialized', 'true');
         return;
@@ -1429,7 +1884,7 @@
       if (!modal) return;
 
       document.getElementById('wizardHouseholdName').value = config.householdName !== 'Household' && config.householdName !== 'Haushalt' ? config.householdName : '';
-      document.getElementById('wizardMonthlyBudget').value = config.monthlyBudget || 1500;
+      document.getElementById('wizardMonthlyBudget').value = config.monthlyBudget || '';
 
       if (config.users && config.users.length > 0) {
         wizardTempUsers = JSON.parse(JSON.stringify(config.users));
@@ -1498,36 +1953,50 @@
       const container = document.getElementById('wizardOwnerOptions');
       if (!container) return;
 
-      container.innerHTML = wizardTempUsers.map(u => {
-        const isSelected = (wizardSelectedOwner === u.name);
+      const validUsers = wizardTempUsers.filter(u => u.name.trim().length > 0);
+      if (validUsers.length === 0) {
+        container.innerHTML = '<div class="text-[10px] text-slate-500 italic col-span-2">Enter names above first</div>';
+        return;
+      }
+
+      if (!validUsers.some(u => u.name === wizardSelectedOwner)) {
+        wizardSelectedOwner = validUsers[0].name;
+      }
+
+      container.innerHTML = validUsers.map(u => {
+        const isSel = (u.name === wizardSelectedOwner);
         const color = PALETTE[u.colorIdx % PALETTE.length];
         return `
-          <button type="button" onclick="setWizardOwner('${escapeHtml(u.name)}')"
-            class="py-2 px-2.5 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition ${isSelected ? 'border-sky-400 bg-sky-500/20 text-white' : 'border-slate-800 bg-slate-900 text-slate-400'}">
+          <button type="button" onclick="selectWizardOwner('${escapeHtml(u.name)}')" 
+                  class="py-2 px-2.5 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5 active:scale-95"
+                  style="
+                    background-color: ${isSel ? color.bg : 'rgba(15, 23, 42, 0.6)'}; 
+                    border-color: ${isSel ? color.border : 'rgba(51, 65, 85, 0.8)'}; 
+                    color: ${isSel ? '#ffffff' : '#94a3b8'}
+                  ">
             <span class="w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
-            <span class="truncate">${escapeHtml(u.name || 'User')}</span>
+            ${escapeHtml(u.name)}
           </button>
         `;
       }).join('');
     }
 
-    function setWizardOwner(name) {
+    function selectWizardOwner(name) {
       wizardSelectedOwner = name;
       renderWizardOwnerOptions();
     }
 
     async function finishSetupWizard() {
-      const hName = document.getElementById('wizardHouseholdName').value.trim() || t('household');
-      const bVal = parseFloat(document.getElementById('wizardMonthlyBudget').value);
+      const hNameInput = document.getElementById('wizardHouseholdName');
+      const hName = (hNameInput.value || '').trim() || 'Household';
+      const bInput = document.getElementById('wizardMonthlyBudget');
+      const bVal = (bInput.value || '').trim();
+      const budget = bVal ? (parseFloat(bVal) || 0) : 0;
 
-      if (!config.householdId || config.householdId === 'hh_default') {
-        config.householdId = generateHouseholdId();
-      }
       config.householdName = hName;
-      config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
-
+      config.monthlyBudget = budget;
       config.users = wizardTempUsers.map((u, i) => ({
-        id: `u_${i+1}`,
+        id: u.id || `u_${i+1}`,
         name: u.name.trim() || `Person ${i+1}`,
         colorIdx: u.colorIdx !== undefined ? u.colorIdx : (i % PALETTE.length)
       }));
@@ -1537,7 +2006,6 @@
       activePerson = config.deviceOwner;
 
       saveConfig();
-      safeStore.setItem('logbuch_device_owner_set', 'true');
       safeStore.setItem('logbuch_household_initialized', 'true');
 
       document.getElementById('setupWizardModal').classList.add('hidden');
@@ -1546,12 +2014,11 @@
       render();
       showToast(`${t('toast_welcome')}${hName}!`);
 
-      // In Supabase sichern
       await saveHouseholdToSupabase();
       subscribeToRealtime();
       syncWithSupabase(false);
 
-      // Nach Setup direkt das Einladungs-Modal für den Partner anzeigen (Punkt a)
+      // Open invite modal after wizard
       openShareInviteModal();
     }
 
@@ -1574,27 +2041,20 @@
       if (!config.householdId) config.householdId = generateHouseholdId();
       const hidParam = encodeURIComponent(config.householdId);
       const hName = encodeURIComponent(config.householdName || 'Household');
-      const budget = config.monthlyBudget || 1500;
+      const budget = config.monthlyBudget || 0;
       const userList = encodeURIComponent(config.users.map(u => u.name).join(','));
       
-      let partnerOwner = config.users[0] ? config.users[0].name : '';
-      if (config.users.length > 1) {
-        const other = config.users.find(u => u.name !== config.deviceOwner);
-        if (other) partnerOwner = other.name;
-      }
-      const ownerParam = encodeURIComponent(partnerOwner);
       const langParam = config.lang ? `&lang=${encodeURIComponent(config.lang)}` : '';
       const currParam = config.currency ? `&curr=${encodeURIComponent(config.currency)}` : '';
 
-      return `${baseUrl}#setup?hid=${hidParam}&h=${hName}&b=${budget}&users=${userList}&owner=${ownerParam}${langParam}${currParam}`;
+      return `${baseUrl}#setup?hid=${hidParam}&h=${hName}&b=${budget}&users=${userList}${langParam}${currParam}`;
     }
 
     async function shareHouseholdInvite() {
       const shareUrl = buildPartnerSetupUrl();
       const shareData = {
         title: `${t('app_title')} - ${config.householdName || t('household')}`,
-        text: `Komm in unseren Haushalt auf Logbuch:
-`,
+        text: `${t('invite_subtitle')}\n`,
         url: shareUrl
       };
 
@@ -1624,7 +2084,7 @@
       }
     }
 
-    // Ausgabe hinzufügen
+    // Add Expense
     async function addExpense(e) {
       if (e) e.preventDefault();
       const amountEl = document.getElementById('inputAmount');
@@ -1658,34 +2118,25 @@
 
       amountEl.value = '';
       if (merchantEl) merchantEl.value = '';
-      amountEl.focus();
+      showToast(t('toast_saved'));
 
-      showToast(`${t('toast_saved')}: ${formatMoney(amount)}`);
-
-      // Hintergrund-Sync mit Supabase
       try {
         await pushExpenseToSupabase(newEntry);
-      } catch (err) {
-        console.warn('Supabase offline, queuing in outbox', err);
-        outbox.push({ action: 'add', entry: newEntry });
+      } catch(err) {
+        outbox.push({ action: 'create', entry: newEntry });
         saveOutbox();
       }
     }
 
-    // Ausgabe löschen mit Bestätigung (Punkt e)
     async function deleteExpense(id) {
-      const exp = expenses.find(e => e.id === id);
-      if (!exp) return;
-
-      const confirmMsg = t('confirm_delete_expense') || `Möchtest du diese Ausgabe wirklich unwiderruflich aus dem Logbuch entfernen?`;
+      const confirmMsg = t('confirm_delete_expense');
       if (!confirm(confirmMsg)) return;
 
       expenses = expenses.filter(e => e.id !== id);
       saveData();
       render();
-      showToast(t('toast_deleted') || '✓ Ausgabe gelöscht');
+      showToast(t('toast_deleted'));
 
-      // Auch im History-Modal aktualisieren falls geöffnet
       renderFullHistoryList();
 
       try {
@@ -1696,14 +2147,14 @@
       }
     }
 
-    // Supabase DB Operationen
+    // Supabase DB Operations
     async function saveHouseholdToSupabase() {
       if (!config.householdId) config.householdId = generateHouseholdId();
       const client = getSupabaseClient();
       const hhPayload = {
         id: config.householdId,
         name: config.householdName || 'Household',
-        monthly_budget: config.monthlyBudget || 1500,
+        monthly_budget: config.monthlyBudget || 0,
         currency: config.currency || '€',
         budget_plan: config.budgetPlan || {},
         updated_at: new Date().toISOString()
@@ -1780,7 +2231,7 @@
           },
           body: JSON.stringify(payload)
         });
-        if (!res.ok) throw new Error('PostgREST error: ' + res.status);
+        if (!res.ok) throw new Error('Supabase fetch error: ' + res.statusText);
       }
     }
 
@@ -1788,35 +2239,33 @@
       if (!config.householdId) return;
       const client = getSupabaseClient();
       if (client) {
-        await client.from('expenses').update({ deleted: true, updated_at: new Date().toISOString() }).eq('id', id);
+        const { error } = await client.from('expenses').delete().eq('id', id);
+        if (error) throw error;
       } else {
-        await fetch(`${SUPABASE_URL}/rest/v1/expenses?id=eq.${id}`, {
-          method: 'PATCH',
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/expenses?id=eq.${id}`, {
+          method: 'DELETE',
           headers: {
             'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ deleted: true, updated_at: new Date().toISOString() })
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+          }
         });
+        if (!res.ok) throw new Error('Supabase delete error: ' + res.statusText);
       }
     }
 
     async function drainOutbox() {
-      if (isDrainingOutbox) return;
-      if (!config.householdId || outbox.length === 0) return;
-
+      if (isDrainingOutbox || outbox.length === 0) return;
       isDrainingOutbox = true;
-      const remaining = [];
 
+      const remaining = [];
       for (const item of outbox) {
         try {
-          if (item.action === 'delete') {
+          if (item.action === 'create' && item.entry) {
+            await pushExpenseToSupabase(item.entry);
+          } else if (item.action === 'delete' && item.id) {
             await deleteExpenseFromSupabase(item.id);
-          } else {
-            await pushExpenseToSupabase(item.entry || item);
           }
-        } catch(err) {
+        } catch(e) {
           remaining.push(item);
         }
       }
@@ -1826,11 +2275,9 @@
       isDrainingOutbox = false;
     }
 
-    // Automatischer Sync (Punkt b)
+    // Bidirectional Synchronization
     async function syncWithSupabase(showToastNotice = false) {
-      if (isSyncing) return;
-      if (!config.householdId) return;
-
+      if (!config.householdId || isSyncing) return;
       isSyncing = true;
       const iconBottom = document.getElementById('iconSyncBottom');
       if (iconBottom) iconBottom.classList.add('animate-spin');
@@ -1839,57 +2286,20 @@
         await drainOutbox();
 
         const client = getSupabaseClient();
-        let remoteEntries = [];
+        let remoteExpenses = [];
+        let remoteHh = null;
 
         if (client) {
-          const { data, error } = await client
+          const { data: hhData } = await client.from('households').select('*').eq('id', config.householdId).maybeSingle();
+          remoteHh = hhData;
+
+          const { data: expData, error } = await client
             .from('expenses')
             .select('*')
             .eq('household_id', config.householdId)
             .eq('deleted', false)
-            .order('date', { ascending: false })
-            .order('created_at', { ascending: false });
-          if (!error && data) remoteEntries = data;
-        } else {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/expenses?household_id=eq.${config.householdId}&deleted=eq.false&order=date.desc,created_at.desc`, {
-            headers: {
-              'apikey': SUPABASE_ANON_KEY,
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-            }
-          });
-          if (res.ok) {
-            remoteEntries = await res.json();
-          }
-        }
-
-        if (remoteEntries && remoteEntries.length >= 0) {
-          const outboxIds = new Set(outbox.map(item => (item.entry ? item.entry.id : item.id)));
-          const localPending = expenses.filter(e => outboxIds.has(e.id));
-          
-          const remoteMapped = remoteEntries.map(r => ({
-            id: r.id,
-            date: r.date,
-            person: r.person,
-            purpose: r.purpose,
-            merchant: r.merchant || '',
-            amount: parseFloat(r.amount) || 0,
-            createdAt: r.created_at
-          }));
-
-          const mergedMap = new Map();
-          remoteMapped.forEach(e => mergedMap.set(e.id, e));
-          localPending.forEach(e => mergedMap.set(e.id, e));
-
-          expenses = Array.from(mergedMap.values()).sort((a, b) => new Date(b.date) - new Date(a.date));
-          saveData();
-          render();
-        }
-
-        // Haushaltsdaten synchronisieren falls vom Partner aktualisiert
-        let remoteHh = null;
-        if (client) {
-          const { data } = await client.from('households').select('*').eq('id', config.householdId).maybeSingle();
-          remoteHh = data;
+            .order('date', { ascending: false });
+          if (!error && expData) remoteExpenses = expData;
         } else {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/households?id=eq.${config.householdId}`, {
             headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
@@ -1898,19 +2308,49 @@
             const arr = await res.json();
             if (arr && arr.length > 0) remoteHh = arr[0];
           }
+
+          const resExp = await fetch(`${SUPABASE_URL}/rest/v1/expenses?household_id=eq.${config.householdId}&deleted=eq.false&order=date.desc`, {
+            headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+          });
+          if (resExp.ok) {
+            remoteExpenses = await resExp.json();
+          }
         }
 
         if (remoteHh) {
           if (remoteHh.name) config.householdName = remoteHh.name;
-          if (remoteHh.monthly_budget) config.monthlyBudget = parseFloat(remoteHh.monthly_budget);
+          if (remoteHh.monthly_budget !== undefined && remoteHh.monthly_budget !== null) {
+            config.monthlyBudget = parseFloat(remoteHh.monthly_budget) || 0;
+          }
           if (remoteHh.currency) config.currency = remoteHh.currency;
           if (remoteHh.budget_plan && Object.keys(remoteHh.budget_plan).length > 0) {
             config.budgetPlan = remoteHh.budget_plan;
           }
           saveConfig();
           updateHouseholdUI();
-          render();
         }
+
+        // Merge remote expenses with local expenses
+        const localMap = new Map(expenses.map(e => [e.id, e]));
+        remoteExpenses.forEach(re => {
+          localMap.set(re.id, {
+            id: re.id,
+            date: re.date,
+            person: re.person,
+            purpose: re.purpose,
+            merchant: re.merchant || '',
+            amount: parseFloat(re.amount) || 0,
+            createdAt: re.created_at || re.updated_at
+          });
+        });
+
+        expenses = Array.from(localMap.values()).sort((a, b) => {
+          if (a.date !== b.date) return b.date.localeCompare(a.date);
+          return (b.id || '').localeCompare(a.id || '');
+        });
+
+        saveData();
+        render();
 
         const syncStatusText = document.getElementById('cloudSyncStatusText');
         if (syncStatusText) {
@@ -1922,6 +2362,8 @@
           sBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> active';
           sBadge.className = 'text-[10px] text-emerald-400 font-bold flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full';
         }
+        const cardSyncBadge = document.getElementById('syncStatusBadgeText');
+        if (cardSyncBadge) cardSyncBadge.innerText = t('cloud_sync_active');
 
         if (showToastNotice) {
           showToast(t('toast_sync_success'));
@@ -1938,13 +2380,15 @@
           sBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> inactive';
           sBadge.className = 'text-[10px] text-slate-400 font-bold flex items-center gap-1 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full';
         }
+        const cardSyncBadge = document.getElementById('syncStatusBadgeText');
+        if (cardSyncBadge) cardSyncBadge.innerText = t('cloud_sync_inactive');
       } finally {
         isSyncing = false;
         if (iconBottom) iconBottom.classList.remove('animate-spin');
       }
     }
 
-    // Realtime-Abonnement
+    // Realtime Subscription
     function subscribeToRealtime() {
       const client = getSupabaseClient();
       if (!client || !config.householdId) return;
@@ -1968,75 +2412,61 @@
           )
           .subscribe();
       } catch(e) {
-        console.warn('Realtime subscription error:', e);
+        console.warn('subscribeToRealtime error:', e);
       }
     }
 
     function handleRemoteRealtimeChange(payload) {
-      const { eventType, new: newRec, old: oldRec } = payload;
+      if (!payload) return;
+      const { eventType, new: newRecord, old: oldRecord } = payload;
+
       if (eventType === 'INSERT' || eventType === 'UPDATE') {
-        if (newRec.deleted) {
-          expenses = expenses.filter(e => e.id !== newRec.id);
-        } else {
-          const mapped = {
-            id: newRec.id,
-            date: newRec.date,
-            person: newRec.person,
-            purpose: newRec.purpose,
-            merchant: newRec.merchant || '',
-            amount: parseFloat(newRec.amount) || 0,
-            createdAt: newRec.created_at
+        if (newRecord && !newRecord.deleted) {
+          const entry = {
+            id: newRecord.id,
+            date: newRecord.date,
+            person: newRecord.person,
+            purpose: newRecord.purpose,
+            merchant: newRecord.merchant || '',
+            amount: parseFloat(newRecord.amount) || 0,
+            createdAt: newRecord.created_at || newRecord.updated_at
           };
-          const idx = expenses.findIndex(e => e.id === newRec.id);
+          const idx = expenses.findIndex(e => e.id === entry.id);
           if (idx !== -1) {
-            expenses[idx] = mapped;
+            expenses[idx] = entry;
           } else {
-            expenses.unshift(mapped);
+            expenses.unshift(entry);
           }
-          expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+        } else if (newRecord && newRecord.deleted) {
+          expenses = expenses.filter(e => e.id !== newRecord.id);
         }
-        saveData();
-        render();
-        renderFullHistoryList();
-        if (navigator.vibrate) {
-          try { navigator.vibrate(20); } catch(e){}
-        }
-      } else if (eventType === 'DELETE') {
-        if (oldRec && oldRec.id) {
-          expenses = expenses.filter(e => e.id !== oldRec.id);
-          saveData();
-          render();
-          renderFullHistoryList();
-        }
+      } else if (eventType === 'DELETE' && oldRecord) {
+        expenses = expenses.filter(e => e.id !== oldRecord.id);
       }
+
+      expenses.sort((a, b) => {
+        if (a.date !== b.date) return b.date.localeCompare(a.date);
+        return (b.id || '').localeCompare(a.id || '');
+      });
+
+      saveData();
+      render();
+      renderFullHistoryList();
     }
 
-    // UI Rendering
+    // Main Render Function
     function render() {
       const now = new Date();
-      const currentYear = now.getFullYear();
-      const currentMonth = now.getMonth();
+      const currentMonthKey = now.toISOString().slice(0, 7); // 'YYYY-MM'
 
-      // Aktueller Monat
-      const currentMonthExpenses = expenses.filter(exp => {
-        if (!exp.date) return false;
-        let y, m;
-        if (typeof exp.date === 'string' && exp.date.includes('-')) {
-          const parts = exp.date.split('-');
-          y = parseInt(parts[0], 10);
-          m = parseInt(parts[1], 10) - 1;
-        } else {
-          const d = new Date(exp.date);
-          y = d.getFullYear();
-          m = d.getMonth();
-        }
-        return y === currentYear && m === currentMonth;
-      });
+      const currentMonthExpenses = expenses.filter(e => (e.date || '').startsWith(currentMonthKey));
 
       let total = 0;
       const userSums = {};
-      config.users.forEach(u => userSums[u.name] = 0);
+      (config.users || []).forEach(u => { userSums[u.name] = 0; });
+
       const purposeMap = {};
+      CATEGORIES.forEach(c => { purposeMap[t(c.i18nKey)] = 0; });
 
       currentMonthExpenses.forEach(exp => {
         total += exp.amount;
@@ -2051,19 +2481,29 @@
 
       document.getElementById('totalExpensesMonth').innerText = formatMoney(total);
 
+      // Responsive Distribution Badges for 2 to 15+ members
       const splitEl = document.getElementById('userSplitDisplay');
       if (splitEl) {
         splitEl.innerHTML = Object.entries(userSums).map(([name, sum]) => {
           const color = getUserColor(name);
-          return `<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full inline-block" style="background-color: ${color.hex}"></span> ${escapeHtml(name)}: <strong style="color: ${color.hex}">${formatMoneyCompact(sum)}</strong></span>`;
-        }).join('<span class="text-slate-600">•</span>');
+          return `
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold shrink-0" 
+                  style="background-color: ${color.bg}; border: 1px solid ${color.border}; color: ${color.text};">
+              <span class="w-2 h-2 rounded-full inline-block shrink-0" style="background-color: ${color.hex}"></span>
+              <span>${escapeHtml(name)}:</span>
+              <strong class="font-bold text-white">${formatMoneyCompact(sum)}</strong>
+            </span>
+          `;
+        }).join('');
       }
 
-      const budget = config.monthlyBudget || 1500;
+      const budget = (config.monthlyBudget !== undefined && config.monthlyBudget !== null) ? config.monthlyBudget : 1500;
       const budgetDisplay = document.getElementById('targetBudgetDisplay');
-      if (budgetDisplay) budgetDisplay.innerText = formatMoneyCompact(budget);
+      if (budgetDisplay) {
+        budgetDisplay.innerText = budget > 0 ? formatMoneyCompact(budget) : (config.currency || '€') + ' --';
+      }
 
-      const depthPct = Math.round((total / budget) * 100);
+      const depthPct = budget > 0 ? Math.round((total / budget) * 100) : 0;
       const freeboard = budget - total;
 
       const barEl = document.getElementById('waterProgressBar');
@@ -2088,15 +2528,20 @@
       }
 
       if (freeboardLabel) {
-        if (freeboard >= 0) {
-          freeboardLabel.innerHTML = `Noch <span class="text-emerald-400 font-bold">${formatMoneyCompact(freeboard)}</span> Puffer`;
+        if (budget === 0) {
+          freeboardLabel.innerHTML = `<span class="text-slate-400 font-semibold">${formatMoneyCompact(total)} ${t('spent_label')}</span>`;
+        } else if (freeboard >= 0) {
+          freeboardLabel.innerHTML = `<span class="text-emerald-400 font-bold">${formatMoneyCompact(freeboard)}</span> ${t('buffer_label')}`;
         } else {
-          freeboardLabel.innerHTML = `<span class="text-rose-400 font-bold">${formatMoneyCompact(Math.abs(freeboard))} über Budget!</span>`;
+          freeboardLabel.innerHTML = `<span class="text-rose-400 font-bold">${formatMoneyCompact(Math.abs(freeboard))} ${t('over_budget_label')}</span>`;
         }
       }
 
       if (statusText) {
-        if (depthPct <= 50) {
+        if (budget === 0) {
+          statusText.className = 'text-sky-400 font-medium text-xs';
+          statusText.innerText = `⛵ ${config.householdName || t('household')}`;
+        } else if (depthPct <= 50) {
           statusText.className = 'text-emerald-400 font-medium text-xs';
           statusText.innerText = `⛵ ${t('status_calm')} (${depthPct}%)`;
         } else if (depthPct <= 80) {
@@ -2111,49 +2556,58 @@
         }
       }
 
-      // Erfasste Belege Liste (Punkt e - mit Löschen)
+      // Recent Receipts List (Current Month)
       const countEl = document.getElementById('recentReceiptsCount');
-      if (countEl) countEl.innerText = `${expenses.length} ${t('entries_count')}`;
+      if (countEl) countEl.innerText = `${currentMonthExpenses.length} ${t('entries_count')}`;
 
       const outboxIds = new Set(outbox.map(item => (item.entry ? item.entry.id : item.id)));
       const listEl = document.getElementById('recentReceiptsList');
       if (listEl) {
-        if (expenses.length === 0) {
-          listEl.innerHTML = `<div class="p-6 text-center text-slate-500 text-xs italic">${t('no_expenses')}</div>`;
+        if (currentMonthExpenses.length === 0) {
+          listEl.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs italic">${t('no_expenses')}</div>`;
         } else {
-          listEl.innerHTML = expenses.slice(0, 30).map(exp => {
-            const isPending = outboxIds.has(exp.id);
+          listEl.innerHTML = currentMonthExpenses.map(exp => {
             const color = getUserColor(exp.person);
-            const locPurpose = getLocalizedCategory(exp.purpose);
+            const isPending = outboxIds.has(exp.id);
+            const pLoc = getLocalizedCategory(exp.purpose);
+            const merchantText = exp.merchant ? ` • ${escapeHtml(exp.merchant)}` : '';
             return `
-            <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs hover:border-slate-700 transition">
-              <div class="flex items-center gap-2">
-                <span class="w-1.5 h-8 rounded-full shrink-0" style="background-color: ${color.hex}"></span>
-                <div>
-                  <div class="font-bold text-white flex items-center gap-1.5">
-                    <span>${escapeHtml(locPurpose)}</span>
-                    ${exp.merchant ? `<span class="text-[10px] font-normal text-slate-400">(${escapeHtml(exp.merchant)})</span>` : ''}
-                    ${isPending ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30">Offline</span>' : ''}
+              <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-900/80 border border-slate-800/80 hover:border-slate-700 transition">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm shrink-0 border"
+                       style="background-color: ${color.bg}; border-color: ${color.border};">
+                    <span class="w-3 h-3 rounded-full" style="background-color: ${color.hex}"></span>
                   </div>
-                  <div class="text-[10px] text-slate-400">${exp.date} • <span class="font-medium" style="color: ${color.hex}">${escapeHtml(exp.person)}</span></div>
+                  <div>
+                    <div class="font-bold text-white text-xs leading-tight">
+                      ${escapeHtml(pLoc)}${merchantText}
+                    </div>
+                    <div class="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1.5">
+                      <span class="font-semibold" style="color: ${color.hex}">${escapeHtml(exp.person)}</span>
+                      <span>•</span>
+                      <span>${exp.date || ''}</span>
+                      ${isPending ? '<span class="text-amber-400 font-semibold" title="Offline saved">⏳</span>' : ''}
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-extrabold text-white">${formatMoney(exp.amount)}</span>
+                  <button type="button" onclick="deleteExpense('${exp.id}')" class="p-1.5 text-slate-500 hover:text-rose-400 active:scale-95 transition" title="Delete">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                  </button>
                 </div>
               </div>
-              <div class="flex items-center gap-2.5">
-                <span class="font-extrabold text-white text-sm">${formatMoney(exp.amount)}</span>
-                <button type="button" onclick="deleteExpense('${escapeHtml(exp.id)}')" class="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Löschen">
-                  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-                </button>
-              </div>
-            </div>
-          `}).join('');
+            `;
+          }).join('');
         }
       }
 
-      renderCategoryChart(purposeMap);
+      // Chart.js Category Breakdown
+      renderChart(purposeMap);
 
-      const sorted = Object.entries(purposeMap).sort((a,b) => b[1] - a[1]);
       const breakdownEl = document.getElementById('categoryBreakdownList');
       if (breakdownEl) {
+        const sorted = Object.entries(purposeMap).filter(([_, val]) => val > 0).sort((a, b) => b[1] - a[1]);
         breakdownEl.innerHTML = sorted.map(([p, val]) => {
           const pctVal = total > 0 ? Math.round((val / total) * 100) : 0;
           return `
@@ -2165,7 +2619,6 @@
         }).join('');
       }
 
-      // Historische Monats-Bilanz rendern (Punkt g)
       renderMonthlyHistory();
 
       if (window.lucide) {
@@ -2173,13 +2626,13 @@
       }
     }
 
-    // Historische Monats-Übersicht IST vs SOLL (Punkt g)
+    // Historical Monthly Balance (Actual vs Budget)
     function renderMonthlyHistory() {
       const container = document.getElementById('monthlyHistoryList');
       if (!container) return;
 
       const monthMap = {};
-      const budget = config.monthlyBudget || 1500;
+      const budget = config.monthlyBudget || 0;
 
       expenses.forEach(exp => {
         if (!exp.date) return;
@@ -2187,80 +2640,103 @@
         monthMap[key] = (monthMap[key] || 0) + exp.amount;
       });
 
-      // Sortiere Monate absteigend
       const sortedKeys = Object.keys(monthMap).sort().reverse();
 
       if (sortedKeys.length === 0) {
-        container.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs italic">Noch keine historischen Monate erfasst.</div>`;
+        container.innerHTML = `<div class="text-center py-4 text-slate-500 text-xs italic">${t('no_history')}</div>`;
         return;
       }
 
-      container.innerHTML = sortedKeys.slice(0, 12).map(key => {
-        const spent = monthMap[key];
-        const diff = budget - spent;
+      container.innerHTML = sortedKeys.map(k => {
+        const spent = monthMap[k];
+        const diff = budget > 0 ? (budget - spent) : 0;
         const isSurplus = diff >= 0;
-        const pct = Math.min(150, Math.round((spent / budget) * 100));
 
-        // Schöner Monatsname
-        const [y, m] = key.split('-');
-        const dateObj = new Date(parseInt(y, 10), parseInt(m, 10) - 1, 1);
-        const monthName = dateObj.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' });
+        let displayDate = k;
+        try {
+          const [year, month] = k.split('-');
+          const d = new Date(parseInt(year), parseInt(month) - 1, 1);
+          displayDate = d.toLocaleDateString(getLocale(), { month: 'long', year: 'numeric' });
+        } catch(e){}
 
         return `
-          <div class="p-3 rounded-xl bg-slate-900/80 border border-slate-800/80 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="font-bold text-white text-xs">${escapeHtml(monthName)}</span>
-              <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${isSurplus ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-400 border border-rose-500/30'}">
-                ${isSurplus ? `+${formatMoney(diff)} Guthaben` : `−${formatMoney(Math.abs(diff))} Überzogen`}
-              </span>
+          <div class="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs">
+            <div>
+              <div class="font-bold text-white">${displayDate}</div>
+              <div class="text-[10px] text-slate-400 mt-0.5">
+                ${t('spent_label')}: <strong class="text-slate-200">${formatMoney(spent)}</strong>
+                ${budget > 0 ? ` • Budget: ${formatMoneyCompact(budget)}` : ''}
+              </div>
             </div>
-            
-            <div class="flex items-center justify-between text-[11px] text-slate-400">
-              <span>IST: <strong class="text-slate-200">${formatMoney(spent)}</strong></span>
-              <span>SOLL: <strong class="text-slate-200">${formatMoney(budget)}</strong></span>
-            </div>
-
-            <!-- Mini Progress Bar -->
-            <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-              <div class="h-1.5 rounded-full ${spent > budget ? 'bg-rose-500' : (spent > budget * 0.85 ? 'bg-amber-400' : 'bg-sky-400')}" style="width: ${Math.min(100, pct)}%"></div>
+            <div class="text-right">
+              ${budget > 0 ? `
+                <div class="font-extrabold ${isSurplus ? 'text-emerald-400' : 'text-rose-400'}">
+                  ${isSurplus ? '+' : ''}${formatMoneyCompact(diff)}
+                </div>
+                <div class="text-[9px] ${isSurplus ? 'text-emerald-500' : 'text-rose-500'} font-semibold">
+                  ${isSurplus ? t('buffer_label') : t('over_budget_label')}
+                </div>
+              ` : `
+                <div class="font-bold text-slate-300">${formatMoneyCompact(spent)}</div>
+              `}
             </div>
           </div>
         `;
       }).join('');
     }
 
-    function renderCategoryChart(purposeMap) {
+    function renderChart(purposeMap) {
       const ctx = document.getElementById('categoryChart');
-      if (!ctx || typeof Chart === 'undefined') return;
+      if (!ctx) return;
 
-      const labels = Object.keys(purposeMap);
-      const data = Object.values(purposeMap);
+      const labels = [];
+      const data = [];
+      const backgroundColors = [
+        '#38bdf8', '#c084fc', '#34d399', '#fbbf24', '#fb7185',
+        '#22d3ee', '#a3e635', '#e879f9', '#94a3b8'
+      ];
 
-      if (labels.length === 0) {
-        labels.push(t('no_expenses'));
-        data.push(1);
+      Object.entries(purposeMap).forEach(([k, val]) => {
+        if (val > 0) {
+          labels.push(k);
+          data.push(val);
+        }
+      });
+
+      if (chartInstance) {
+        chartInstance.destroy();
+        chartInstance = null;
       }
 
-      const colors = ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899', '#06b6d4', '#84cc16', '#6366f1', '#64748b'];
-
-      if (chartInstance) chartInstance.destroy();
+      if (data.length === 0) {
+        ctx.style.display = 'none';
+        return;
+      }
+      ctx.style.display = 'block';
 
       chartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
           labels: labels,
-          datasets: [{ data, backgroundColor: colors.slice(0, labels.length), borderWidth: 0 }]
+          datasets: [{
+            data: data,
+            backgroundColor: backgroundColors.slice(0, data.length),
+            borderWidth: 0,
+            hoverOffset: 4
+          }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          cutout: '68%'
+          plugins: {
+            legend: { display: false }
+          },
+          cutout: '72%'
         }
       });
     }
 
-    // GESAMTES LOGBUCH MODAL & EXCEL EXPORT (Punkt f)
+    // History Modal & Search
     function openHistoryModal() {
       const modal = document.getElementById('historyModal');
       if (!modal) return;
@@ -2275,52 +2751,49 @@
 
     function renderFullHistoryList() {
       const container = document.getElementById('fullHistoryContainer');
+      const sub = document.getElementById('historyModalSubtitle');
       const searchInput = document.getElementById('historySearchInput');
-      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
-      const subtitle = document.getElementById('historyModalSubtitle');
-
       if (!container) return;
+
+      const query = (searchInput ? searchInput.value : '').toLowerCase().trim();
 
       let filtered = expenses;
       if (query) {
         filtered = expenses.filter(e => {
-          return (e.person && e.person.toLowerCase().includes(query)) ||
-                 (e.purpose && e.purpose.toLowerCase().includes(query)) ||
-                 (e.merchant && e.merchant.toLowerCase().includes(query)) ||
-                 (e.date && e.date.includes(query)) ||
-                 (String(e.amount).includes(query));
+          const pLoc = getLocalizedCategory(e.purpose).toLowerCase();
+          return (
+            (e.person || '').toLowerCase().includes(query) ||
+            (e.merchant || '').toLowerCase().includes(query) ||
+            pLoc.includes(query) ||
+            (e.date || '').includes(query)
+          );
         });
       }
 
-      const totalAllTime = filtered.reduce((s, e) => s + e.amount, 0);
-      if (subtitle) {
-        subtitle.innerText = `${filtered.length} Einträge • ${formatMoney(totalAllTime)} Gesamt`;
-      }
+      if (sub) sub.innerText = `${filtered.length} ${t('entries_count')}`;
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs italic">Keine Einträge gefunden.</div>`;
+        container.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs italic">${t('no_expenses')}</div>`;
         return;
       }
 
       container.innerHTML = filtered.map(exp => {
         const color = getUserColor(exp.person);
-        const locPurpose = getLocalizedCategory(exp.purpose);
+        const pLoc = getLocalizedCategory(exp.purpose);
+        const merchantText = exp.merchant ? ` • ${escapeHtml(exp.merchant)}` : '';
         return `
-          <div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between text-xs hover:border-slate-700 transition">
-            <div class="flex items-center gap-2">
-              <span class="w-1.5 h-8 rounded-full shrink-0" style="background-color: ${color.hex}"></span>
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${color.hex}"></span>
               <div>
-                <div class="font-bold text-white flex items-center gap-1.5">
-                  <span>${escapeHtml(locPurpose)}</span>
-                  ${exp.merchant ? `<span class="text-[10px] font-normal text-slate-400">(${escapeHtml(exp.merchant)})</span>` : ''}
-                </div>
-                <div class="text-[10px] text-slate-400">${exp.date} • <span class="font-medium" style="color: ${color.hex}">${escapeHtml(exp.person)}</span></div>
+                <div class="font-bold text-white">${escapeHtml(pLoc)}${merchantText}</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">${escapeHtml(exp.person)} • ${exp.date || ''}</div>
               </div>
             </div>
-            <div class="flex items-center gap-2.5">
-              <span class="font-extrabold text-white text-sm">${formatMoney(exp.amount)}</span>
-              <button type="button" onclick="deleteExpense('${escapeHtml(exp.id)}')" class="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Löschen">
-                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white">${formatMoney(exp.amount)}</span>
+              <button type="button" onclick="deleteExpense('${exp.id}')" class="p-1 text-slate-500 hover:text-rose-400 active:scale-95 transition" title="Delete">
+                <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
               </button>
             </div>
           </div>
@@ -2328,51 +2801,56 @@
       }).join('');
     }
 
-    // CSV / Excel Export mit UTF-8 BOM für fehlerfreie Umlaute in Excel (Punkt f)
+    // CSV / Excel Export
     function exportAllExpensesCSV() {
       if (expenses.length === 0) {
         alert(t('no_expenses'));
         return;
       }
-      
-      // UTF-8 BOM für Excel
-      let csv = "\uFEFFID;Datum;Person;Kategorie;Ort / Shop;Betrag\n";
-      expenses.forEach(e => {
-        csv += `${e.id};${e.date};${e.person};"${getLocalizedCategory(e.purpose)}";"${e.merchant || ''}";${e.amount.toFixed(2).replace('.', ',')}\n`;
-      });
 
-      const fileName = `Logbuch_${config.householdName || 'Haushalt'}_Gesamtexport_${new Date().toISOString().slice(0,10)}.csv`;
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = fileName;
+      const headers = ['ID', 'Date', 'Person', 'Category', 'Merchant', 'Amount', 'Currency'];
+      const rows = expenses.map(e => [
+        e.id,
+        e.date,
+        `"${(e.person || '').replace(/"/g, '""')}"`,
+        `"${getLocalizedCategory(e.purpose).replace(/"/g, '""')}"`,
+        `"${(e.merchant || '').replace(/"/g, '""')}"`,
+        (e.amount || 0).toFixed(2),
+        config.currency || 'EUR'
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + 
+        [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `logbuch_export_${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      showToast('✓ CSV / Excel Datei heruntergeladen');
     }
 
-    // FIXKOSTEN & BUDGET-PLANNER MODAL (Punkt h)
+    // FIXED COSTS & BUDGET PLANNER
     function openPlannerModal() {
       const modal = document.getElementById('plannerModal');
       if (!modal) return;
       if (!config.budgetPlan) {
         config.budgetPlan = { incomes: [], fixedCosts: [] };
       }
-      // Wenn noch leer, sinnvolle Initialwerte vorbefüllen
+      // Template defaults set to 0 to prevent mobile append bugs
       if (config.budgetPlan.incomes.length === 0) {
         config.budgetPlan.incomes = [
-          { id: 'inc_1', name: 'Gehalt Person 1', amount: 2600, interval: 'monthly' },
-          { id: 'inc_2', name: 'Gehalt Person 2', amount: 2200, interval: 'monthly' }
+          { id: 'inc_1', name: 'Salary Person 1', amount: 0, interval: 'monthly' }
         ];
       }
       if (config.budgetPlan.fixedCosts.length === 0) {
         config.budgetPlan.fixedCosts = [
-          { id: 'fix_1', name: 'Miete / Kredit', amount: 1200, interval: 'monthly' },
-          { id: 'fix_2', name: 'Strom & Gas', amount: 180, interval: 'monthly' },
-          { id: 'fix_3', name: 'Internet & Handy', amount: 80, interval: 'monthly' },
-          { id: 'fix_4', name: 'KFZ-Versicherung', amount: 600, interval: 'yearly' },
-          { id: 'fix_5', name: 'Abos (Spotify, Streaming)', amount: 45, interval: 'monthly' }
+          { id: 'fix_1', name: 'Rent / Mortgage', amount: 0, interval: 'monthly' },
+          { id: 'fix_2', name: 'Electricity & Gas', amount: 0, interval: 'monthly' },
+          { id: 'fix_3', name: 'Internet & Mobile', amount: 0, interval: 'monthly' },
+          { id: 'fix_4', name: 'Car Insurance', amount: 0, interval: 'yearly' },
+          { id: 'fix_5', name: 'Streaming & Subs', amount: 0, interval: 'monthly' }
         ];
       }
 
@@ -2389,23 +2867,63 @@
     function getIntervalDivisor(interval) {
       if (interval === 'yearly') return 12;
       if (interval === 'half_yearly' || interval === 'halfyearly') return 2;
-      if (interval === 'quarterly') return 4;
+      if (interval === 'quarterly') return 4; // Crucial divisor = 4
       return 1; // monthly
     }
 
+    // Preserves all current inputs from DOM before re-rendering
+    function syncPlannerInputsFromDOM() {
+      if (!config.budgetPlan) return;
+      const incList = document.getElementById('plannerIncomesList');
+      if (incList) {
+        const rows = incList.querySelectorAll('.planner-item-row');
+        rows.forEach((row, i) => {
+          if (config.budgetPlan.incomes[i]) {
+            const nameInput = row.querySelector('.planner-name-input');
+            const amountInput = row.querySelector('.planner-amount-input');
+            const intervalSelect = row.querySelector('.planner-interval-select');
+            if (nameInput) config.budgetPlan.incomes[i].name = nameInput.value;
+            if (amountInput) {
+              const cleaned = (amountInput.value || '').replace(',', '.');
+              config.budgetPlan.incomes[i].amount = parseFloat(cleaned) || 0;
+            }
+            if (intervalSelect) config.budgetPlan.incomes[i].interval = intervalSelect.value;
+          }
+        });
+      }
+
+      const fixList = document.getElementById('plannerFixedCostsList');
+      if (fixList) {
+        const rows = fixList.querySelectorAll('.planner-item-row');
+        rows.forEach((row, i) => {
+          if (config.budgetPlan.fixedCosts[i]) {
+            const nameInput = row.querySelector('.planner-name-input');
+            const amountInput = row.querySelector('.planner-amount-input');
+            const intervalSelect = row.querySelector('.planner-interval-select');
+            if (nameInput) config.budgetPlan.fixedCosts[i].name = nameInput.value;
+            if (amountInput) {
+              const cleaned = (amountInput.value || '').replace(',', '.');
+              config.budgetPlan.fixedCosts[i].amount = parseFloat(cleaned) || 0;
+            }
+            if (intervalSelect) config.budgetPlan.fixedCosts[i].interval = intervalSelect.value;
+          }
+        });
+      }
+    }
+
     function renderPlannerLists() {
-      // 1. Einnahmen
+      // 1. Incomes
       const incList = document.getElementById('plannerIncomesList');
       if (incList && config.budgetPlan) {
         incList.innerHTML = config.budgetPlan.incomes.map((inc, i) => `
-          <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 p-2 rounded-xl text-xs">
-            <input type="text" value="${escapeHtml(inc.name)}" oninput="updatePlannerIncome(${i}, 'name', this.value)" placeholder="z. B. Gehalt" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-white">
-            <input type="number" step="10" value="${inc.amount}" oninput="updatePlannerIncome(${i}, 'amount', this.value)" class="w-24 bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-emerald-400 font-bold text-right">
-            <select onchange="updatePlannerIncome(${i}, 'interval', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-lg px-1.5 py-1 text-[11px] text-slate-300">
-              <option value="monthly" ${inc.interval === 'monthly' ? 'selected' : ''}>Monatl.</option>
-              <option value="quarterly" ${inc.interval === 'quarterly' ? 'selected' : ''}>Quartal (/4)</option>
-              <option value="half_yearly" ${inc.interval === 'half_yearly' ? 'selected' : ''}>Halbjährl. (/2)</option>
-              <option value="yearly" ${inc.interval === 'yearly' ? 'selected' : ''}>Jährl. (/12)</option>
+          <div class="planner-item-row flex items-center gap-2 bg-slate-900/90 border border-slate-800 p-2 rounded-xl text-xs">
+            <input type="text" value="${escapeHtml(inc.name)}" oninput="updatePlannerIncome(${i}, 'name', this.value)" placeholder="e.g. Salary" class="planner-name-input w-full bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-white">
+            <input type="number" step="10" value="${inc.amount !== undefined ? inc.amount : 0}" oninput="updatePlannerIncome(${i}, 'amount', this.value)" class="planner-amount-input w-24 bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-emerald-400 font-bold text-right">
+            <select onchange="updatePlannerIncome(${i}, 'interval', this.value)" class="planner-interval-select bg-slate-950 border border-slate-700/80 rounded-lg px-1.5 py-1 text-[11px] text-slate-300">
+              <option value="monthly" ${inc.interval === 'monthly' ? 'selected' : ''}>Monthly</option>
+              <option value="quarterly" ${inc.interval === 'quarterly' ? 'selected' : ''}>Quarterly (/4)</option>
+              <option value="half_yearly" ${inc.interval === 'half_yearly' ? 'selected' : ''}>Half-year (/2)</option>
+              <option value="yearly" ${inc.interval === 'yearly' ? 'selected' : ''}>Yearly (/12)</option>
             </select>
             <button type="button" onclick="removePlannerIncome(${i})" class="text-slate-500 hover:text-rose-400 p-1">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2414,35 +2932,34 @@
         `).join('');
       }
 
-      // 2. Fixkosten
+      // 2. Fixed Costs
       const fixList = document.getElementById('plannerFixedCostsList');
       if (fixList && config.budgetPlan) {
-        fixList.innerHTML = config.budgetPlan.fixedCosts.map((fix, i) => {
-          return `
-          <div class="flex items-center gap-2 bg-slate-900/90 border border-slate-800 p-2 rounded-xl text-xs">
-            <input type="text" value="${escapeHtml(fix.name)}" oninput="updatePlannerFixedCost(${i}, 'name', this.value)" placeholder="z. B. KFZ, Miete" class="w-full bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-white">
-            <input type="number" step="5" value="${fix.amount}" oninput="updatePlannerFixedCost(${i}, 'amount', this.value)" class="w-24 bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-rose-400 font-bold text-right">
-            <select onchange="updatePlannerFixedCost(${i}, 'interval', this.value)" class="bg-slate-950 border border-slate-700/80 rounded-lg px-1.5 py-1 text-[11px] text-slate-300">
-              <option value="monthly" ${fix.interval === 'monthly' ? 'selected' : ''}>Monatl.</option>
-              <option value="quarterly" ${fix.interval === 'quarterly' ? 'selected' : ''}>Quartal (/4)</option>
-              <option value="half_yearly" ${fix.interval === 'half_yearly' ? 'selected' : ''}>Halbjährl. (/2)</option>
-              <option value="yearly" ${fix.interval === 'yearly' ? 'selected' : ''}>Jährl. (/12)</option>
+        fixList.innerHTML = config.budgetPlan.fixedCosts.map((fix, i) => `
+          <div class="planner-item-row flex items-center gap-2 bg-slate-900/90 border border-slate-800 p-2 rounded-xl text-xs">
+            <input type="text" value="${escapeHtml(fix.name)}" oninput="updatePlannerFixedCost(${i}, 'name', this.value)" placeholder="e.g. Rent, Gas" class="planner-name-input w-full bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-white">
+            <input type="number" step="5" value="${fix.amount !== undefined ? fix.amount : 0}" oninput="updatePlannerFixedCost(${i}, 'amount', this.value)" class="planner-amount-input w-24 bg-slate-950 border border-slate-700/80 rounded-lg px-2 py-1 text-rose-400 font-bold text-right">
+            <select onchange="updatePlannerFixedCost(${i}, 'interval', this.value)" class="planner-interval-select bg-slate-950 border border-slate-700/80 rounded-lg px-1.5 py-1 text-[11px] text-slate-300">
+              <option value="monthly" ${fix.interval === 'monthly' ? 'selected' : ''}>Monthly</option>
+              <option value="quarterly" ${fix.interval === 'quarterly' ? 'selected' : ''}>Quarterly (/4)</option>
+              <option value="half_yearly" ${fix.interval === 'half_yearly' ? 'selected' : ''}>Half-year (/2)</option>
+              <option value="yearly" ${fix.interval === 'yearly' ? 'selected' : ''}>Yearly (/12)</option>
             </select>
             <button type="button" onclick="removePlannerFixedCost(${i})" class="text-slate-500 hover:text-rose-400 p-1">
               <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
-          `;
-        }).join('');
+        `).join('');
       }
     }
 
     function addPlannerIncome() {
+      syncPlannerInputsFromDOM();
       if (!config.budgetPlan) config.budgetPlan = { incomes: [], fixedCosts: [] };
       config.budgetPlan.incomes.push({
         id: 'inc_' + Date.now(),
-        name: 'Neues Einkommen',
-        amount: 1000,
+        name: 'Income',
+        amount: 0,
         interval: 'monthly'
       });
       renderPlannerLists();
@@ -2450,15 +2967,17 @@
     }
 
     function removePlannerIncome(idx) {
+      syncPlannerInputsFromDOM();
       config.budgetPlan.incomes.splice(idx, 1);
       renderPlannerLists();
       calculatePlannerSummary();
     }
 
     function updatePlannerIncome(idx, field, val) {
-      if (!config.budgetPlan.incomes[idx]) return;
+      if (!config.budgetPlan || !config.budgetPlan.incomes[idx]) return;
       if (field === 'amount') {
-        config.budgetPlan.incomes[idx].amount = parseFloat(val) || 0;
+        const cleaned = String(val).replace(/[^0-9.,]/g, '').replace(',', '.');
+        config.budgetPlan.incomes[idx].amount = parseFloat(cleaned) || 0;
       } else {
         config.budgetPlan.incomes[idx][field] = val;
       }
@@ -2466,11 +2985,12 @@
     }
 
     function addPlannerFixedCost() {
+      syncPlannerInputsFromDOM();
       if (!config.budgetPlan) config.budgetPlan = { incomes: [], fixedCosts: [] };
       config.budgetPlan.fixedCosts.push({
         id: 'fix_' + Date.now(),
-        name: 'Neuer Vertrag / Abo',
-        amount: 50,
+        name: 'Item / Subscription',
+        amount: 0,
         interval: 'monthly'
       });
       renderPlannerLists();
@@ -2478,15 +2998,17 @@
     }
 
     function removePlannerFixedCost(idx) {
+      syncPlannerInputsFromDOM();
       config.budgetPlan.fixedCosts.splice(idx, 1);
       renderPlannerLists();
       calculatePlannerSummary();
     }
 
     function updatePlannerFixedCost(idx, field, val) {
-      if (!config.budgetPlan.fixedCosts[idx]) return;
+      if (!config.budgetPlan || !config.budgetPlan.fixedCosts[idx]) return;
       if (field === 'amount') {
-        config.budgetPlan.fixedCosts[idx].amount = parseFloat(val) || 0;
+        const cleaned = String(val).replace(/[^0-9.,]/g, '').replace(',', '.');
+        config.budgetPlan.fixedCosts[idx].amount = parseFloat(cleaned) || 0;
       } else {
         config.budgetPlan.fixedCosts[idx][field] = val;
       }
@@ -2497,18 +3019,20 @@
       if (!config.budgetPlan) return;
 
       let totalIncomeMonthly = 0;
-      config.budgetPlan.incomes.forEach(inc => {
-        const val = (inc.amount || 0) / getIntervalDivisor(inc.interval);
-        totalIncomeMonthly += val;
+      (config.budgetPlan.incomes || []).forEach(inc => {
+        const amt = parseFloat(inc.amount) || 0;
+        const divisor = getIntervalDivisor(inc.interval);
+        totalIncomeMonthly += (amt / divisor);
       });
 
       let totalFixedCostsMonthly = 0;
-      config.budgetPlan.fixedCosts.forEach(fix => {
-        const val = (fix.amount || 0) / getIntervalDivisor(fix.interval);
-        totalFixedCostsMonthly += val;
+      (config.budgetPlan.fixedCosts || []).forEach(fix => {
+        const amt = parseFloat(fix.amount) || 0;
+        const divisor = getIntervalDivisor(fix.interval);
+        totalFixedCostsMonthly += (amt / divisor);
       });
 
-      const surplus = Math.max(0, totalIncomeMonthly - totalFixedCostsMonthly);
+      const surplus = Math.max(0, Math.round(totalIncomeMonthly - totalFixedCostsMonthly));
 
       const incEl = document.getElementById('plannerIncomesTotal');
       if (incEl) incEl.innerText = formatMoney(totalIncomeMonthly);
@@ -2520,41 +3044,44 @@
       if (surplusEl) surplusEl.innerText = formatMoney(surplus);
 
       const recText = document.getElementById('plannerRecommendationText');
-      if (recText) recText.innerText = `${formatMoneyCompact(surplus)} / Monat`;
+      if (recText) recText.innerText = `${formatMoneyCompact(surplus)} / ${t('month_suffix')}`;
 
-      // Zwischenspeichern
       saveConfig();
     }
 
-    // Errechnetes Budget übernehmen
+    // Apply calculated surplus directly to household budget
     function applyPlannerBudget() {
+      syncPlannerInputsFromDOM();
       calculatePlannerSummary();
+
       let totalIncomeMonthly = 0;
-      config.budgetPlan.incomes.forEach(inc => {
-        const val = (inc.amount || 0) / getIntervalDivisor(inc.interval);
-        totalIncomeMonthly += val;
+      (config.budgetPlan.incomes || []).forEach(inc => {
+        const amt = parseFloat(inc.amount) || 0;
+        const divisor = getIntervalDivisor(inc.interval);
+        totalIncomeMonthly += (amt / divisor);
       });
 
       let totalFixedCostsMonthly = 0;
-      config.budgetPlan.fixedCosts.forEach(fix => {
-        const val = (fix.amount || 0) / getIntervalDivisor(fix.interval);
-        totalFixedCostsMonthly += val;
+      (config.budgetPlan.fixedCosts || []).forEach(fix => {
+        const amt = parseFloat(fix.amount) || 0;
+        const divisor = getIntervalDivisor(fix.interval);
+        totalFixedCostsMonthly += (amt / divisor);
       });
 
       const surplus = Math.max(0, Math.round(totalIncomeMonthly - totalFixedCostsMonthly));
-      config.monthlyBudget = surplus > 0 ? surplus : 1500;
+      config.monthlyBudget = surplus;
 
       saveConfig();
       closePlannerModal();
       updateHouseholdUI();
       render();
-      showToast(`✓ Soll-Budget auf ${formatMoneyCompact(config.monthlyBudget)} gesetzt!`);
 
-      // In Supabase synchronisieren
+      const budgetDisplay = document.getElementById('targetBudgetDisplay');
+      if (budgetDisplay) budgetDisplay.innerText = formatMoneyCompact(config.monthlyBudget);
+
+      showToast(`${t('toast_budget_applied')}${formatMoneyCompact(config.monthlyBudget)}`);
       saveHouseholdToSupabase();
     }
-
-
 
     function toggleDeviceOwner() {
       if (!config.users || config.users.length === 0) return;
@@ -2618,12 +3145,13 @@
       const modal = document.getElementById('settingsModal');
       if (!modal) return;
       document.getElementById('settingsHouseholdName').value = config.householdName || '';
-      document.getElementById('settingsMonthlyBudget').value = config.monthlyBudget || 1500;
+      document.getElementById('settingsMonthlyBudget').value = config.monthlyBudget || '';
       
       const hidInput = document.getElementById('settingsHouseholdId');
       if (hidInput) hidInput.value = config.householdId || '';
 
       renderSettingsPills();
+      renderSettingsHouseholdsList();
       renderSettingsUsersList();
       renderSettingsOwnerOptions();
       modal.classList.remove('hidden');
@@ -2638,12 +3166,13 @@
       const list = document.getElementById('settingsUsersList');
       if (!list) return;
 
-      list.innerHTML = config.users.map((u, i) => {
+      list.innerHTML = (config.users || []).map((u, i) => {
         const color = PALETTE[u.colorIdx % PALETTE.length];
         return `
           <div class="flex items-center gap-2">
             <span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${color.hex}"></span>
-            <input type="text" value="${escapeHtml(u.name)}" oninput="updateSettingsUserName(${i}, this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1 text-xs text-white">
+            <input type="text" value="${escapeHtml(u.name)}" oninput="updateSettingsUserName(${i}, this.value)"
+              class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1 text-xs text-white">
             ${config.users.length > 1 ? `
               <button type="button" onclick="removeSettingsUser(${i})" class="text-slate-500 hover:text-rose-400 p-1">
                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2683,35 +3212,49 @@
       const container = document.getElementById('settingsDeviceOwnerOptions');
       if (!container) return;
 
-      container.innerHTML = config.users.map(u => {
-        const isSelected = (config.deviceOwner === u.name);
+      const validUsers = (config.users || []).filter(u => u.name.trim().length > 0);
+      if (validUsers.length === 0) return;
+
+      if (!validUsers.some(u => u.name === config.deviceOwner)) {
+        config.deviceOwner = validUsers[0].name;
+        activePerson = config.deviceOwner;
+      }
+
+      container.innerHTML = validUsers.map(u => {
+        const isSel = (u.name === config.deviceOwner);
         const color = PALETTE[u.colorIdx % PALETTE.length];
         return `
-          <button type="button" onclick="setDeviceOwner('${escapeHtml(u.name)}')"
-            class="py-1.5 px-2.5 rounded-xl text-xs font-semibold border flex items-center justify-center gap-1.5 transition ${isSelected ? 'border-sky-400 bg-sky-500/20 text-white' : 'border-slate-800 bg-slate-900 text-slate-400'}">
+          <button type="button" onclick="selectSettingsOwner('${escapeHtml(u.name)}')" 
+                  class="py-2 px-2.5 rounded-xl text-xs font-bold border transition flex items-center justify-center gap-1.5 active:scale-95"
+                  style="
+                    background-color: ${isSel ? color.bg : 'rgba(15, 23, 42, 0.6)'}; 
+                    border-color: ${isSel ? color.border : 'rgba(51, 65, 85, 0.8)'}; 
+                    color: ${isSel ? '#ffffff' : '#94a3b8'}
+                  ">
             <span class="w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
-            <span class="truncate">${escapeHtml(u.name || 'User')}</span>
+            ${escapeHtml(u.name)}
           </button>
         `;
       }).join('');
     }
 
-    function setDeviceOwner(name) {
+    function selectSettingsOwner(name) {
       config.deviceOwner = name;
       activePerson = name;
       renderSettingsOwnerOptions();
     }
 
     async function saveSettings() {
-      const hName = document.getElementById('settingsHouseholdName').value.trim() || t('household');
-      const bVal = parseFloat(document.getElementById('settingsMonthlyBudget').value);
+      const hNameInput = document.getElementById('settingsHouseholdName');
+      config.householdName = (hNameInput.value || '').trim() || 'Household';
 
-      config.householdName = hName;
-      config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
-      
-      const hIdInput = document.getElementById('settingsHouseholdId');
-      if (hIdInput && hIdInput.value.trim()) {
-        config.householdId = hIdInput.value.trim();
+      const bInput = document.getElementById('settingsMonthlyBudget');
+      const bVal = (bInput.value || '').trim();
+      config.monthlyBudget = bVal ? (parseFloat(bVal) || 0) : 0;
+
+      const hidInput = document.getElementById('settingsHouseholdId');
+      if (hidInput && hidInput.value.trim()) {
+        config.householdId = hidInput.value.trim();
       }
 
       config.users = config.users.map((u, i) => ({
@@ -2749,7 +3292,7 @@
       })[m]);
     }
 
-    // App Start & Lifecycle Sync
+    // App Startup & Lifecycle
     document.addEventListener('DOMContentLoaded', () => {
       init();
     });
@@ -2771,6 +3314,8 @@
         syncStatusText.innerText = 'active';
         syncStatusText.className = 'text-emerald-400 font-semibold';
       }
+      const cardBadge = document.getElementById('syncStatusBadgeText');
+      if (cardBadge) cardBadge.innerText = t('cloud_sync_active');
       syncWithSupabase(false);
     });
     window.addEventListener('offline', () => {
@@ -2784,6 +3329,8 @@
         sBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> inactive';
         sBadge.className = 'text-[10px] text-slate-400 font-bold flex items-center gap-1 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-full';
       }
+      const cardBadge = document.getElementById('syncStatusBadgeText');
+      if (cardBadge) cardBadge.innerText = t('cloud_sync_inactive');
     });
   </script>
 </body>

@@ -10,6 +10,7 @@
 
 ## ✨ Features
 
+* **🌍 Mehrsprachig & Multi-Währung:** Unterstützt Englisch, Deutsch und Französisch (automatische Geräteerkennung & manueller Switcher) sowie EUR (€), USD ($), GBP (£) und CHF mit lokalisierter Währungsformatierung.
 * **⚡ Fokus auf die Kasse:** Beim Öffnen der Web-App ist das Betragsfeld sofort im Fokus mit Ziffernblock. 1-Tap Schnell-Chips für Kategorien und Händler.
 * **🔒 100 % Privat & Autark:** Keine Drittanbieter-Server, keine Registrierung, keine Tracker. Alle Buchungen liegen lokal auf dem Gerät (`localStorage`) und optional in deiner eigenen privaten Google Drive Tabelle.
 * **📶 Offline-First mit Outbox:** Funktioniert auch bei absolutem Funkloch im Supermarkt oder Keller. Buchungen werden in unter 0,1 ms lokal gesichert und automatisch im Hintergrund synchronisiert, sobald wieder Netz vorhanden ist.
@@ -41,13 +42,15 @@ Die Web-App kann direkt im Browser getestet werden:
 Du kannst die App für beliebige Geräte über Parameter im URL-Hash vorkonfigurieren (ohne dass diese Parameter an einen Server übertragen werden):
 
 ```text
-https://robolf.github.io/Logbuch/#setup?h=Unser%20Haushalt&b=1500&users=Alex,Sam&owner=Alex&hook=...&sheet=...
+https://robolf.github.io/Logbuch/#setup?h=Unser%20Haushalt&b=1500&users=Alex,Sam&owner=Alex&lang=de&curr=€&hook=...&sheet=...
 ```
 
 * `h`: Name des Haushalts (z. B. `Unser Haushalt`)
-* `b`: Monatliches Soll-Budget in Euro (z. B. `1500`)
+* `b`: Monatliches Soll-Budget (z. B. `1500`)
 * `users`: Kommagetrennte Liste aller Personen (z. B. `Alex,Sam`)
 * `owner`: Besitzer dieses Geräts (z. B. `Alex`)
+* `lang`: (Optional) Sprache (`de`, `en`, `fr`)
+* `curr`: (Optional) Währungssymbol (`€`, `$`, `£`, `CHF`)
 * `hook`: (Optional) Deine Google Apps Script Webhook-URL
 * `sheet`: (Optional) Direkter Link zu eurer Google-Tabelle für den 1-Klick-Zugriff
 

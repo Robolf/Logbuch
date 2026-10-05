@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title id="pageTitle">Logbuch - Haushaltsbuch</title>
+  <title id="pageTitle">Logbook - Household Budget</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Logbuch">
@@ -68,28 +68,48 @@
         <div class="w-14 h-14 mx-auto rounded-2xl bg-sky-500/15 text-sky-400 flex items-center justify-center border border-sky-400/20 text-2xl shadow">
           ⛵
         </div>
-        <h3 class="text-base font-extrabold text-white tracking-tight">Neuen Haushalt anlegen</h3>
-        <p class="text-xs text-slate-400">Richte dein persönliches Haushaltsbuch in 30 Sekunden ein.</p>
+        <h3 id="wizardTitle" class="text-base font-extrabold text-white tracking-tight">Neuen Haushalt anlegen</h3>
+        <p id="wizardSubtitle" class="text-xs text-slate-400">Richte dein persönliches Haushaltsbuch in 30 Sekunden ein.</p>
       </div>
 
       <div class="space-y-3 pt-1">
+        <!-- 0. Language & Currency -->
+        <div class="grid grid-cols-2 gap-2 pb-1">
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 block mb-1" id="lblWizardLang">Language</label>
+            <div class="grid grid-cols-3 gap-1">
+              <button type="button" onclick="setLanguage('en')" id="wBtnLangEn" class="py-1 rounded-lg text-[11px] font-bold border border-sky-400 bg-sky-500/20 text-sky-300">EN</button>
+              <button type="button" onclick="setLanguage('de')" id="wBtnLangDe" class="py-1 rounded-lg text-[11px] font-medium border border-slate-700 bg-slate-900 text-slate-400">DE</button>
+              <button type="button" onclick="setLanguage('fr')" id="wBtnLangFr" class="py-1 rounded-lg text-[11px] font-medium border border-slate-700 bg-slate-900 text-slate-400">FR</button>
+            </div>
+          </div>
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 block mb-1" id="lblWizardCurr">Currency</label>
+            <div class="grid grid-cols-4 gap-0.5">
+              <button type="button" onclick="setCurrency('€')" id="wBtnCurrEur" class="py-1 rounded-lg text-[11px] font-bold border border-emerald-400 bg-emerald-500/20 text-emerald-300">€</button>
+              <button type="button" onclick="setCurrency('$')" id="wBtnCurrUsd" class="py-1 rounded-lg text-[11px] font-medium border border-slate-700 bg-slate-900 text-slate-400">$</button>
+              <button type="button" onclick="setCurrency('£')" id="wBtnCurrGbp" class="py-1 rounded-lg text-[11px] font-medium border border-slate-700 bg-slate-900 text-slate-400">£</button>
+              <button type="button" onclick="setCurrency('CHF')" id="wBtnCurrChf" class="py-1 rounded-lg text-[10px] font-medium border border-slate-700 bg-slate-900 text-slate-400">CHF</button>
+            </div>
+          </div>
+        </div>
         <!-- 1. Haushaltsname -->
         <div>
-          <label class="text-[11px] font-bold text-slate-300 block mb-1">Name des Haushalts</label>
+          <label id="lblWizardHouseholdName" class="text-[11px] font-bold text-slate-300 block mb-1">Name des Haushalts</label>
           <input type="text" id="wizardHouseholdName" placeholder="z. B. Unser Haushalt" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
         </div>
 
         <!-- 2. Monatliches Budget -->
         <div>
-          <label class="text-[11px] font-bold text-slate-300 block mb-1">Monatliches Soll-Budget (€)</label>
+          <label id="lblWizardMonthlyBudget" class="text-[11px] font-bold text-slate-300 block mb-1">Monatliches Soll-Budget (€)</label>
           <input type="number" step="10" id="wizardMonthlyBudget" placeholder="1500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
         </div>
 
         <!-- 3. Personen anlegen -->
         <div>
           <div class="flex items-center justify-between mb-1.5">
-            <label class="text-[11px] font-bold text-slate-300">Personen im Haushalt</label>
-            <button type="button" onclick="addWizardUser()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold flex items-center gap-1">
+            <label id="lblWizardUsers" class="text-[11px] font-bold text-slate-300">Personen im Haushalt</label>
+            <button type="button" id="btnWizardAddUser" onclick="addWizardUser()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold flex items-center gap-1">
               + Person hinzufügen
             </button>
           </div>
@@ -100,7 +120,7 @@
 
         <!-- 4. Wer bedient dieses Smartphone? -->
         <div class="pt-2 border-t border-slate-800">
-          <label class="text-[11px] font-bold text-slate-300 block mb-1">Wem gehört dieses Smartphone?</label>
+          <label id="lblWizardOwner" class="text-[11px] font-bold text-slate-300 block mb-1">Wem gehört dieses Smartphone?</label>
           <div id="wizardOwnerOptions" class="grid grid-cols-2 gap-1.5">
             <!-- Dynamisch gefüllt -->
           </div>
@@ -108,20 +128,20 @@
 
         <!-- 5. Google Sheet Webhook (Optional) -->
         <div class="pt-2 border-t border-slate-800 space-y-1">
-          <label class="text-[11px] font-bold text-slate-300 block">Google Sheet Webhook (Optional)</label>
+          <label id="lblWizardWebhook" class="text-[11px] font-bold text-slate-300 block">Google Sheet Webhook (Optional)</label>
           <input type="url" id="wizardGoogleWebhook" placeholder="https://script.google.com/macros/s/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
-          <p class="text-[10px] text-slate-500 leading-tight">Kann auch jederzeit später in den Einstellungen hinterlegt werden.</p>
+          <p id="lblWizardWebhookHint" class="text-[10px] text-slate-500 leading-tight">Kann auch jederzeit später in den Einstellungen hinterlegt werden.</p>
         </div>
 
         <!-- 6. Google Sheet / Drive Link (Optional) -->
         <div class="pt-2 border-t border-slate-800 space-y-1">
-          <label class="text-[11px] font-bold text-slate-300 block">Google Sheet / Drive Link (Optional)</label>
+          <label id="lblWizardSheet" class="text-[11px] font-bold text-slate-300 block">Google Sheet / Drive Link (Optional)</label>
           <input type="url" id="wizardGoogleSheetUrl" placeholder="https://docs.google.com/spreadsheets/d/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
-          <p class="text-[10px] text-slate-500 leading-tight">Direktlink zur Google-Tabelle für den 1-Klick-Zugriff auf alle Buchungen & Historie.</p>
+          <p id="lblWizardSheetHint" class="text-[10px] text-slate-500 leading-tight">Direktlink zur Google-Tabelle für den 1-Klick-Zugriff auf alle Buchungen & Historie.</p>
         </div>
       </div>
 
-      <button onclick="finishSetupWizard()" class="w-full mt-2 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 text-white font-extrabold rounded-xl text-xs transition shadow-lg shadow-sky-500/20 active:scale-[0.98]">
+      <button id="btnWizardStart" onclick="finishSetupWizard()" class="w-full mt-2 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 text-white font-extrabold rounded-xl text-xs transition shadow-lg shadow-sky-500/20 active:scale-[0.98]">
         Haushalt jetzt starten 🚀
       </button>
     </div>
@@ -134,7 +154,7 @@
         <img src="apple-touch-icon.png" alt="Logbuch" class="w-8 h-8 rounded-xl border border-sky-400/20 shadow-sm object-cover">
         <div>
           <div class="flex items-center gap-1.5">
-            <h1 class="text-sm font-bold text-white tracking-tight leading-tight">Logbuch</h1>
+            <h1 class="text-sm font-bold text-white tracking-tight leading-tight" id="headerTitleText">Logbook</h1>
             <!-- Klickbarer Switcher direkt im Header mit Benutzer-Farbe -->
             <button onclick="toggleDeviceOwner()" id="headerOwnerBadge" class="text-[10px] px-2 py-0.5 rounded-full font-bold flex items-center gap-1 transition active:scale-95" title="Tippen zum Wechseln">
               User
@@ -180,7 +200,7 @@
     <!-- 1. CARD: AUSGABE ERFASSEN (HAUPTFOKUS BEIM APP-START) -->
     <div class="glass-card rounded-2xl p-4 shadow-xl border border-slate-800 space-y-3">
       <div class="flex items-center justify-between">
-        <h2 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
+        <h2 id="cardAddTitle" class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-1.5">
           <svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           Ausgabe erfassen
         </h2>
@@ -195,48 +215,25 @@
         <div>
           <div class="relative">
             <input type="number" step="0.01" inputmode="decimal" id="inputAmount" placeholder="0,00" required class="w-full bg-slate-900/90 border border-slate-700/80 rounded-2xl px-4 py-3 text-3xl font-extrabold text-white placeholder-slate-600 focus:outline-none focus:border-sky-400 focus:ring-1 focus:ring-sky-400 text-right pr-11 tracking-tight">
-            <span class="absolute right-4 top-3.5 text-2xl font-bold text-slate-400">€</span>
+            <span id="currencySymbolDisplay" class="absolute right-4 top-3.5 text-2xl font-bold text-slate-400">€</span>
           </div>
         </div>
 
         <!-- 2. Kategorie (Zweck) - Aufgeräumtes 2-Spalten-Raster -->
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kategorie</label>
+            <label id="lblCategory" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Category</label>
             <span id="selectedCategoryLabel" class="text-[10px] text-sky-400 font-bold">🛒 Supermarkt & Essen</span>
           </div>
-          <div class="grid grid-cols-2 gap-1.5">
-            <button type="button" onclick="selectPurpose('Supermarkt & Essen', '🛒 Supermarkt & Essen', this)" class="purpose-btn active-chip py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
-              <span>🛒</span> Supermarkt & Essen
-            </button>
-            <button type="button" onclick="selectPurpose('Kinder & Baby', '👶 Kinder & Baby', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
-              <span>👶</span> Kinder & Baby
-            </button>
-            <button type="button" onclick="selectPurpose('Mobilität & Auto', '⛽ Auto & Tanken', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
-              <span>⛽</span> Auto & Tanken
-            </button>
-            <button type="button" onclick="selectPurpose('Drogerie & Gesundheit', '💊 Drogerie & Pflege', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
-              <span>💊</span> Drogerie & Pflege
-            </button>
-            <button type="button" onclick="selectPurpose('Freizeit & Gastro', '☕ Restaurant & Café', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
-              <span>☕</span> Restaurant & Café
-            </button>
-            <button type="button" onclick="selectPurpose('Haus & Garten', '🏠 Haus & Garten', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
-              <span>🏠</span> Haus & Garten
-            </button>
-            <button type="button" onclick="selectPurpose('Kleidung & Mode', '👗 Kleidung & Schuhe', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
-              <span>👗</span> Kleidung & Schuhe
-            </button>
-            <button type="button" onclick="selectPurpose('Sonstiges', '📦 Sonstiges', this)" class="purpose-btn py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
-              <span>📦</span> Sonstiges
-            </button>
+          <div class="grid grid-cols-2 gap-1.5" id="purposeButtonsGrid">
+            <!-- Dynamically rendered via renderCategoryButtons() -->
           </div>
-          <input type="hidden" id="inputPurpose" value="Supermarkt & Essen">
+          <input type="hidden" id="inputPurpose" value="groceries">
         </div>
 
         <!-- 3. Ort / Händler (Schnell-Chips + Eingabefeld) -->
         <div>
-          <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Ort / Händler</label>
+          <label id="lblMerchant" class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Merchant / Place</label>
           <div class="flex flex-wrap gap-1 mb-1.5">
             <button type="button" onclick="setMerchant('Lidl')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Lidl</button>
             <button type="button" onclick="setMerchant('Rewe')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Rewe</button>
@@ -249,7 +246,7 @@
             <button type="button" onclick="setMerchant('Amazon')" class="merchant-chip px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700/80 text-[11px] text-slate-300 hover:text-white transition">Amazon</button>
           </div>
           <div>
-            <input type="text" id="inputMerchant" placeholder="Händler / Notiz (optional)" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
+            <input type="text" id="inputMerchant" id="inputMerchant" placeholder="Merchant / Note (optional)" class="w-full bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-sky-400">
           </div>
           <!-- Datum ist automatisch Heute (im Hintergrund) -->
           <input type="date" id="inputDate" class="hidden">
@@ -258,7 +255,7 @@
         <!-- Speichern Button -->
         <button type="submit" id="btnSubmitExpense" class="w-full py-3.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 active:from-sky-700 text-white font-extrabold rounded-xl text-sm transition shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2 active:scale-[0.98]">
           <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-          Ausgabe speichern
+          <span id="btnSubmitExpenseText">Save Expense</span>
         </button>
       </form>
     </div>
@@ -275,10 +272,10 @@
       <div class="flex items-baseline justify-between">
         <div>
           <span class="text-2xl font-extrabold text-white" id="totalExpensesMonth">0,00 €</span>
-          <span class="text-xs text-slate-400 ml-1">ausgegeben</span>
+          <span id="spentSubtitle" class="text-xs text-slate-400 ml-1">spent</span>
         </div>
         <div class="text-right text-xs text-slate-400">
-          Soll-Budget: <span class="font-bold text-slate-200" id="budgetDisplay">1.500 €</span>
+          <span id="targetBudgetLabel">Target Budget:</span> <span class="font-bold text-slate-200" id="budgetDisplay">1,500 €</span>
         </div>
       </div>
 
@@ -305,9 +302,9 @@
     <!-- Kategorien-Auswertung (Wofür geht das Geld drauf?) -->
     <div class="glass-card rounded-2xl p-4 shadow-xl">
       <div class="flex items-center justify-between mb-2">
-        <h3 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+        <h3 id="chartCardTitle" class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
           <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
-          Wofür geben wir Geld aus?
+          Where is our money going?
         </h3>
         <span class="text-[11px] text-slate-400" id="entryCountBadge">0 Einträge</span>
       </div>
@@ -322,7 +319,7 @@
     <!-- Letzte Einträge Liste -->
     <div class="glass-card rounded-2xl p-4 shadow-xl">
       <div class="flex items-center justify-between mb-2">
-        <h3 class="text-xs font-bold text-white uppercase tracking-wider">Erfasste Quittungen</h3>
+        <h3 id="receiptsCardTitle" class="text-xs font-bold text-white uppercase tracking-wider">Recorded Receipts</h3>
       </div>
       <div id="expenseList" class="space-y-2 max-h-72 overflow-y-auto pr-1">
         <!-- Dynamisch gerendert -->
@@ -332,7 +329,7 @@
     <!-- Google Drive / Sheet Direktdatenbank Link & Aktionen -->
     <div class="glass-card rounded-2xl p-4 text-xs space-y-3">
       <div class="flex items-center justify-between">
-        <h4 class="font-bold text-slate-200 flex items-center gap-1.5">
+        <h4 id="dbCardTitle" class="font-bold text-slate-200 flex items-center gap-1.5">
           <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
             <polyline points="14 2 14 8 20 8"/>
@@ -342,12 +339,12 @@
           </svg>
           Google Tabelle & Historie
         </h4>
-        <span class="text-[10px] text-slate-500 flex items-center gap-1">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Live-Cloud
+        <span id="dbCardBadge" class="text-[10px] text-slate-500 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Live Cloud
         </span>
       </div>
-      <p class="text-slate-400 text-[11px] leading-relaxed">
-        Alle Buchungen werden direkt in eurer Google-Tabelle synchronisiert. Öffne die Tabelle, um alle historischen Einträge und Auswertungen direkt einzusehen:
+      <p id="dbCardDesc" class="text-slate-400 text-[11px] leading-relaxed">
+        All entries are synchronized in your cloud sheet. Open the spreadsheet to view all historical records and reports:
       </p>
       <div>
         <button onclick="openGoogleSheetDirectly()" class="w-full py-2.5 px-3 rounded-xl bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-300 border border-emerald-500/30 font-semibold flex items-center justify-center gap-2 active:scale-95 transition">
@@ -356,12 +353,12 @@
             <polyline points="15 3 21 3 21 9"/>
             <line x1="10" y1="14" x2="21" y2="3"/>
           </svg>
-          <span>Google Tabelle öffnen (Historie)</span>
+          <span id="btnOpenSheetBottomText">Open Cloud Sheet (History)</span>
         </button>
       </div>
       <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-[11px] text-slate-400">
-        <button onclick="openSettingsModal()" class="hover:text-white underline">Einstellungen & Haushalt</button>
-        <button onclick="clearCurrentMonth()" class="text-rose-400 hover:text-rose-300">Monat leeren</button>
+        <button onclick="openSettingsModal()" id="linkSettingsBottom" class="hover:text-white underline">Household Settings</button>
+        <button onclick="clearCurrentMonth()" id="linkClearMonthBottom" class="text-rose-400 hover:text-rose-300">Clear Month</button>
       </div>
     </div>
 
@@ -371,7 +368,7 @@
   <div id="settingsModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
     <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-slate-700 shadow-2xl my-auto">
       <div class="flex items-center justify-between pb-2 border-b border-slate-800">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+        <h3 id="settingsTitle" class="text-sm font-bold text-white flex items-center gap-2">
           <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
           Haushalts-Einstellungen
         </h3>
@@ -381,23 +378,57 @@
       </div>
 
       <div class="space-y-3">
+        <!-- Sprache & Währung -->
+        <div class="space-y-2 pb-2 border-b border-slate-800">
+          <div>
+            <label id="lblSettingsLang" class="text-[11px] font-semibold text-slate-300 block mb-1.5">Language / Sprache / Langue</label>
+            <div class="grid grid-cols-3 gap-1.5" id="settingsLangOptions">
+              <button type="button" onclick="setLanguage('en')" id="btnLangEn" class="py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 flex items-center justify-center gap-1">
+                <span>🇬🇧</span> EN
+              </button>
+              <button type="button" onclick="setLanguage('de')" id="btnLangDe" class="py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 flex items-center justify-center gap-1">
+                <span>🇩🇪</span> DE
+              </button>
+              <button type="button" onclick="setLanguage('fr')" id="btnLangFr" class="py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 flex items-center justify-center gap-1">
+                <span>🇫🇷</span> FR
+              </button>
+            </div>
+          </div>
+          <div>
+            <label id="lblSettingsCurr" class="text-[11px] font-semibold text-slate-300 block mb-1.5">Currency / Währung / Devise</label>
+            <div class="grid grid-cols-4 gap-1.5" id="settingsCurrencyOptions">
+              <button type="button" onclick="setCurrency('€')" id="btnCurrEur" class="py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 flex items-center justify-center">
+                € EUR
+              </button>
+              <button type="button" onclick="setCurrency('$')" id="btnCurrUsd" class="py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 flex items-center justify-center">
+                $ USD
+              </button>
+              <button type="button" onclick="setCurrency('£')" id="btnCurrGbp" class="py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 flex items-center justify-center">
+                £ GBP
+              </button>
+              <button type="button" onclick="setCurrency('CHF')" id="btnCurrChf" class="py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 flex items-center justify-center">
+                CHF
+              </button>
+            </div>
+          </div>
+        </div>
         <!-- Haushaltsname -->
         <div>
-          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Name des Haushalts</label>
+          <label id="lblSettingsHouseholdName" class="text-[11px] font-semibold text-slate-300 block mb-1">Name des Haushalts</label>
           <input type="text" id="settingsHouseholdName" placeholder="z. B. Unser Haushalt" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
         </div>
 
         <!-- Monatliches Soll-Budget -->
         <div>
-          <label class="text-[11px] font-semibold text-slate-300 block mb-1">Monatliches Soll-Budget (€)</label>
+          <label id="lblSettingsMonthlyBudget" class="text-[11px] font-semibold text-slate-300 block mb-1">Monatliches Soll-Budget (€)</label>
           <input type="number" step="10" id="settingsMonthlyBudget" placeholder="1500" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
         </div>
 
         <!-- Personen verwalten (Beliebig viele mit Farben) -->
         <div class="pt-2 border-t border-slate-800">
           <div class="flex items-center justify-between mb-1.5">
-            <label class="text-[11px] font-semibold text-slate-300">Personen im Haushalt</label>
-            <button type="button" onclick="addSettingsUser()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
+            <label id="lblSettingsUsers" class="text-[11px] font-semibold text-slate-300">Personen im Haushalt</label>
+            <button type="button" id="btnSettingsAddUser" onclick="addSettingsUser()" class="text-[10px] text-sky-400 hover:text-sky-300 font-bold">
               + Person hinzufügen
             </button>
           </div>
@@ -408,7 +439,7 @@
 
         <!-- Wer ist Inhaber dieses Handys? -->
         <div class="pt-2 border-t border-slate-800">
-          <label class="text-[11px] font-semibold text-slate-300 block mb-1.5">Standard-Erfasser auf diesem Gerät</label>
+          <label id="lblSettingsDeviceOwner" class="text-[11px] font-semibold text-slate-300 block mb-1.5">Standard-Erfasser auf diesem Gerät</label>
           <div id="settingsDeviceOwnerOptions" class="grid grid-cols-2 gap-1.5">
             <!-- Dynamisch gerendert -->
           </div>
@@ -416,8 +447,8 @@
 
         <!-- Google Sheet Webhook Sync -->
         <div class="pt-2 border-t border-slate-800 space-y-1">
-          <label class="text-[11px] font-semibold text-slate-300 block">Google Sheet Webhook (Gemeinsame Cloud)</label>
-          <p class="text-[10px] text-slate-400 leading-tight">
+          <label id="lblSettingsWebhook" class="text-[11px] font-semibold text-slate-300 block">Google Sheet Webhook (Gemeinsame Cloud)</label>
+          <p id="lblSettingsWebhookDesc" class="text-[10px] text-slate-400 leading-tight">
             Synchronisiert alle Einträge automatisch mit eurer Google-Tabelle.
           </p>
           <input type="url" id="inputGoogleWebhook" placeholder="https://script.google.com/macros/s/..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white placeholder-slate-600 focus:outline-none focus:border-sky-400">
@@ -425,7 +456,7 @@
 
         <!-- Google Sheet Link -->
         <div class="pt-2 border-t border-slate-800 space-y-1">
-          <label class="text-[11px] font-semibold text-slate-300 block">Google Sheet / Drive Link (Historie & Tabelle)</label>
+          <label id="lblSettingsSheet" class="text-[11px] font-semibold text-slate-300 block">Google Sheet / Drive Link (Historie & Tabelle)</label>
           <p class="text-[10px] text-slate-400 leading-tight">
             Direkter Link zur Google-Tabelle zum Einsehen aller Buchungen.
           </p>
@@ -434,15 +465,15 @@
 
         <!-- Magischer Setup-Link für Partner kopieren -->
         <div class="pt-2 border-t border-slate-800">
-          <button type="button" onclick="copyPartnerSetupLink()" class="w-full py-2 px-3 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-300 text-xs font-bold flex items-center justify-center gap-1.5 transition">
+          <button type="button" id="btnSettingsPartnerLink" onclick="copyPartnerSetupLink()" class="w-full py-2 px-3 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-300 text-xs font-bold flex items-center justify-center gap-1.5 transition">
             <span>🔗</span> Einrichtungs-Link für Partner kopieren
           </button>
-          <p class="text-[9px] text-slate-400 text-center mt-1">Per WhatsApp / iMessage senden – richtet das Handy des Partners sofort ein!</p>
+          <p id="lblSettingsPartnerLinkHint" class="text-[9px] text-slate-400 text-center mt-1">Per WhatsApp / iMessage senden – richtet das Handy des Partners sofort ein!</p>
         </div>
 
         <!-- Lokales CSV Backup -->
         <div class="pt-2 border-t border-slate-800">
-          <button type="button" onclick="shareOrExport()" class="w-full py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
+          <button type="button" id="btnSettingsBackup" onclick="shareOrExport()" class="w-full py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-400 hover:text-slate-200 text-[11px] font-medium flex items-center justify-center gap-1.5 transition">
             <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             Lokale Einträge als CSV exportieren
           </button>
@@ -450,7 +481,7 @@
       </div>
 
       <div class="pt-3 border-t border-slate-800 flex justify-end gap-2">
-        <button onclick="saveSettings()" class="w-full py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-sky-500/20">
+        <button id="btnSettingsSave" onclick="saveSettings()" class="w-full py-2.5 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-sky-500/20">
           Einstellungen speichern
         </button>
       </div>
@@ -489,14 +520,265 @@
     const DEFAULT_WEBHOOK = "";
     const DEFAULT_SHEET_URL = "";
 
+    // Multi-Language Dictionary (EN base, DE, FR)
+    const I18N = {
+      en: {
+        app_title: "Logbook",
+        household: "Household",
+        header_user_hint: "Tap to switch user",
+        sync_btn_title: "Sync with Cloud Sheet",
+        settings_btn_title: "Settings",
+        sheet_btn_title: "Open Cloud Sheet (History)",
+        card_add_title: "Record Expense",
+        category_label: "Category",
+        cat_supermarket: "🛒 Groceries & Food",
+        cat_kids: "👶 Kids & Family",
+        cat_auto: "⛽ Transport & Auto",
+        cat_drugstore: "💊 Drugstore & Health",
+        cat_leisure: "☕ Restaurant & Leisure",
+        cat_home: "🏠 Home & Garden",
+        cat_clothing: "👗 Clothing & Shoes",
+        cat_other: "📦 Miscellaneous",
+        merchant_label: "Merchant / Place",
+        merchant_placeholder: "Merchant / Note (optional)",
+        btn_save: "Save Expense",
+        badge_local: "Local on Device",
+        badge_sync_active: "Cloud Sheet active",
+        spent_label: "spent",
+        target_budget_label: "Target Budget:",
+        buffer_label: "Buffer",
+        status_calm: "Calm Seas",
+        status_breeze: "Gentle Breeze",
+        status_waves: "High Waves",
+        status_storm: "Storm Warning",
+        status_wreck: "Shipwrecked!",
+        status_over: "Over",
+        split_label: "Split:",
+        chart_title: "Where is our money going?",
+        entries_count: "entries",
+        receipts_title: "Recorded Receipts",
+        db_title: "Cloud Database & History",
+        db_live_badge: "Live Cloud",
+        db_desc: "All entries are synchronized with your cloud database. Click here to open the spreadsheet and view full historical records and reports:",
+        btn_open_sheet: "Open Cloud Sheet (History)",
+        link_settings: "Household Settings",
+        link_clear_month: "Clear Month",
+        // Wizard
+        wizard_title: "Set up New Household",
+        wizard_subtitle: "Set up your private shared budget in 30 seconds.",
+        wizard_name_label: "Household Name",
+        wizard_name_placeholder: "e.g. Our Home",
+        wizard_budget_label: "Monthly Target Budget",
+        wizard_users_label: "People in Household",
+        wizard_add_user: "+ Add Person",
+        wizard_owner_label: "Who owns this smartphone?",
+        wizard_webhook_label: "Cloud Webhook (Optional)",
+        wizard_webhook_hint: "Can also be configured anytime in settings.",
+        wizard_sheet_label: "Cloud Sheet / Drive Link (Optional)",
+        wizard_sheet_hint: "Direct link to your spreadsheet for 1-click access.",
+        wizard_start_btn: "Start Household Now 🚀",
+        // Settings
+        settings_title: "Household Settings",
+        settings_lang_label: "Language / Sprache / Langue",
+        settings_curr_label: "Currency / Währung / Devise",
+        settings_name_label: "Household Name",
+        settings_budget_label: "Monthly Target Budget",
+        settings_users_label: "People in Household",
+        settings_add_user_btn: "+ Add Person",
+        settings_owner_label: "Default Person on this Phone",
+        settings_webhook_label: "Cloud Webhook (Shared Cloud)",
+        settings_webhook_desc: "Automatically syncs all receipts with your Google Sheet.",
+        settings_sheet_label: "Cloud Sheet / Drive Link (History)",
+        settings_sheet_desc: "Direct link to open your Google Sheet in 1 tap.",
+        settings_partner_link_btn: "🔗 Copy Setup Link for Partner",
+        settings_partner_link_hint: "Send via WhatsApp / iMessage – configures partner's phone in 1 tap!",
+        settings_backup_btn: "Export Local Entries as CSV",
+        settings_save_btn: "Save Settings",
+        toast_saved: "Saved",
+        toast_welcome: "Welcome to ",
+        toast_partner_copied: "✓ Partner setup link copied!",
+        confirm_clear_month: "Do you really want to clear all entries for this month on this device?",
+        no_expenses: "No receipts recorded yet."
+      },
+      de: {
+        app_title: "Logbuch",
+        household: "Haushalt",
+        header_user_hint: "Tippen zum Wechseln",
+        sync_btn_title: "Google Sheet synchronisieren",
+        settings_btn_title: "Einstellungen",
+        sheet_btn_title: "Google Tabelle (Historie) öffnen",
+        card_add_title: "Ausgabe erfassen",
+        category_label: "Kategorie",
+        cat_supermarket: "🛒 Supermarkt & Essen",
+        cat_kids: "👶 Kinder & Baby",
+        cat_auto: "⛽ Auto & Tanken",
+        cat_drugstore: "💊 Drogerie & Pflege",
+        cat_leisure: "☕ Restaurant & Café",
+        cat_home: "🏠 Haus & Garten",
+        cat_clothing: "👗 Kleidung & Schuhe",
+        cat_other: "📦 Sonstiges",
+        merchant_label: "Ort / Händler",
+        merchant_placeholder: "Händler / Notiz (optional)",
+        btn_save: "Ausgabe speichern",
+        badge_local: "Lokal auf Gerät",
+        badge_sync_active: "Google Sheet aktiv",
+        spent_label: "ausgegeben",
+        target_budget_label: "Soll-Budget:",
+        buffer_label: "Puffer",
+        status_calm: "Ruhige See",
+        status_breeze: "Frische Brise",
+        status_waves: "Hohe Wellen",
+        status_storm: "Sturmwarnung",
+        status_wreck: "Schiffbruch!",
+        status_over: "Drüber",
+        split_label: "Aufteilung:",
+        chart_title: "Wofür geben wir Geld aus?",
+        entries_count: "Einträge",
+        receipts_title: "Erfasste Quittungen",
+        db_title: "Google Tabelle & Historie",
+        db_live_badge: "Live-Cloud",
+        db_desc: "Alle Buchungen werden direkt in eurer Google-Tabelle synchronisiert. Öffne die Tabelle, um alle historischen Einträge und Auswertungen direkt einzusehen:",
+        btn_open_sheet: "Google Tabelle öffnen (Historie)",
+        link_settings: "Einstellungen & Haushalt",
+        link_clear_month: "Monat leeren",
+        // Wizard
+        wizard_title: "Neuen Haushalt anlegen",
+        wizard_subtitle: "Richte dein persönliches Haushaltsbuch in 30 Sekunden ein.",
+        wizard_name_label: "Name des Haushalts",
+        wizard_name_placeholder: "z. B. Unser Haushalt",
+        wizard_budget_label: "Monatliches Soll-Budget",
+        wizard_users_label: "Personen im Haushalt",
+        wizard_add_user: "+ Person hinzufügen",
+        wizard_owner_label: "Wem gehört dieses Smartphone?",
+        wizard_webhook_label: "Google Sheet Webhook (Optional)",
+        wizard_webhook_hint: "Kann auch jederzeit später in den Einstellungen hinterlegt werden.",
+        wizard_sheet_label: "Google Sheet / Drive Link (Optional)",
+        wizard_sheet_hint: "Direktlink zur Google-Tabelle für den 1-Klick-Zugriff auf alle Buchungen.",
+        wizard_start_btn: "Haushalt jetzt starten 🚀",
+        // Settings
+        settings_title: "Haushalts-Einstellungen",
+        settings_lang_label: "Sprache / Language / Langue",
+        settings_curr_label: "Währung / Currency / Devise",
+        settings_name_label: "Name des Haushalts",
+        settings_budget_label: "Monatliches Soll-Budget",
+        settings_users_label: "Personen im Haushalt",
+        settings_add_user_btn: "+ Person hinzufügen",
+        settings_owner_label: "Standard-Erfasser auf diesem Gerät",
+        settings_webhook_label: "Google Sheet Webhook (Gemeinsame Cloud)",
+        settings_webhook_desc: "Synchronisiert alle Einträge automatisch mit eurer Google-Tabelle.",
+        settings_sheet_label: "Google Sheet / Drive Link (Historie & Tabelle)",
+        settings_sheet_desc: "Direkter Link zur Google-Tabelle zum Einsehen aller Buchungen.",
+        settings_partner_link_btn: "🔗 Einrichtungs-Link für Partner kopieren",
+        settings_partner_link_hint: "Per WhatsApp / iMessage senden – richtet das Handy des Partners sofort ein!",
+        settings_backup_btn: "Lokale Einträge als CSV exportieren",
+        settings_save_btn: "Einstellungen speichern",
+        toast_saved: "Gespeichert",
+        toast_welcome: "Willkommen im ",
+        toast_partner_copied: "✓ Setup-Link für Partner kopiert!",
+        confirm_clear_month: "Möchtest du wirklich alle Einträge dieses Monats auf diesem Gerät löschen?",
+        no_expenses: "Noch keine Ausgaben erfasst."
+      },
+      fr: {
+        app_title: "Journal",
+        household: "Foyer",
+        header_user_hint: "Appuyez pour changer",
+        sync_btn_title: "Synchroniser avec Google Sheet",
+        settings_btn_title: "Paramètres",
+        sheet_btn_title: "Ouvrir la feuille Google (Historique)",
+        card_add_title: "Ajouter une dépense",
+        category_label: "Catégorie",
+        cat_supermarket: "🛒 Supermarché & Repas",
+        cat_kids: "👶 Enfants & Famille",
+        cat_auto: "⛽ Transport & Carburant",
+        cat_drugstore: "💊 Pharmacie & Soins",
+        cat_leisure: "☕ Restaurant & Sorties",
+        cat_home: "🏠 Maison & Jardin",
+        cat_clothing: "👗 Vêtements & Mode",
+        cat_other: "📦 Divers",
+        merchant_label: "Commerçant / Lieu",
+        merchant_placeholder: "Commerçant / Note (optionnel)",
+        btn_save: "Enregistrer la dépense",
+        badge_local: "Local sur l'appareil",
+        badge_sync_active: "Google Sheet actif",
+        spent_label: "dépensé",
+        target_budget_label: "Budget cible :",
+        buffer_label: "Marge",
+        status_calm: "Mer calme",
+        status_breeze: "Brise légère",
+        status_waves: "Fortes vagues",
+        status_storm: "Avis de tempête",
+        status_wreck: "Naufrage !",
+        status_over: "Dépassement",
+        split_label: "Répartition :",
+        chart_title: "Où va notre argent ?",
+        entries_count: "entrées",
+        receipts_title: "Reçus enregistrés",
+        db_title: "Base Cloud & Historique",
+        db_live_badge: "Cloud en direct",
+        db_desc: "Toutes les écritures sont synchronisées dans votre feuille Google. Ouvrez-la pour consulter tout l'historique et les rapports :",
+        btn_open_sheet: "Ouvrir la feuille Cloud (Historique)",
+        link_settings: "Paramètres du foyer",
+        link_clear_month: "Vider le mois",
+        // Wizard
+        wizard_title: "Créer un nouveau foyer",
+        wizard_subtitle: "Configurez votre budget partagé en 30 secondes.",
+        wizard_name_label: "Nom du foyer",
+        wizard_name_placeholder: "ex. Notre Foyer",
+        wizard_budget_label: "Budget mensuel cible",
+        wizard_users_label: "Personnes dans le foyer",
+        wizard_add_user: "+ Ajouter une personne",
+        wizard_owner_label: "À qui appartient ce smartphone ?",
+        wizard_webhook_label: "Webhook Google Sheet (Optionnel)",
+        wizard_webhook_hint: "Peut être ajouté plus tard dans les paramètres.",
+        wizard_sheet_label: "Lien Google Sheet (Optionnel)",
+        wizard_sheet_hint: "Lien direct pour un accès en 1 clic à vos données.",
+        wizard_start_btn: "Démarrer le foyer maintenant 🚀",
+        // Settings
+        settings_title: "Paramètres du foyer",
+        settings_lang_label: "Langue / Language / Sprache",
+        settings_curr_label: "Devise / Currency / Währung",
+        settings_name_label: "Nom du foyer",
+        settings_budget_label: "Budget mensuel cible",
+        settings_users_label: "Personnes dans le foyer",
+        settings_add_user_btn: "+ Ajouter une personne",
+        settings_owner_label: "Utilisateur par défaut sur cet appareil",
+        settings_webhook_label: "Webhook Google Sheet (Partagé)",
+        settings_webhook_desc: "Synchronise automatiquement les reçus avec votre Google Sheet.",
+        settings_sheet_label: "Lien Google Sheet (Historique)",
+        settings_sheet_desc: "Lien direct pour ouvrir votre feuille Google en 1 clic.",
+        settings_partner_link_btn: "🔗 Copier le lien pour le partenaire",
+        settings_partner_link_hint: "Envoyer par WhatsApp / iMessage – configure le téléphone en 1 clic !",
+        settings_backup_btn: "Exporter les entrées en CSV",
+        settings_save_btn: "Enregistrer les paramètres",
+        toast_saved: "Enregistré",
+        toast_welcome: "Bienvenue dans ",
+        toast_partner_copied: "✓ Lien partenaire copié !",
+        confirm_clear_month: "Voulez-vous vraiment effacer toutes les entrées de ce mois sur cet appareil ?",
+        no_expenses: "Aucune dépense enregistrée."
+      }
+    };
+
+    const CATEGORIES = [
+      { key: 'groceries', icon: '🛒', i18nKey: 'cat_supermarket' },
+      { key: 'kids', icon: '👶', i18nKey: 'cat_kids' },
+      { key: 'auto', icon: '⛽', i18nKey: 'cat_auto' },
+      { key: 'drugstore', icon: '💊', i18nKey: 'cat_drugstore' },
+      { key: 'leisure', icon: '☕', i18nKey: 'cat_leisure' },
+      { key: 'home', icon: '🏠', i18nKey: 'cat_home' },
+      { key: 'clothing', icon: '👗', i18nKey: 'cat_clothing' },
+      { key: 'other', icon: '📦', i18nKey: 'cat_other' }
+    ];
+
     let expenses = [];
     let outbox = [];
     let isDrainingOutbox = false;
     let isSyncing = false;
 
     let config = {
-      householdName: 'Haushalt',
+      householdName: 'Household',
       monthlyBudget: 1500,
+      currency: '€',
+      lang: 'en',
       users: [
         { id: 'u_1', name: 'Person 1', colorIdx: 0 },
         { id: 'u_2', name: 'Person 2', colorIdx: 1 }
@@ -508,6 +790,293 @@
 
     let activePerson = 'Person 1';
     let chartInstance = null;
+
+    function getAutoLang() {
+      try {
+        const nav = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+        if (nav.startsWith('de')) return 'de';
+        if (nav.startsWith('fr')) return 'fr';
+      } catch(e){}
+      return 'en';
+    }
+
+    function t(key) {
+      const lang = config.lang || getAutoLang();
+      if (I18N[lang] && I18N[lang][key] !== undefined) return I18N[lang][key];
+      if (I18N['en'] && I18N['en'][key] !== undefined) return I18N['en'][key];
+      return key;
+    }
+
+    function getLocale() {
+      const lang = config.lang || getAutoLang();
+      if (lang === 'de') return 'de-DE';
+      if (lang === 'fr') return 'fr-FR';
+      return 'en-US';
+    }
+
+    function formatMoney(amount) {
+      const num = typeof amount === 'number' ? amount : parseFloat(amount) || 0;
+      const formatted = num.toLocaleString(getLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return formatted + ' ' + (config.currency || '€');
+    }
+
+    function formatMoneyCompact(amount) {
+      const num = typeof amount === 'number' ? amount : parseFloat(amount) || 0;
+      const formatted = num.toLocaleString(getLocale(), { maximumFractionDigits: 0 });
+      return formatted + ' ' + (config.currency || '€');
+    }
+
+    function getLocalizedCategory(catKey) {
+      if (!catKey) return t('cat_other');
+      const lk = String(catKey).toLowerCase();
+      if (lk.includes('supermarkt') || lk.includes('essen') || lk.includes('grocer') || lk.includes('food') || lk.includes('repas')) return t('cat_supermarket');
+      if (lk.includes('kinder') || lk.includes('baby') || lk.includes('kid') || lk.includes('enfant')) return t('cat_kids');
+      if (lk.includes('auto') || lk.includes('tanken') || lk.includes('mobil') || lk.includes('transport') || lk.includes('fuel') || lk.includes('carburant')) return t('cat_auto');
+      if (lk.includes('drogerie') || lk.includes('pflege') || lk.includes('drug') || lk.includes('health') || lk.includes('pharmacie') || lk.includes('soins')) return t('cat_drugstore');
+      if (lk.includes('freizeit') || lk.includes('gastro') || lk.includes('restaurant') || lk.includes('caf') || lk.includes('leisure') || lk.includes('sorties')) return t('cat_leisure');
+      if (lk.includes('haus') || lk.includes('garten') || lk.includes('home') || lk.includes('garden') || lk.includes('maison') || lk.includes('jardin')) return t('cat_home');
+      if (lk.includes('kleidung') || lk.includes('mode') || lk.includes('schuhe') || lk.includes('cloth') || lk.includes('shoe') || lk.includes('vêtement')) return t('cat_clothing');
+      return t('cat_other');
+    }
+
+    function setLanguage(lang) {
+      config.lang = lang;
+      saveConfig();
+      updateI18nUI();
+      updateHouseholdUI();
+      render();
+    }
+
+    function setCurrency(curr) {
+      config.currency = curr;
+      saveConfig();
+      updateCurrencyUI();
+      render();
+    }
+
+    function updateCurrencyUI() {
+      const curDisplay = document.getElementById('currencySymbolDisplay');
+      if (curDisplay) curDisplay.innerText = config.currency || '€';
+      renderSettingsPills();
+      renderWizardPills();
+    }
+
+    function renderCategoryButtons() {
+      const container = document.getElementById('purposeButtonsGrid');
+      if (!container) return;
+      const inputEl = document.getElementById('inputPurpose');
+      const currentKey = inputEl ? inputEl.value : 'groceries';
+
+      container.innerHTML = CATEGORIES.map(c => {
+        const fullLabel = t(c.i18nKey);
+        const isActive = (currentKey === c.key || currentKey === fullLabel || (c.key === 'groceries' && currentKey === 'Supermarkt & Essen'));
+        // Clean text without icon for button text
+        const textOnly = fullLabel.replace(/^[^\s]+\s*/, '');
+        return `
+          <button type="button" data-key="${c.key}" onclick="selectCategory('${c.key}', this)" class="purpose-btn ${isActive ? 'active-chip' : ''} py-2 px-2.5 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 text-xs text-left flex items-center gap-1.5 transition">
+            <span>${c.icon}</span> ${escapeHtml(textOnly)}
+          </button>
+        `;
+      }).join('');
+
+      const curCat = CATEGORIES.find(c => c.key === currentKey || (c.key === 'groceries' && currentKey === 'Supermarkt & Essen')) || CATEGORIES[0];
+      const selLabel = document.getElementById('selectedCategoryLabel');
+      if (selLabel) selLabel.innerText = t(curCat.i18nKey);
+    }
+
+    function selectCategory(catKey, btn) {
+      const inputEl = document.getElementById('inputPurpose');
+      if (inputEl) inputEl.value = catKey;
+      const curCat = CATEGORIES.find(c => c.key === catKey) || CATEGORIES[0];
+      const selLabel = document.getElementById('selectedCategoryLabel');
+      if (selLabel) selLabel.innerText = t(curCat.i18nKey);
+
+      document.querySelectorAll('.purpose-btn').forEach(b => b.classList.remove('active-chip'));
+      if (btn) btn.classList.add('active-chip');
+    }
+
+    function selectPurpose(purposeKey, label, btn) {
+      selectCategory(purposeKey, btn);
+    }
+
+    function renderSettingsPills() {
+      const currentLang = config.lang || getAutoLang();
+      ['en', 'de', 'fr'].forEach(l => {
+        const btn = document.getElementById('btnLang' + l.charAt(0).toUpperCase() + l.slice(1));
+        if (!btn) return;
+        if (currentLang === l) {
+          btn.className = "py-1.5 rounded-xl text-xs font-bold border border-sky-400 bg-sky-500/20 text-sky-300 transition active:scale-95 flex items-center justify-center gap-1";
+        } else {
+          btn.className = "py-1.5 rounded-xl text-xs font-medium border border-slate-700 bg-slate-900 text-slate-400 hover:text-white transition active:scale-95 flex items-center justify-center gap-1";
+        }
+      });
+
+      const currentCurr = config.currency || '€';
+      const currMap = { '€': 'btnCurrEur', '$': 'btnCurrUsd', '£': 'btnCurrGbp', 'CHF': 'btnCurrChf' };
+      Object.keys(currMap).forEach(c => {
+        const btn = document.getElementById(currMap[c]);
+        if (!btn) return;
+        if (currentCurr === c) {
+          btn.className = "py-1.5 rounded-xl text-xs font-bold border border-emerald-400 bg-emerald-500/20 text-emerald-300 transition active:scale-95 flex items-center justify-center";
+        } else {
+          btn.className = "py-1.5 rounded-xl text-xs font-medium border border-slate-700 bg-slate-900 text-slate-400 hover:text-white transition active:scale-95 flex items-center justify-center";
+        }
+      });
+    }
+
+    function renderWizardPills() {
+      const currentLang = config.lang || getAutoLang();
+      ['en', 'de', 'fr'].forEach(l => {
+        const btn = document.getElementById('wBtnLang' + l.charAt(0).toUpperCase() + l.slice(1));
+        if (!btn) return;
+        if (currentLang === l) {
+          btn.className = "py-1 rounded-lg text-[11px] font-bold border border-sky-400 bg-sky-500/20 text-sky-300";
+        } else {
+          btn.className = "py-1 rounded-lg text-[11px] font-medium border border-slate-700 bg-slate-900 text-slate-400";
+        }
+      });
+
+      const currentCurr = config.currency || '€';
+      const currMap = { '€': 'wBtnCurrEur', '$': 'wBtnCurrUsd', '£': 'wBtnCurrGbp', 'CHF': 'wBtnCurrChf' };
+      Object.keys(currMap).forEach(c => {
+        const btn = document.getElementById(currMap[c]);
+        if (!btn) return;
+        if (currentCurr === c) {
+          btn.className = "py-1 rounded-lg text-[11px] font-bold border border-emerald-400 bg-emerald-500/20 text-emerald-300";
+        } else {
+          btn.className = "py-1 rounded-lg text-[10px] font-medium border border-slate-700 bg-slate-900 text-slate-400";
+        }
+      });
+    }
+
+    function updateI18nUI() {
+      // Titles and Header
+      const pageTitle = document.getElementById('pageTitle');
+      if (pageTitle) pageTitle.innerText = `${t('app_title')} - ${config.householdName || t('household')}`;
+      const headerTitle = document.getElementById('headerTitleText');
+      if (headerTitle) headerTitle.innerText = t('app_title');
+      
+      const headerOwnerBadge = document.getElementById('headerOwnerBadge');
+      if (headerOwnerBadge) headerOwnerBadge.title = t('header_user_hint');
+      const btnCloudSync = document.getElementById('btnCloudSync');
+      if (btnCloudSync) btnCloudSync.title = t('sync_btn_title');
+
+      // Card 1
+      const cardAddTitle = document.getElementById('cardAddTitle');
+      if (cardAddTitle) {
+        cardAddTitle.innerHTML = `<svg class="w-4 h-4 text-sky-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg> ${t('card_add_title')}`;
+      }
+      const lblCategory = document.getElementById('lblCategory');
+      if (lblCategory) lblCategory.innerText = t('category_label');
+      const lblMerchant = document.getElementById('lblMerchant');
+      if (lblMerchant) lblMerchant.innerText = t('merchant_label');
+      const inputMerchant = document.getElementById('inputMerchant');
+      if (inputMerchant) inputMerchant.placeholder = t('merchant_placeholder');
+      const btnSubmitExpenseText = document.getElementById('btnSubmitExpenseText');
+      if (btnSubmitExpenseText) btnSubmitExpenseText.innerText = t('btn_save');
+
+      renderCategoryButtons();
+
+      // Card 2
+      const spentSub = document.getElementById('spentSubtitle');
+      if (spentSub) spentSub.innerText = t('spent_label');
+      const targetLbl = document.getElementById('targetBudgetLabel');
+      if (targetLbl) targetLbl.innerText = t('target_budget_label');
+
+      // Card 3
+      const chartTitle = document.getElementById('chartCardTitle');
+      if (chartTitle) {
+        chartTitle.innerHTML = `<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg> ${t('chart_title')}`;
+      }
+
+      // Card 4
+      const receiptsTitle = document.getElementById('receiptsCardTitle');
+      if (receiptsTitle) receiptsTitle.innerText = t('receipts_title');
+
+      // Card 5
+      const dbTitle = document.getElementById('dbCardTitle');
+      if (dbTitle) {
+        dbTitle.innerHTML = `<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/><polyline points="10 9 9 9 8 9"/></svg> ${t('db_title')}`;
+      }
+      const dbBadge = document.getElementById('dbCardBadge');
+      if (dbBadge) {
+        dbBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ${t('db_live_badge')}`;
+      }
+      const dbDesc = document.getElementById('dbCardDesc');
+      if (dbDesc) dbDesc.innerText = t('db_desc');
+      const btnOpenSheetBottomText = document.getElementById('btnOpenSheetBottomText');
+      if (btnOpenSheetBottomText) btnOpenSheetBottomText.innerText = t('btn_open_sheet');
+      const linkSettingsBottom = document.getElementById('linkSettingsBottom');
+      if (linkSettingsBottom) linkSettingsBottom.innerText = t('link_settings');
+      const linkClearMonthBottom = document.getElementById('linkClearMonthBottom');
+      if (linkClearMonthBottom) linkClearMonthBottom.innerText = t('link_clear_month');
+
+      // Settings Labels
+      const lblSettingsLang = document.getElementById('lblSettingsLang');
+      if (lblSettingsLang) lblSettingsLang.innerText = t('settings_lang_label');
+      const lblSettingsCurr = document.getElementById('lblSettingsCurr');
+      if (lblSettingsCurr) lblSettingsCurr.innerText = t('settings_curr_label');
+
+      // Setup Wizard Labels
+      const wTitle = document.getElementById('wizardTitle');
+      if (wTitle) wTitle.innerText = t('wizard_title');
+      const wSub = document.getElementById('wizardSubtitle');
+      if (wSub) wSub.innerText = t('wizard_subtitle');
+      const wHNameLbl = document.getElementById('lblWizardHouseholdName');
+      if (wHNameLbl) wHNameLbl.innerText = t('wizard_name_label');
+      const wMBudgetLbl = document.getElementById('lblWizardMonthlyBudget');
+      if (wMBudgetLbl) wMBudgetLbl.innerText = `${t('wizard_budget_label')} (${config.currency || '€'})`;
+      const wUsersLbl = document.getElementById('lblWizardUsers');
+      if (wUsersLbl) wUsersLbl.innerText = t('wizard_users_label');
+      const wAddUserBtn = document.getElementById('btnWizardAddUser');
+      if (wAddUserBtn) wAddUserBtn.innerText = t('wizard_add_user');
+      const wOwnerLbl = document.getElementById('lblWizardOwner');
+      if (wOwnerLbl) wOwnerLbl.innerText = t('wizard_owner_label');
+      const wHookLbl = document.getElementById('lblWizardWebhook');
+      if (wHookLbl) wHookLbl.innerText = t('wizard_webhook_label');
+      const wHookHint = document.getElementById('lblWizardWebhookHint');
+      if (wHookHint) wHookHint.innerText = t('wizard_webhook_hint');
+      const wSheetLbl = document.getElementById('lblWizardSheet');
+      if (wSheetLbl) wSheetLbl.innerText = t('wizard_sheet_label');
+      const wSheetHint = document.getElementById('lblWizardSheetHint');
+      if (wSheetHint) wSheetHint.innerText = t('wizard_sheet_hint');
+      const wStartBtn = document.getElementById('btnWizardStart');
+      if (wStartBtn) wStartBtn.innerText = t('wizard_start_btn');
+
+      // Settings Modal Labels
+      const sTitle = document.getElementById('settingsTitle');
+      if (sTitle) sTitle.innerHTML = `<svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg> ${t('settings_title')}`;
+      const sHNameLbl = document.getElementById('lblSettingsHouseholdName');
+      if (sHNameLbl) sHNameLbl.innerText = t('settings_name_label');
+      const sMBudgetLbl = document.getElementById('lblSettingsMonthlyBudget');
+      if (sMBudgetLbl) sMBudgetLbl.innerText = `${t('settings_budget_label')} (${config.currency || '€'})`;
+      const sUsersLbl = document.getElementById('lblSettingsUsers');
+      if (sUsersLbl) sUsersLbl.innerText = t('settings_users_label');
+      const sAddUserBtn = document.getElementById('btnSettingsAddUser');
+      if (sAddUserBtn) sAddUserBtn.innerText = t('settings_add_user_btn');
+      const sOwnerLbl = document.getElementById('lblSettingsDeviceOwner');
+      if (sOwnerLbl) sOwnerLbl.innerText = t('settings_owner_label');
+      const sHookLbl = document.getElementById('lblSettingsWebhook');
+      if (sHookLbl) sHookLbl.innerText = t('settings_webhook_label');
+      const sHookDesc = document.getElementById('lblSettingsWebhookDesc');
+      if (sHookDesc) sHookDesc.innerText = t('settings_webhook_desc');
+      const sSheetLbl = document.getElementById('lblSettingsSheet');
+      if (sSheetLbl) sSheetLbl.innerText = t('settings_sheet_label');
+      const sSheetDesc = document.getElementById('lblSettingsSheetDesc');
+      if (sSheetDesc) sSheetDesc.innerText = t('settings_sheet_desc');
+      const sPartnerBtn = document.getElementById('btnSettingsPartnerLink');
+      if (sPartnerBtn) sPartnerBtn.innerHTML = `<span>🔗</span> ${t('settings_partner_link_btn')}`;
+      const sPartnerHint = document.getElementById('lblSettingsPartnerLinkHint');
+      if (sPartnerHint) sPartnerHint.innerText = t('settings_partner_link_hint');
+      const sBackupBtn = document.getElementById('btnSettingsBackup');
+      if (sBackupBtn) sBackupBtn.innerHTML = `<svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg> ${t('settings_backup_btn')}`;
+      const sSaveBtn = document.getElementById('btnSettingsSave');
+      if (sSaveBtn) sSaveBtn.innerText = t('settings_save_btn');
+
+      updateCurrencyUI();
+      renderSettingsPills();
+      renderWizardPills();
+    }
 
     function getUserColor(userName) {
       if (!config.users || config.users.length === 0) return PALETTE[0];
@@ -602,6 +1171,10 @@
           // Google Sheet URL
           if (params.get('sheet')) config.googleSheetUrl = decodeURIComponent(params.get('sheet'));
 
+          // Language & Currency
+          if (params.get('lang')) config.lang = decodeURIComponent(params.get('lang'));
+          if (params.get('curr')) config.currency = decodeURIComponent(params.get('curr'));
+
           saveConfig();
           safeStore.setItem('logbuch_device_owner_set', 'true');
           safeStore.setItem('logbuch_household_initialized', 'true');
@@ -614,18 +1187,9 @@
     }
 
     function init() {
-      // Aktuellen Monat dynamisch anzeigen
-      try {
-        const mLabel = document.getElementById('currentMonthLabel');
-        if (mLabel) {
-          mLabel.innerText = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric' }).format(new Date());
-        }
-      } catch(e){}
-
-      checkUrlSetup();
-
       // Datum vorbefüllen
-      document.getElementById('inputDate').valueAsDate = new Date();
+      const dateEl = document.getElementById('inputDate');
+      if (dateEl) dateEl.valueAsDate = new Date();
 
       // Config laden
       const storedConfig = safeStore.getItem(STORAGE_KEY_CONFIG);
@@ -643,6 +1207,9 @@
         } catch(e){}
       }
 
+      // URL Setup Hash prüfen (überschreibt bestehende Config falls vorhanden)
+      checkUrlSetup();
+
       if (!config.users || config.users.length === 0) {
         config.users = [
           { id: 'u_1', name: 'Person 1', colorIdx: 0 },
@@ -653,10 +1220,13 @@
       if (!config.monthlyBudget) config.monthlyBudget = 1500;
       if (!config.googleWebhook) config.googleWebhook = DEFAULT_WEBHOOK;
       if (!config.googleSheetUrl) config.googleSheetUrl = DEFAULT_SHEET_URL;
+      if (!config.lang) config.lang = getAutoLang();
+      if (!config.currency) config.currency = '€';
       saveConfig();
 
       activePerson = config.deviceOwner || (config.users[0] && config.users[0].name) || 'User';
 
+      updateI18nUI();
       updateHouseholdUI();
       checkFirstLaunch();
 
@@ -695,48 +1265,40 @@
       safeStore.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config));
     }
 
-    // Aktualisiert alle UI-Elemente bezüglich Haushalt, User & Farben
     function updateHouseholdUI() {
-      // Titel & Untertitel
-      const hName = config.householdName || 'Haushalt';
-      document.getElementById('headerHouseholdSubtitle').textContent = hName;
-      document.getElementById('pageTitle').textContent = `Logbuch - ${hName}`;
+      const titleEl = document.getElementById('headerHouseholdSubtitle');
+      if (titleEl) titleEl.innerText = config.householdName || t('household');
 
-      // Header Badge für aktuellen Geräte-Besitzer
-      const badge = document.getElementById('headerOwnerBadge');
-      if (badge) {
-        const color = getUserColor(config.deviceOwner);
-        badge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span> ${config.deviceOwner}`;
-        badge.style.backgroundColor = color.bg;
-        badge.style.borderColor = color.border;
-        badge.style.color = color.text;
+      const ownerBadge = document.getElementById('headerOwnerBadge');
+      if (ownerBadge) {
+        const uColor = getUserColor(config.deviceOwner);
+        ownerBadge.innerText = config.deviceOwner;
+        ownerBadge.style.backgroundColor = uColor.bg;
+        ownerBadge.style.borderColor = uColor.border;
+        ownerBadge.style.color = uColor.text;
       }
 
-      // Sync Badge Status
+      renderFormPersonSelectors();
+
       const syncBadge = document.getElementById('syncStatusBadge');
       if (syncBadge && config.googleWebhook && config.googleWebhook.startsWith('http')) {
-        syncBadge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-sky-400 mr-1 animate-pulse"></span> Google Sheet aktiv`;
-        syncBadge.className = "text-[11px] px-2 py-0.5 rounded-full bg-sky-950/60 text-sky-300 border border-sky-500/40 font-medium";
+        syncBadge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-sky-400 mr-1 animate-pulse"></span> ${t('badge_sync_active')}`;
+      } else if (syncBadge) {
+        syncBadge.innerText = t('badge_local');
       }
-
-      // Formular-Pills für alle User rendern
-      renderFormUserSelectors();
-
-      // Standardmäßig den Besitzer dieses Geräts als Erfasser vorauswählen
-      setPerson(config.deviceOwner || (config.users[0] && config.users[0].name) || 'User');
     }
 
-    function renderFormUserSelectors() {
+    function renderFormPersonSelectors() {
       const container = document.getElementById('formPersonSelectors');
       if (!container) return;
 
-      container.innerHTML = config.users.map(u => {
-        const color = getUserColor(u.name);
-        const isActive = activePerson === u.name;
+      container.innerHTML = (config.users || []).map((u, i) => {
+        const color = PALETTE[u.colorIdx % PALETTE.length];
+        const isCurrent = activePerson === u.name;
         return `
-          <button type="button" data-user="${escapeHtml(u.name)}" onclick="setPerson(this.dataset.user)" id="btnUserSelector_${escapeId(u.name)}"
-            class="px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition active:scale-95"
-            style="${isActive ? `background-color: ${color.bg}; border: 1px solid ${color.border}; color: ${color.text}; font-weight: bold;` : 'background-color: #0f172a; border: 1px solid #334155; color: #94a3b8;'}">
+          <button type="button" data-user="${escapeHtml(u.name)}" onclick="setPerson(this.dataset.user)"
+            class="px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition active:scale-95"
+            style="${isCurrent ? `background-color: ${color.bg}; border: 1.5px solid ${color.border}; color: ${color.text}; font-weight: 800;` : 'background-color: #0f172a; border: 1px solid #334155; color: #94a3b8;'}">
             <span class="inline-block w-2 h-2 rounded-full" style="background-color: ${color.hex}"></span>
             ${escapeHtml(u.name)}
           </button>
@@ -746,42 +1308,27 @@
 
     function setPerson(person) {
       activePerson = person;
-      if (!config.users) return;
-
-      config.users.forEach(u => {
-        const btn = document.getElementById(`btnUserSelector_${escapeId(u.name)}`);
-        if (btn) {
-          const color = getUserColor(u.name);
-          const isActive = u.name === person;
-          if (isActive) {
-            btn.style.backgroundColor = color.bg;
-            btn.style.border = `1px solid ${color.border}`;
-            btn.style.color = color.text;
-            btn.style.fontWeight = 'bold';
-          } else {
-            btn.style.backgroundColor = '#0f172a';
-            btn.style.border = '1px solid #334155';
-            btn.style.color = '#94a3b8';
-            btn.style.fontWeight = 'normal';
-          }
-        }
-      });
+      renderFormPersonSelectors();
     }
 
     function toggleDeviceOwner() {
       if (!config.users || config.users.length === 0) return;
-      const currentIdx = config.users.findIndex(u => u.name === config.deviceOwner);
-      const nextIdx = (currentIdx + 1) % config.users.length;
-      const newOwner = config.users[nextIdx].name;
-
-      config.deviceOwner = newOwner;
-      safeStore.setItem('logbuch_device_owner_set', 'true');
+      const curIdx = config.users.findIndex(u => u.name === config.deviceOwner);
+      const nextIdx = (curIdx + 1) % config.users.length;
+      config.deviceOwner = config.users[nextIdx].name;
+      activePerson = config.deviceOwner;
       saveConfig();
       updateHouseholdUI();
-      showToast(`Erfasser eingestellt: ${newOwner}`);
+      render();
+      showToast(`${config.deviceOwner}`);
     }
 
-    // Wizard: Neuer Haushalt anlegen (Erster Start)
+    function setMerchant(m) {
+      const input = document.getElementById('inputMerchant');
+      if (input) input.value = m;
+    }
+
+    // Wizard Logic
     let wizardTempUsers = [
       { name: 'Person 1', colorIdx: 0 },
       { name: 'Person 2', colorIdx: 1 }
@@ -799,7 +1346,7 @@
       const modal = document.getElementById('setupWizardModal');
       if (!modal) return;
 
-      document.getElementById('wizardHouseholdName').value = config.householdName !== 'Haushalt' ? config.householdName : '';
+      document.getElementById('wizardHouseholdName').value = config.householdName !== 'Household' && config.householdName !== 'Haushalt' ? config.householdName : '';
       document.getElementById('wizardMonthlyBudget').value = config.monthlyBudget || 1500;
       document.getElementById('wizardGoogleWebhook').value = config.googleWebhook || '';
       if (document.getElementById('wizardGoogleSheetUrl')) {
@@ -811,6 +1358,7 @@
         wizardSelectedOwner = config.deviceOwner || wizardTempUsers[0].name;
       }
 
+      renderWizardPills();
       renderWizardUsers();
       renderWizardOwnerOptions();
       modal.classList.remove('hidden');
@@ -883,7 +1431,7 @@
     }
 
     function finishSetupWizard() {
-      const hName = document.getElementById('wizardHouseholdName').value.trim() || 'Haushalt';
+      const hName = document.getElementById('wizardHouseholdName').value.trim() || t('household');
       const bVal = parseFloat(document.getElementById('wizardMonthlyBudget').value);
       const hook = document.getElementById('wizardGoogleWebhook').value.trim();
       const sheet = document.getElementById('wizardGoogleSheetUrl') ? document.getElementById('wizardGoogleSheetUrl').value.trim() : '';
@@ -907,90 +1455,66 @@
       safeStore.setItem('logbuch_household_initialized', 'true');
 
       document.getElementById('setupWizardModal').classList.add('hidden');
+      updateI18nUI();
       updateHouseholdUI();
       render();
-      showToast(`Willkommen im ${hName}!`);
+      showToast(`${t('toast_welcome')}${hName}!`);
 
       if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
         syncWithGoogleSheet(true);
       }
     }
 
-    function selectPurpose(purposeKey, label, btn) {
-      document.getElementById('inputPurpose').value = purposeKey;
-      document.getElementById('selectedCategoryLabel').innerText = label;
-
-      document.querySelectorAll('.purpose-btn').forEach(b => b.classList.remove('active-chip'));
-      btn.classList.add('active-chip');
-    }
-
-    function setMerchant(merchantName) {
-      const input = document.getElementById('inputMerchant');
-      input.value = merchantName;
-      input.focus();
-    }
-
-    function addExpense(e) {
+    // Ausgabe hinzufügen
+    async function addExpense(e) {
       e.preventDefault();
-      const inputAmt = document.getElementById('inputAmount');
-      const amount = parseFloat(inputAmt.value);
-      const purpose = document.getElementById('inputPurpose').value;
-      const merchant = document.getElementById('inputMerchant').value.trim() || 'Alltag';
-      const date = document.getElementById('inputDate').value || new Date().toISOString().split('T')[0];
+      const amountInput = document.getElementById('inputAmount');
+      const amount = parseFloat(amountInput.value);
+      const catKey = document.getElementById('inputPurpose').value;
+      const purpose = getLocalizedCategory(catKey);
+      const merchant = document.getElementById('inputMerchant').value.trim();
+      const date = document.getElementById('inputDate').value || new Date().toISOString().slice(0,10);
 
-      if (isNaN(amount) || amount <= 0) {
-        showToast("Bitte einen Betrag eingeben!", true);
-        return;
-      }
+      if (isNaN(amount) || amount <= 0) return;
 
-      // Eindeutige ID generieren
-      const uniqueId = 'exp_' + date.replace(/-/g, '') + '_' + Math.round(amount * 100) + '_' + Math.random().toString(36).substr(2, 4);
-
-      const newEntry = {
-        id: uniqueId,
-        date,
-        timestamp: new Date().toISOString(),
+      const newExpense = {
+        id: 'exp_' + Date.now(),
+        date: date,
         person: activePerson,
-        purpose,
-        merchant,
-        amount,
+        purpose: purpose,
+        merchant: merchant,
+        amount: amount,
         pendingSync: true
       };
 
-      // 1. Sofort lokal sichern (< 0.1 ms)
-      expenses.unshift(newEntry);
+      expenses.unshift(newExpense);
       saveData();
 
-      // 2. In Outbox legen
-      outbox.push(newEntry);
+      outbox.push(newExpense);
       saveOutbox();
 
-      // 3. Formular zurücksetzen
-      inputAmt.value = '';
+      showToast(`${t('toast_saved')}: ${formatMoney(amount)}`);
+
+      amountInput.value = '';
       document.getElementById('inputMerchant').value = '';
-      inputAmt.blur();
+      amountInput.focus();
 
-      // 4. Immer auf den Standard-Inhaber dieses Telefons zurücksetzen
-      setPerson(config.deviceOwner);
-
-      // 5. Ansicht aktualisieren & Feedback
       render();
-      showToast(`✓ ${amount.toFixed(2).replace('.', ',')} € gespeichert`);
 
-      // 6. Asynchron im Hintergrund übertragen
-      setTimeout(() => {
+      if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
         drainOutbox();
-      }, 50);
+      }
     }
 
     function deleteExpense(id) {
-      if (confirm("Eintrag löschen?")) {
-        expenses = expenses.filter(e => String(e.id) !== String(id));
+      const idx = expenses.findIndex(x => String(x.id) === String(id));
+      if (idx !== -1) {
+        expenses.splice(idx, 1);
         outbox = outbox.filter(o => String(o.id) !== String(id));
         saveData();
         saveOutbox();
         render();
-        showToast("Eintrag gelöscht");
+        showToast("Deleted");
 
         if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
           try {
@@ -1017,26 +1541,35 @@
       expenses.forEach(exp => {
         total += exp.amount;
         userTotals[exp.person] = (userTotals[exp.person] || 0) + exp.amount;
-        purposeMap[exp.purpose] = (purposeMap[exp.purpose] || 0) + exp.amount;
+        const locP = getLocalizedCategory(exp.purpose);
+        purposeMap[locP] = (purposeMap[locP] || 0) + exp.amount;
       });
 
       // Total Card
-      document.getElementById('totalExpensesMonth').innerText = total.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+      document.getElementById('totalExpensesMonth').innerText = formatMoney(total);
+
+      // Localized current month
+      const currentMonthLabel = document.getElementById('currentMonthLabel');
+      if (currentMonthLabel) {
+        try {
+          currentMonthLabel.innerText = new Intl.DateTimeFormat(getLocale(), { month: 'long', year: 'numeric' }).format(new Date());
+        } catch(e){}
+      }
 
       // Aufteilung nach Person dynamisch für alle User mit individuellen Farben
       const splitEl = document.getElementById('userSplitBreakdown');
       if (splitEl) {
         const userSpans = Object.entries(userTotals).map(([name, sum]) => {
           const color = getUserColor(name);
-          return `<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full inline-block" style="background-color: ${color.hex}"></span> ${escapeHtml(name)}: <strong style="color: ${color.hex}">${sum.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })}</strong></span>`;
+          return `<span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full inline-block" style="background-color: ${color.hex}"></span> ${escapeHtml(name)}: <strong style="color: ${color.hex}">${formatMoneyCompact(sum)}</strong></span>`;
         });
-        splitEl.innerHTML = `<span>Aufteilung:</span> <div class="flex flex-wrap items-center gap-x-2 gap-y-1">${userSpans.join('')}</div>`;
+        splitEl.innerHTML = `<span>${t('split_label')}</span> <div class="flex flex-wrap items-center gap-x-2 gap-y-1">${userSpans.join('')}</div>`;
       }
 
       // Nautical Seegang & Wasserlinie Berechnungen
       const budget = Number(config.monthlyBudget) || 1500;
       const budgetDisplay = document.getElementById('budgetDisplay');
-      if (budgetDisplay) budgetDisplay.innerText = budget.toLocaleString('de-DE') + ' €';
+      if (budgetDisplay) budgetDisplay.innerText = formatMoneyCompact(budget);
 
       const depthPct = Math.round((total / budget) * 100);
       const freeboard = budget - total;
@@ -1055,57 +1588,58 @@
 
       if (freeboardLabel) {
         if (freeboard >= 0) {
-          freeboardLabel.innerHTML = `Noch <span class="text-emerald-400 font-bold">${freeboard.toFixed(0)} €</span> Puffer`;
+          freeboardLabel.innerHTML = `${formatMoneyCompact(freeboard)} <span class="text-slate-300 font-bold">${t('buffer_label')}</span>`;
         } else {
-          freeboardLabel.innerHTML = `<span class="text-rose-400 font-bold">${Math.abs(freeboard).toFixed(0)} € über Budget!</span>`;
+          freeboardLabel.innerHTML = `<span class="text-rose-400 font-bold">${formatMoneyCompact(Math.abs(freeboard))} ${t('status_over')}</span>`;
         }
       }
 
       if (statusText) {
         if (total <= (budget * 0.5)) {
           statusText.className = "text-emerald-400 font-medium";
-          statusText.innerText = `⛵ Ruhige See (${depthPct}% vom Budget)`;
+          statusText.innerText = `⛵ ${t('status_calm')} (${depthPct}%)`;
         } else if (total <= (budget * 0.8)) {
           statusText.className = "text-sky-400 font-medium";
-          statusText.innerText = `🌊 Frische Brise (${depthPct}% vom Budget)`;
+          statusText.innerText = `🌊 ${t('status_breeze')} (${depthPct}%)`;
         } else if (total <= budget) {
           statusText.className = "text-amber-400 font-medium";
-          statusText.innerText = `⚠️ Kabbelige See (${depthPct}% vom Budget)`;
+          statusText.innerText = `⚠️ ${t('status_waves')} (${depthPct}%)`;
         } else {
           statusText.className = "text-rose-400 font-bold animate-pulse";
-          statusText.innerText = `🚨 Budget überschritten (+${(total - budget).toFixed(0)} €)`;
+          statusText.innerText = `🚨 ${t('status_storm')} (+${formatMoneyCompact(total - budget)})`;
         }
       }
 
       // Badge aktualisieren
       const badgeEl = document.getElementById('entryCountBadge');
-      if (badgeEl) badgeEl.innerText = `${expenses.length} Einträge`;
+      if (badgeEl) badgeEl.innerText = `${expenses.length} ${t('entries_count')}`;
 
       // Einträge Liste mit Personen-Farbindikatoren
       const listEl = document.getElementById('expenseList');
       if (listEl) {
         if (expenses.length === 0) {
-          listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">Noch keine Ausgaben erfasst.</p>`;
+          listEl.innerHTML = `<p class="text-xs text-slate-500 text-center py-6">${t('no_expenses')}</p>`;
         } else {
           listEl.innerHTML = expenses.map(exp => {
             const isPending = exp.pendingSync || outbox.some(o => String(o.id) === String(exp.id));
             const color = getUserColor(exp.person);
+            const locPurpose = getLocalizedCategory(exp.purpose);
             return `
             <div class="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between text-xs hover:border-slate-700 transition">
               <div class="flex items-center gap-2">
                 <span class="w-1.5 h-8 rounded-full shrink-0" style="background-color: ${color.hex}"></span>
                 <div>
                   <div class="font-bold text-white flex items-center gap-1.5">
-                    <span>${escapeHtml(exp.purpose)}</span>
-                    <span class="text-[10px] font-normal text-slate-400">(${escapeHtml(exp.merchant)})</span>
-                    ${isPending ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30">Lokal</span>' : ''}
+                    <span>${escapeHtml(locPurpose)}</span>
+                    ${exp.merchant ? `<span class="text-[10px] font-normal text-slate-400">(${escapeHtml(exp.merchant)})</span>` : ''}
+                    ${isPending ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30">Offline</span>' : ''}
                   </div>
                   <div class="text-[10px] text-slate-400">${exp.date} • <span class="font-medium" style="color: ${color.hex}">${escapeHtml(exp.person)}</span></div>
                 </div>
               </div>
               <div class="flex items-center gap-2.5">
-                <span class="font-extrabold text-white text-sm">${exp.amount.toFixed(2).replace('.', ',')} €</span>
-                <button data-id="${escapeHtml(exp.id)}" onclick="deleteExpense(this.dataset.id)" class="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Löschen">
+                <span class="font-extrabold text-white text-sm">${formatMoney(exp.amount)}</span>
+                <button data-id="${escapeHtml(exp.id)}" onclick="deleteExpense(this.dataset.id)" class="text-slate-500 hover:text-rose-400 p-1.5 rounded-lg hover:bg-rose-500/10 transition" title="Delete">
                   <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                 </button>
               </div>
@@ -1126,7 +1660,7 @@
           return `
             <div class="flex items-center justify-between py-1 border-b border-slate-800/60">
               <span class="text-slate-300">${escapeHtml(p)}</span>
-              <span class="font-bold text-white">${val.toFixed(2).replace('.', ',')} € <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span></span>
+              <span class="font-bold text-white">${formatMoney(val)} <span class="text-[10px] text-slate-400 font-normal">(${pct}%)</span></span>
             </div>
           `;
         }).join('');
@@ -1145,7 +1679,7 @@
       const data = Object.values(purposeMap);
 
       if (labels.length === 0) {
-        labels.push("Keine Daten");
+        labels.push(t('no_expenses'));
         data.push(1);
       }
 
@@ -1170,7 +1704,7 @@
 
     // CSV Generierung
     function buildCSV() {
-      let csv = "ID;Datum;Person;Zweck;Haendler;Betrag_EUR\n";
+      let csv = "ID;Datum;Person;Zweck;Haendler;Betrag\n";
       expenses.forEach(e => {
         csv += `${e.id};${e.date};${e.person};"${e.purpose}";"${e.merchant || ''}";${e.amount.toFixed(2).replace('.', ',')}\n`;
       });
@@ -1180,18 +1714,18 @@
     // Teilen / Export
     async function shareOrExport() {
       if (expenses.length === 0) {
-        alert("Noch keine Ausgaben erfasst!");
+        alert(t('no_expenses'));
         return;
       }
       const csv = buildCSV();
-      const fileName = `Haushalt_${config.deviceOwner}_${new Date().toISOString().slice(0,10)}.csv`;
+      const fileName = `Logbook_${config.deviceOwner}_${new Date().toISOString().slice(0,10)}.csv`;
       const file = new File([csv], fileName, { type: 'text/csv' });
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
-            title: `Haushaltsbuch ${config.householdName}`,
-            text: `Hier sind unsere Haushaltsausgaben:`,
+            title: `${t('app_title')} - ${config.householdName}`,
+            text: `Receipts export:`,
             files: [file]
           });
           return;
@@ -1213,7 +1747,7 @@
         window.open(config.googleSheetUrl, '_blank');
       } else {
         const entered = prompt(
-          "Bitte gib die Web-Adresse eurer Google-Tabelle ein:\n(z. B. https://docs.google.com/spreadsheets/d/...)",
+          "Google Sheet URL (https://docs.google.com/spreadsheets/...):",
           ""
         );
         if (entered && entered.trim().startsWith('http')) {
@@ -1240,6 +1774,7 @@
       settingsTempUsers = JSON.parse(JSON.stringify(config.users || []));
       settingsSelectedOwner = config.deviceOwner;
 
+      renderSettingsPills();
       renderSettingsUsers();
       renderSettingsOwnerOptions();
     }
@@ -1316,7 +1851,7 @@
     }
 
     function saveSettings() {
-      config.householdName = document.getElementById('settingsHouseholdName').value.trim() || 'Haushalt';
+      config.householdName = document.getElementById('settingsHouseholdName').value.trim() || t('household');
       const bVal = parseFloat(document.getElementById('settingsMonthlyBudget').value);
       config.monthlyBudget = (!isNaN(bVal) && bVal > 0) ? bVal : 1500;
       config.googleWebhook = document.getElementById('inputGoogleWebhook').value.trim();
@@ -1332,10 +1867,11 @@
       config.deviceOwner = ownerExists ? settingsSelectedOwner : config.users[0].name;
 
       saveConfig();
+      updateI18nUI();
       updateHouseholdUI();
       render();
       closeSettingsModal();
-      showToast(`Einstellungen gespeichert: ${config.deviceOwner}`);
+      showToast(`${t('toast_saved')}: ${config.deviceOwner}`);
 
       if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
         syncWithGoogleSheet(true);
@@ -1345,11 +1881,10 @@
     // Erzeugt den Setup-Link für den Partner zum schnellen Teilen
     function copyPartnerSetupLink() {
       const baseUrl = window.location.origin + window.location.pathname;
-      const hName = encodeURIComponent(config.householdName || 'Haushalt');
+      const hName = encodeURIComponent(config.householdName || 'Household');
       const budget = config.monthlyBudget || 1500;
       const userList = encodeURIComponent(config.users.map(u => u.name).join(','));
       
-      // Für den Partner standardmäßig die andere Person auswählen
       let partnerOwner = config.users[0] ? config.users[0].name : '';
       if (config.users.length > 1) {
         const other = config.users.find(u => u.name !== config.deviceOwner);
@@ -1358,17 +1893,19 @@
       const ownerParam = encodeURIComponent(partnerOwner);
       const hookParam = config.googleWebhook ? `&hook=${encodeURIComponent(config.googleWebhook)}` : '';
       const sheetParam = config.googleSheetUrl ? `&sheet=${encodeURIComponent(config.googleSheetUrl)}` : '';
+      const langParam = config.lang ? `&lang=${encodeURIComponent(config.lang)}` : '';
+      const currParam = config.currency ? `&curr=${encodeURIComponent(config.currency)}` : '';
 
-      const shareUrl = `${baseUrl}#setup?h=${hName}&b=${budget}&users=${userList}&owner=${ownerParam}${hookParam}${sheetParam}`;
+      const shareUrl = `${baseUrl}#setup?h=${hName}&b=${budget}&users=${userList}&owner=${ownerParam}${hookParam}${sheetParam}${langParam}${currParam}`;
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(shareUrl).then(() => {
-          showToast("✓ Setup-Link für Partner kopiert!");
+          showToast(t('toast_partner_copied'));
         }).catch(() => {
-          prompt("Kopiere diesen Link für deinen Partner:", shareUrl);
+          prompt(t('settings_partner_link_btn') + ":", shareUrl);
         });
       } else {
-        prompt("Kopiere diesen Link für deinen Partner:", shareUrl);
+        prompt(t('settings_partner_link_btn') + ":", shareUrl);
       }
     }
 
@@ -1384,7 +1921,7 @@
         while (outbox.length > 0) {
           const item = outbox[0];
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 10000);
+          const timeoutId = setTimeout(() => controller.abort(), 12000);
 
           try {
             await fetch(config.googleWebhook, {
@@ -1404,9 +1941,8 @@
               expenses[localIdx].pendingSync = false;
             }
             saveData();
-          } catch (postErr) {
-            clearTimeout(timeoutId);
-            console.warn("Outbox sync deferred (offline/timeout):", postErr);
+          } catch (err) {
+            console.warn("Outbox-Drain pausiert (Offline oder Timeout):", err);
             break;
           }
         }
@@ -1425,105 +1961,103 @@
       }
 
       isSyncing = true;
-      const icon = document.getElementById('iconSync');
-      if (icon) icon.classList.add('animate-spin');
-
-      drainOutbox();
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const syncBtn = document.getElementById('btnCloudSync');
+      const syncIcon = document.getElementById('iconSync');
+      if (syncIcon) syncIcon.classList.add('animate-spin');
 
       try {
+        await drainOutbox();
+
         let reqUrl = config.googleWebhook;
-        reqUrl += (reqUrl.includes('?') ? '&' : '?') + 'api=json';
+        reqUrl += (reqUrl.includes('?') ? '&' : '?') + 'api=json&t=' + Date.now();
+
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
+
         const response = await fetch(reqUrl, { signal: controller.signal });
         clearTimeout(timeoutId);
-        const data = await response.json();
 
-        if (data.status === 'success' && Array.isArray(data.entries)) {
-          const cloudList = data.entries.map(c => ({
-            id: String(c.id),
-            date: c.date,
-            timestamp: c.timestamp || '',
-            person: c.person,
-            purpose: c.purpose,
-            merchant: c.merchant,
-            amount: typeof c.amount === 'string' ? (parseFloat(c.amount.replace(',', '.')) || 0) : Number(c.amount),
-            pendingSync: false
-          }));
+        if (!response.ok) throw new Error("HTTP " + response.status);
 
-          const cloudIds = new Set(cloudList.map(c => c.id));
-          const outboxIds = new Set(outbox.map(o => String(o.id)));
+        const resData = await response.json();
+        if (resData.status === "success" && Array.isArray(resData.entries)) {
+          const cloudEntries = resData.entries;
+          const mergedMap = new Map();
 
-          const unsyncedLocal = expenses.filter(e => 
-            !cloudIds.has(String(e.id)) || outboxIds.has(String(e.id)) || e.pendingSync === true
-          );
+          expenses.forEach(e => mergedMap.set(String(e.id), e));
 
-          expenses = [...unsyncedLocal, ...cloudList];
-
-          const seen = new Set();
-          expenses = expenses.filter(e => {
-            const id = String(e.id);
-            if (seen.has(id)) return false;
-            seen.add(id);
-            return true;
+          cloudEntries.forEach(ce => {
+            const id = String(ce.id);
+            if (!mergedMap.has(id)) {
+              mergedMap.set(id, {
+                id: id,
+                date: ce.date,
+                person: ce.person,
+                purpose: ce.purpose,
+                merchant: ce.merchant || '',
+                amount: parseFloat(ce.amount) || 0,
+                pendingSync: false
+              });
+            } else {
+              const existing = mergedMap.get(id);
+              existing.pendingSync = false;
+            }
           });
 
-          expenses.sort((a,b) => new Date(b.date) - new Date(a.date));
+          expenses = Array.from(mergedMap.values());
+          expenses.sort((a, b) => new Date(b.date) - new Date(a.date));
+
           saveData();
           render();
 
           const badge = document.getElementById('syncStatusBadge');
           if (badge) {
-            badge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1 animate-pulse"></span> Google Sheet aktiv`;
-            badge.className = "text-[11px] px-2 py-0.5 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 font-medium";
+            badge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1 animate-pulse"></span> ${t('badge_sync_active')}`;
           }
 
           if (showFeedback) {
-            showToast(`✓ Synchronisiert! ${cloudList.length} Einträge geladen.`);
+            showToast("✓ " + (resData.count || cloudEntries.length) + " " + t('entries_count'));
           }
         }
       } catch (err) {
-        clearTimeout(timeoutId);
-        console.warn("Sync aborted or offline:", err);
-
-        const badge = document.getElementById('syncStatusBadge');
-        if (badge) {
-          badge.innerHTML = `<span class="inline-block w-2 h-2 rounded-full bg-amber-400 mr-1"></span> Offline (Lokal gesichert)`;
-          badge.className = "text-[11px] px-2 py-0.5 rounded-full bg-amber-950/60 text-amber-300 border border-amber-500/40 font-medium";
-        }
-
+        console.error("Sync-Fehler:", err);
         if (showFeedback) {
-          showToast("Cloud-Sync dauerte > 12s. Daten sind lokal sicher!", true);
+          showToast("Sync: Offline / Cloud nicht erreichbar", true);
         }
       } finally {
         isSyncing = false;
-        if (icon) icon.classList.remove('animate-spin');
+        if (syncIcon) syncIcon.classList.remove('animate-spin');
       }
     }
 
     function clearCurrentMonth() {
-      if (confirm("Wirklich alle Ausgaben auf diesem Gerät löschen?")) {
+      if (confirm(t('confirm_clear_month'))) {
         expenses = [];
+        outbox = [];
         saveData();
+        saveOutbox();
         render();
+        showToast("Cleared");
       }
     }
 
     function escapeHtml(str) {
-      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
-    function escapeId(str) {
-      return String(str || '').replace(/[^a-zA-Z0-9_-]/g, '_');
-    }
-
+    // App Start
     document.addEventListener('DOMContentLoaded', () => {
       init();
       if (config.googleWebhook && config.googleWebhook.startsWith('http')) {
         syncWithGoogleSheet(false);
       }
     });
-  </script>
+</script>
 </body>
 </html>

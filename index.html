@@ -745,7 +745,7 @@
 
     // Supabase Credentials
     const SUPABASE_URL = 'https://krdunxtbpgpdmutlicdt.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZHVueHRicGdwZG11dGxpY2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzNDc1NzEsImV4cCI6MjA5MDkyMzU3MX0.y7Lh9i-uK61F4f_YQyB9_RjL0C2Tqj-7B1u_yHw_3vY';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtyZHVueHRicGdwZG11dGxpY2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI3MzgzODQsImV4cCI6MjA5ODMxNDM4NH0.yd_LcTldUl9uHGCQ-bX-QI154TA80M7Dvav5lWFtXCM';
 
     let supabaseClient = null;
     function getSupabaseClient() {
@@ -1677,6 +1677,7 @@
 
           if (params.get('hid')) {
             config.householdId = decodeURIComponent(params.get('hid')).trim();
+            safeStore.setItem('logbuch_household_initialized', 'true');
           }
 
           if (params.get('h')) {
@@ -1697,6 +1698,7 @@
           if (params.get('lang')) config.lang = decodeURIComponent(params.get('lang'));
           if (params.get('curr')) config.currency = decodeURIComponent(params.get('curr'));
 
+          safeStore.setItem('logbuch_household_initialized', 'true');
           saveConfig();
           saveHouseholdToList({
             id: config.householdId,
@@ -1869,14 +1871,16 @@
     }
 
     function checkFirstLaunch() {
-      if (config.householdId && config.householdName && config.householdName !== 'Household' && config.householdName !== 'Haushalt') {
+      const isInitialized = safeStore.getItem('logbuch_household_initialized');
+      if (isInitialized === 'true') return;
+      if (window.location.hash.includes('hid=') || window.location.search.includes('hid=') || window.location.hash.includes('setup')) {
+        return;
+      }
+      if (config.householdId && safeStore.getItem(STORAGE_KEY_CONFIG)) {
         safeStore.setItem('logbuch_household_initialized', 'true');
         return;
       }
-      const isInitialized = safeStore.getItem('logbuch_household_initialized');
-      if (!isInitialized) {
-        openSetupWizard();
-      }
+      openSetupWizard();
     }
 
     function openSetupWizard() {
@@ -2237,17 +2241,20 @@
 
     async function deleteExpenseFromSupabase(id) {
       if (!config.householdId) return;
+      const payload = { deleted: true, updated_at: new Date().toISOString() };
       const client = getSupabaseClient();
       if (client) {
-        const { error } = await client.from('expenses').delete().eq('id', id);
+        const { error } = await client.from('expenses').update(payload).eq('id', id);
         if (error) throw error;
       } else {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/expenses?id=eq.${id}`, {
-          method: 'DELETE',
+          method: 'PATCH',
           headers: {
             'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          }
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error('Supabase delete error: ' + res.statusText);
       }
@@ -2283,6 +2290,7 @@
       if (iconBottom) iconBottom.classList.add('animate-spin');
 
       try {
+        await saveHouseholdToSupabase();
         await drainOutbox();
 
         const client = getSupabaseClient();
@@ -2296,9 +2304,7 @@
           const { data: expData, error } = await client
             .from('expenses')
             .select('*')
-            .eq('household_id', config.householdId)
-            .eq('deleted', false)
-            .order('date', { ascending: false });
+            .eq('household_id', config.householdId);
           if (!error && expData) remoteExpenses = expData;
         } else {
           const res = await fetch(`${SUPABASE_URL}/rest/v1/households?id=eq.${config.householdId}`, {
@@ -2309,7 +2315,7 @@
             if (arr && arr.length > 0) remoteHh = arr[0];
           }
 
-          const resExp = await fetch(`${SUPABASE_URL}/rest/v1/expenses?household_id=eq.${config.householdId}&deleted=eq.false&order=date.desc`, {
+          const resExp = await fetch(`${SUPABASE_URL}/rest/v1/expenses?household_id=eq.${config.householdId}&select=*`, {
             headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
           });
           if (resExp.ok) {
@@ -2330,9 +2336,37 @@
           updateHouseholdUI();
         }
 
-        // Merge remote expenses with local expenses
-        const localMap = new Map(expenses.map(e => [e.id, e]));
+        // Segregate remote into active and deleted
+        const remoteMap = new Map();
+        const remoteDeletedIds = new Set();
+        const remoteActive = [];
+
         remoteExpenses.forEach(re => {
+          remoteMap.set(re.id, re);
+          if (re.deleted) {
+            remoteDeletedIds.add(re.id);
+          } else {
+            remoteActive.push(re);
+          }
+        });
+
+        // 1. Remove any remotely deleted items from local
+        expenses = expenses.filter(e => !remoteDeletedIds.has(e.id));
+
+        // 2. Upload any local items not present remotely yet (preserves existing offline entries)
+        for (const loc of expenses) {
+          if (!remoteMap.has(loc.id)) {
+            try {
+              await pushExpenseToSupabase(loc);
+            } catch(e) {
+              console.warn('Sync push local expense error:', e);
+            }
+          }
+        }
+
+        // 3. Merge active remote expenses into local
+        const localMap = new Map(expenses.map(e => [e.id, e]));
+        remoteActive.forEach(re => {
           localMap.set(re.id, {
             id: re.id,
             date: re.date,
